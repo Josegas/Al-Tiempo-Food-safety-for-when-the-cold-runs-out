@@ -25,7 +25,7 @@ make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
 ```
 
 ## What it does
-1. **Safe window + reminders** — "I cooked beans at 12:00" → "According to USDA FSIS, eat them before 13:00 or throw them away" (38 °C day → 1-hour rule).
+1. **Safe window + reminders** — "I cooked beans at 12:00" → "According to the U.S. FDA, eat them before 13:00 or throw them away" (38 °C day → 1-hour rule).
 2. **Meal planning** — when to cook and how much, so nothing sits out.
 3. **Power-outage mode** — fridge/freezer clock from the moment the power went out.
 4. **Strict mode for babies and young children.**
@@ -47,10 +47,16 @@ make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
 - **Security:** gitleaks secret scan, pip-audit dependency scan, bandit-style static rules, Dependabot.
 - **Policy as code:** a release (`v*` tag) is blocked while any food rule is not verified on its official source.
 - **Safety regression tests:** every real unsafe answer we found becomes a test (see `docs/diario.md`).
+- **Evals drive decisions:** 18 bilingual scenarios (incl. adversarial ones) picked the model —
+  Nova Lite 8/18, Nova Pro 15/18, **Nova 2 Lite 18/18** — and now pass 36/36 at $0.00227 per turn
+  (`docs/metrics.md`, `docs/costs.md`). Every number we publish is in `docs/sources.md`.
 
-## Status of rule sources
-Rules marked `unverified: true` are pending manual verification on the official page and are only
-used in demo mode (`ALLOW_UNVERIFIED_RULES=true`). Run `python scripts/check_rules.py` to see them.
+## Rule sources (all verified on 2026-11-03)
+Every rule in `rules/food_rules.yaml` stores the **verbatim sentence** from its official page
+(`verified_text`) so anyone can check it with Ctrl+F. Sources: WHO *Five keys to safer food*,
+U.S. FDA, CDC (infant formula), NHS (cooked rice). One rule is marked `adapted` (rice without a
+fridge) and one is a `policy` (stricter mode for young children); both say so to the user.
+CI blocks a release if any rule is unverified (`python scripts/check_rules.py --strict`).
 
 ## Disclaimer
 Al Tiempo gives general food-safety guidance from public health sources. It is not medical advice.

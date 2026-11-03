@@ -15,7 +15,7 @@ TOOL_RESULT = {
                     "eat_by": "2026-11-04T13:00:00",
                     "eat_by_hhmm": "13:00",
                     "reminder_at": "2026-11-04T12:45:00",
-                    "rule_ids": ["WHO_COOKED_2H", "FSIS_HOT_1H"],
+                    "rule_ids": ["WHO_COOKED_2H", "FDA_HOT_1H"],
                 }
             )
         }
@@ -37,9 +37,7 @@ def test_collect_allowed_from_tool_result():
 
 def test_consistent_answer_passes():
     times, minutes = collect_allowed(TOOL_RESULT)
-    text = (
-        "According to USDA FSIS, eat it before 13:00 or throw it away. Today the limit is 1 hour."
-    )
+    text = "According to the U.S. FDA, eat it before 13:00 or throw it away. Today the limit is 1 hour."
     assert find_unbacked(text, times, minutes) == {"times": [], "minutes": []}
 
 
@@ -61,3 +59,19 @@ def test_invented_claims_are_blocked(text):
     times, minutes = collect_allowed(TOOL_RESULT)
     bad = find_unbacked(text, times, minutes)
     assert bad["times"] or bad["minutes"], text
+
+
+# False positives found in evals (2026-11-03): these must PASS.
+def test_minutes_left_from_tool_is_allowed():
+    res = {"content": [{"text": json.dumps({"minutes_left": 30, "eat_by_hhmm": "12:30"})}]}
+    times, minutes = collect_allowed(res)
+    assert find_unbacked("Te quedan 30 minutos, cómelo antes de las 12:30.", times, minutes) == {
+        "times": [],
+        "minutes": [],
+    }
+
+
+def test_service_window_minutes_allowed():
+    res = {"content": [{"text": json.dumps({"service_windows": [{"service_minutes": 120}]})}]}
+    times, minutes = collect_allowed(res)
+    assert find_unbacked("El servicio dura 2 horas.", times, minutes)["minutes"] == []

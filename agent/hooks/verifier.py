@@ -75,7 +75,7 @@ def _walk(obj: Any, times: set[str], minutes: set[int]) -> None:
     rules = load_rules()
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if k.endswith("minutes") and isinstance(v, int | float):
+            if "minutes" in k and isinstance(v, int | float):
                 minutes.add(int(v))
             if k == "rule_ids" and isinstance(v, list):
                 for rid in v:
@@ -144,8 +144,9 @@ class VerifierHook(HookProvider):
         for msg in event.messages or []:
             for block in msg.get("content", []) if isinstance(msg, dict) else []:
                 if "text" in block:
-                    t, _ = extract_claims(block["text"])
+                    t, m = extract_claims(block["text"])
                     self.allowed_times |= t
+                    self.allowed_minutes |= m
 
     def on_tool_result(self, event: AfterToolCallEvent) -> None:
         t, m = collect_allowed(event.result)
@@ -169,7 +170,9 @@ class VerifierHook(HookProvider):
             if msg.get("role") == "user":
                 for block in msg.get("content", []):
                     if "text" in block:
-                        self.allowed_times |= extract_claims(block["text"])[0]
+                        t, m = extract_claims(block["text"])
+                        self.allowed_times |= t
+                        self.allowed_minutes |= m  # durations the user said ("hace 5 horas")
         bad = find_unbacked(text, self.allowed_times, self.allowed_minutes)
         if not bad["times"] and not bad["minutes"]:
             return
