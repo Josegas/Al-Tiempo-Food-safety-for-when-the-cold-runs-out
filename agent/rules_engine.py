@@ -159,10 +159,10 @@ def compute_safe_window(
         audience = "general"
 
     # Base rules for any cooked food at room temperature.
-    applied += [get_rule("WHO_COOKED_2H"), get_rule("FSIS_2H")]
+    applied += [get_rule("WHO_COOKED_2H"), get_rule("FDA_2H")]
 
     # Heat: if any forecast hour in the 2-hour window is above 32 °C -> 1 hour.
-    hot = get_rule("FSIS_HOT_1H")
+    hot = get_rule("FDA_HOT_1H")
     max_t = _max_temp_between(hourly_temps, cooked_at, cooked_at + timedelta(minutes=120))
     if max_t is None:
         assumptions.append("No temperature forecast available: assumed hot day (> 32 °C).")
@@ -174,7 +174,7 @@ def compute_safe_window(
         assumptions.append(f"Forecast max {max_t:.1f} °C (not above {hot.hot_threshold_c:.0f} °C).")
 
     if food_type == "cooked_rice":
-        applied.append(get_rule("RICE_COOL_1H"))
+        applied.append(get_rule("NHS_RICE_1H"))
 
     serve_immediately = False
     keep_leftovers = True
@@ -247,14 +247,14 @@ def track_outage(
 ) -> dict:
     """What is still within the official outage rules and what is not."""
     assumptions: list[str] = []
-    fridge = get_rule("FSIS_OUTAGE_FRIDGE_4H")
+    fridge = get_rule("FDA_OUTAGE_FRIDGE_4H")
 
     if freezer_fullness == "full":
-        freezer = get_rule("FSIS_OUTAGE_FREEZER_FULL_48H")
+        freezer = get_rule("FDA_OUTAGE_FREEZER_FULL_48H")
     else:
         if freezer_fullness not in ("half",):
             assumptions.append("Freezer fullness unknown: assumed half full (24 h).")
-        freezer = get_rule("FSIS_OUTAGE_FREEZER_HALF_24H")
+        freezer = get_rule("FDA_OUTAGE_FREEZER_HALF_24H")
 
     fridge_until = outage_started_at + timedelta(minutes=fridge.limit_minutes)
     freezer_until = outage_started_at + timedelta(minutes=freezer.limit_minutes)
@@ -295,14 +295,14 @@ def track_outage(
 def _room_limit(
     hourly_temps: HourlyTemps | None, start: datetime, end: datetime
 ) -> tuple[int, list[Rule], str]:
-    hot = get_rule("FSIS_HOT_1H")
+    hot = get_rule("FDA_HOT_1H")
     base = get_rule("WHO_COOKED_2H")
     max_t = _max_temp_between(hourly_temps, start, end)
     if max_t is None:
         return hot.limit_minutes, [hot], "No forecast: assumed hot day (> 32 °C)."
     if max_t > hot.hot_threshold_c:
         return hot.limit_minutes, [hot], f"Forecast reaches {max_t:.1f} °C."
-    return base.limit_minutes, [base, get_rule("FSIS_2H")], f"Forecast max {max_t:.1f} °C."
+    return base.limit_minutes, [base, get_rule("FDA_2H")], f"Forecast max {max_t:.1f} °C."
 
 
 def plan_shelter_batches(
@@ -326,11 +326,14 @@ def plan_shelter_batches(
     batches: list[dict] = []
     used: list[Rule] = []
     assumptions: list[str] = []
+    windows_info: list[dict] = []
 
     for w_start, w_end in service_windows:
         if w_end <= w_start:
             raise ValueError("service window end must be after start")
         window_min = int((w_end - w_start).total_seconds() // 60)
+        windows_info.append({"start_hhmm": _fmt(w_start), "end_hhmm": _fmt(w_end),
+                             "service_minutes": window_min})  # fmt: skip
 
         if can_hot_hold:
             hold = get_rule("WHO_HOT_HOLD_60C")
@@ -378,6 +381,7 @@ def plan_shelter_batches(
     unique = list(dict.fromkeys(used))
     return {
         "people": people,
+        "service_windows": windows_info,
         "batches": batches,
         "rule_ids": [r.id for r in unique],
         "sources": [r.source() for r in unique],
