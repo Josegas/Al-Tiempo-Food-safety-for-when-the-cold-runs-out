@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from strands import Agent
@@ -12,7 +13,15 @@ from agent.hooks.verifier import VerifierHook
 from agent.tools import ALL_TOOLS
 
 PROMPTS = Path(__file__).resolve().parent / "prompts"
-DEFAULT_MODEL = "us.amazon.nova-lite-v1:0"
+THINKING_RE = re.compile(r"<thinking>.*?</thinking>", re.DOTALL)
+
+
+def clean_answer(text: str) -> str:
+    """Removes model 'thinking' tags that some models (e.g. Nova) leak into the answer."""
+    return THINKING_RE.sub("", text).strip()
+
+
+DEFAULT_MODEL = "us.amazon.nova-2-lite-v1:0"
 
 
 def system_prompt(language: str) -> str:
@@ -50,5 +59,5 @@ if __name__ == "__main__":  # local chat: python -m agent.agent es
             text = input("> ")
         except (EOFError, KeyboardInterrupt):
             break
-        print(agent(text))
+        print(clean_answer(str(agent(text))))
         print(f"[verifier] retried={verifier.retried_count} blocked={verifier.blocked_count}")

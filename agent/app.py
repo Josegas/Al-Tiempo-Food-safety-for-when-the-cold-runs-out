@@ -7,17 +7,15 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 import time
 
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
-from agent.agent import build_agent
+from agent.agent import build_agent, clean_answer
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger("al_tiempo")
 app = BedrockAgentCoreApp()
-THINKING_RE = re.compile(r"<thinking>.*?</thinking>", re.DOTALL)
 
 FALLBACK = {
     "en": "Sorry, I could not answer right now. Safety rule while you wait: on a hot day, do not keep cooked food out more than 1 hour; if in doubt, throw it away.",
@@ -50,7 +48,7 @@ def invoke(payload: dict) -> dict:
         "tools_used": list(result.metrics.tool_metrics.keys()),
     }
     log.info(json.dumps(record))  # structured log -> CloudWatch Logs Insights / metric filters
-    answer = THINKING_RE.sub("", str(result)).strip()
+    answer = clean_answer(str(result))
     return {"answer": answer, "metrics": record, "history": agent.messages}
 
 
