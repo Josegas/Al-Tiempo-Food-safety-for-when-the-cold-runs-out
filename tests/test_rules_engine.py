@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import datetime
 
 import pytest
@@ -14,7 +15,7 @@ def test_mild_day_two_hours():
     w = re_.compute_safe_window("cooked_food", T0, "general", flat(25))
     assert w.limit_minutes == 120
     assert w.eat_by_hhmm == "14:00"
-    assert "FSIS_HOT_1H" not in w.rule_ids
+    assert "FDA_HOT_1H" not in w.rule_ids
 
 
 def test_exactly_32c_is_not_above_threshold():
@@ -26,7 +27,7 @@ def test_just_above_32c_one_hour():
     w = re_.compute_safe_window("cooked_food", T0, "general", flat(32.1))
     assert w.limit_minutes == 60
     assert w.eat_by_hhmm == "13:00"
-    assert "FSIS_HOT_1H" in w.rule_ids
+    assert "FDA_HOT_1H" in w.rule_ids
 
 
 def test_heat_later_in_window_counts():
@@ -50,7 +51,7 @@ def test_unknown_food_treated_as_cooked_food():
 def test_rice_one_hour_even_on_mild_day():
     w = re_.compute_safe_window("cooked_rice", T0, "general", flat(20))
     assert w.limit_minutes == 60
-    assert "RICE_COOL_1H" in w.rule_ids
+    assert "NHS_RICE_1H" in w.rule_ids
 
 
 def test_hot_day_fixture_38c():
@@ -93,11 +94,22 @@ def test_reminder_before_deadline():
 
 # --- unverified rules are blocked unless explicitly allowed --------------------
 def test_unverified_rule_blocked_in_production(monkeypatch):
-    monkeypatch.setenv("ALLOW_UNVERIFIED_RULES", "false")
-    if all(not r.unverified for r in re_.load_rules().values()):
-        pytest.skip("all rules verified")
+    rules = dict(re_.load_rules())
+    rules["WHO_COOKED_2H"] = dataclasses.replace(rules["WHO_COOKED_2H"], unverified=True)
+    monkeypatch.setattr(re_, "load_rules", lambda: rules)
     with pytest.raises(re_.RuleNotAllowedError):
         re_.compute_safe_window("cooked_food", T0, "general", flat(25))
+    monkeypatch.setenv("ALLOW_UNVERIFIED_RULES", "true")  # dev override works
+    assert re_.compute_safe_window("cooked_food", T0, "general", flat(25)).unverified_rules_used
+
+
+def test_all_rules_verified_with_verbatim_text():
+    import yaml
+
+    raw = yaml.safe_load((re_.RULES_DIR / "food_rules.yaml").read_text(encoding="utf-8"))["rules"]
+    for r in raw:
+        assert r["unverified"] is False, r["id"]
+        assert r.get("verified_text"), r["id"]
 
 
 def test_every_rule_has_source():
@@ -127,7 +139,7 @@ def test_outage_door_opened_is_conservative():
 
 def test_outage_unknown_freezer_assumes_half():
     r = re_.track_outage(datetime(2026, 11, 4, 6), datetime(2026, 11, 4, 7), False, None)
-    assert "FSIS_OUTAGE_FREEZER_HALF_24H" in r["rule_ids"]
+    assert "FDA_OUTAGE_FREEZER_HALF_24H" in r["rule_ids"]
     assert r["freezer_safe_until"] == "2026-11-05T06:00:00"
 
 

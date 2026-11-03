@@ -4,9 +4,9 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def _allow_unverified(monkeypatch):
-    # Tests check the LOGIC. Source verification is enforced separately by scripts/check_rules.py.
-    monkeypatch.setenv("ALLOW_UNVERIFIED_RULES", "true")
+def _production_like(monkeypatch):
+    # Production setting: unverified rules are NOT allowed. Demo fixtures, no network.
+    monkeypatch.setenv("ALLOW_UNVERIFIED_RULES", "false")
     monkeypatch.setenv("DEMO_MODE", "true")
 
 

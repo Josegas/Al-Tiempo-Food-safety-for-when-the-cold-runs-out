@@ -31,8 +31,15 @@ def main(strict: bool) -> int:
                 errors.append(f"{rid}: limit_minutes must be a positive integer")
         if r.get("unverified", True):
             unverified.append(rid)
-        elif not r.get("verified_on"):
-            errors.append(f"{rid}: verified rule needs verified_on")
+        else:
+            if not r.get("verified_on"):
+                errors.append(f"{rid}: verified rule needs verified_on")
+            if not r.get("verified_text"):
+                errors.append(f"{rid}: verified rule needs verified_text (verbatim quote)")
+        if r.get("kind", "official") not in ("official", "adapted", "policy"):
+            errors.append(f"{rid}: kind must be official, adapted or policy")
+        if r.get("kind") == "adapted" and not r.get("adaptation"):
+            errors.append(f"{rid}: adapted rule must explain its adaptation")
 
     for e in errors:
         print(f"::error file=rules/food_rules.yaml::{e}")

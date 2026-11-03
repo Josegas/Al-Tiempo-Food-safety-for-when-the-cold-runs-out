@@ -58,21 +58,19 @@ Agent loop + tools, hooks, skills + steering, session managers, despliegue en Ag
 
 ## 2. El problema (con evidencia)
 
-Comer comida que estuvo demasiado tiempo a temperatura ambiente enferma, sobre todo a niños pequeños, y el calor lo empeora. Más de mil millones de personas no tienen refrigeración confiable, pero la mayoría sí tiene celular.
+Comer comida que estuvo demasiado tiempo a temperatura ambiente enferma, sobre todo a niños pequeños, y el calor lo empeora. Unos 1,085 millones de personas pobres (339 M rurales + 746 M urbanas, suma nuestra) están en alto riesgo por falta de acceso a enfriamiento (Chilling Prospects 2026), y 655 millones no tienen electricidad. En India, aun en zonas rurales, el celular es mucho más común que el refrigerador (91.5% vs 25.2%, NFHS-5 reportado por prensa).
 
-**Datos para el artículo (verificar cada uno y citar la fuente; preferir la fuente primaria):**
-- OMS: unos 600 millones de personas se enferman al año por comida contaminada y 420,000 mueren; 125,000 de esas muertes son de menores de 5 años.
-- Calor: los casos de salmonelosis aumentan de forma lineal con la temperatura por encima de un umbral (Kovats et al., 2004, 10 países europeos). https://pmc.ncbi.nlm.nih.gov/articles/PMC2870124
-- Sin refrigeración: poco más de 1,000 millones de personas en alto riesgo por falta de acceso a refrigeración (SEforALL, Chilling Prospects 2025). https://iifiir.org/en/news/chilling-prospects-2025-refrigeration-remains-inaccessible-for-over-one-billion-people
-- Sin electricidad: 666 millones de personas en 2023; 85% en África subsahariana (Tracking SDG7 2025). https://www.un.org/en/node/208821
-- India (NFHS-5, 2019–21): solo 37.9% de los hogares tenía refrigerador (25.2% en zonas rurales). https://tribuneindia.com/news/mobile-most-owned-item-survey-393691
-- África: menos del 30% de los hogares tiene refrigerador; menos del 9% en el este de África. https://trendtype.com/insights/where-are-the-fridges-in-africa/
-- Luz intermitente: aun con refrigerador, la comida se echa a perder (SEforALL / Cooling Post). https://www.coolingpost.com/features/cooling-is-out-of-reach-for-over-1-billion-people
-- Celulares: 93.3% de los hogares en India tiene celular (NFHS-5); más del 86% en África.
+**Datos para el artículo — VERIFICADOS el 2026-11-03 (detalle, frases textuales y links en `docs/sources.md`). Solo usar cifras que estén en ese archivo:**
+- OMS (hoja del 4 jun 2026): **866 millones** se enferman al año por comida contaminada (casi 1 de cada 9 personas) y **1.52 millones** mueren; los menores de 5 años cargan el **29%** del daño, con **143 000 muertes en 2021**. https://www.who.int/news-room/fact-sheets/detail/food-safety
+- Calor: los casos de salmonelosis aumentan de forma lineal con la temperatura por encima de 6 °C (Kovats et al., 2004, 10 poblaciones europeas). https://pmc.ncbi.nlm.nih.gov/articles/PMC2870124
+- Sin electricidad: **655 millones** de personas en 2024; África concentra el **88.8%** (Tracking SDG7 2026, SEforALL, julio 2026).
+- Sin refrigeración/enfriamiento: **339 millones** de pobres rurales y **746 millones** de pobres urbanos en alto riesgo, en 77 países expuestos al calor (Chilling Prospects 2026, SEforALL, vía UNEP Cool Coalition).
+- India (NFHS-5, 2019–21, reportado por The Tribune): 37.9% de los hogares tiene refrigerador (25.2% rural) y 93.3% tiene celular (91.5% rural). ⚠️ Fuente secundaria: confirmar en el reporte primario o citar como "reportado por".
+- **Eliminadas por no tener fuente primaria:** "<30% de hogares africanos con refrigerador" y ">86% con celular en África". Las cifras viejas de la OMS (600 M / 420 000 / 125 000) ya no se usan.
 
 **Lo que existe hoy (para la sección "Existing solutions" del artículo):**
 - USDA FoodKeeper: dice cuánto dura la comida en refrigerador, congelador o alacena. **Da por hecho que hay refrigerador.**
-- Reglas generales (OMS "Cinco claves", USDA): no dejar comida cocida más de 2 h a temperatura ambiente; 1 h si hace más de 32 °C.
+- Reglas generales (OMS "Cinco claves", FDA/USDA): no dejar comida cocida más de 2 h a temperatura ambiente; 1 h si hace más de 90 °F (32.2 °C).
 - No encontramos ninguna herramienta que aplique esas reglas al pronóstico del día para un hogar sin refrigerador, ni que planee tandas de cocina para albergues sin refrigeración.
 - **Nunca digas "somos los primeros".** Di "no encontramos una herramienta que…".
 
@@ -173,7 +171,7 @@ Archivo `rules/food_rules.yaml`. Cada regla:
   verified_on: "2026-11-03"
   unverified: false
 ```
-Reglas a verificar en su fuente oficial antes de usarlas:
+Reglas a verificar en su fuente oficial antes de usarlas (✅ las 11 verificadas el 2026-11-03 con frase textual; para las de USDA se usan las páginas equivalentes de la FDA porque FSIS bloquea lectores automáticos — ver `docs/sources.md`):
 - OMS "Cinco claves para la inocuidad de los alimentos": límite de 2 h, mantener caliente (> 60 °C), recalentar hasta que eche vapor, no descongelar a temperatura ambiente.
 - USDA FSIS: 1 h cuando hace más de 32 °C (90 °F).
 - USDA FSIS: apagones (cuánto tiempo mantiene la comida un refrigerador cerrado; congelador lleno vs. a medias).
