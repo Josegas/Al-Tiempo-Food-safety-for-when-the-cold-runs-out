@@ -1,0 +1,38 @@
+# Fixed questions for diarrhoea / vomiting. No diagnosis, no doses.
+# Escalation policy (project, conservative): ANY single sign -> go to a clinic / call emergency now.
+# (WHO classifies "severe dehydration" with at least two signs; we escalate earlier on purpose.)
+
+source_name: "WHO - Diarrhoeal disease fact sheet (7 March 2024)"
+source_url: "https://www.who.int/news-room/fact-sheets/detail/diarrhoeal-disease"
+verified_on: "2026-11-03"
+unverified: false
+
+signs:
+  - id: LETHARGIC
+    question:
+      en: "Is the person very sleepy, hard to wake up, or unconscious?"
+      es: "¿La persona está muy adormilada, cuesta despertarla o está inconsciente?"
+  - id: SUNKEN_EYES
+    question:
+      en: "Are the eyes sunken?"
+      es: "¿Tiene los ojos hundidos?"
+  - id: CANNOT_DRINK
+    question:
+      en: "Is the person unable to drink, or drinking very poorly?"
+      es: "¿No puede beber o bebe muy poco?"
+  - id: SKIN_PINCH_SLOW
+    question:
+      en: "If you gently pinch the skin of the belly, does it take 2 seconds or more to go back?"
+      es: "Si pellizca suavemente la piel del abdomen, ¿tarda 2 segundos o más en regresar?"
+  - id: BLOOD_IN_STOOL
+    question:
+      en: "Is there blood in the stool?"
+      es: "¿Hay sangre en las heces?"
+
+# National emergency numbers. Unknown country -> generic "local emergency number" message.
+emergency_numbers:
+  MX: "911"
+  US: "911"
+  IN: "112"
+  ES: "112"
+  GB: "999"

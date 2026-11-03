@@ -1,0 +1,127 @@
+# Food-safety rules used by the deterministic rules engine (agent/rules_engine.py).
+# The LLM never computes limits: it only explains what this file + the engine return.
+#
+# Every rule needs: id, description, limit_minutes (or null), source_name, source_url,
+# verified_on, unverified.
+#   unverified: true  -> the text was NOT confirmed on the official page yet.
+#                        The engine refuses to use it unless ALLOW_UNVERIFIED_RULES=true (dev/demo).
+#   kind: policy      -> a project decision that is MORE conservative than the official rule.
+#                        It is labeled as such to the user; it never claims to be official.
+#
+# HOW TO VERIFY: open source_url in a normal browser, find the sentence in `expected_text` (approximate; replace it with the verbatim text),
+# then set unverified: false and verified_on: <today>. CI (scripts/check_rules.py --strict)
+# blocks releases while any rule is unverified.
+
+rules:
+  - id: WHO_COOKED_2H
+    description: "Cooked food should not stay at room temperature for more than 2 hours."
+    applies_to: [cooked_food]
+    limit_minutes: 120
+    expected_text: "Do not leave cooked food at room temperature for more than 2 hours."
+    source_name: "WHO - Five Keys to Safer Food Manual (2006)"
+    source_url: "https://www.who.int/publications/i/item/9789241594639"
+    verified_on: null
+    unverified: true
+
+  - id: FSIS_2H
+    description: "Perishable food should not be left out of refrigeration more than 2 hours."
+    applies_to: [cooked_food]
+    limit_minutes: 120
+    expected_text: "Never leave perishable food out for more than 2 hours (or 1 hour if it's hotter than 90 °F outside)."
+    source_name: "USDA FSIS - Danger Zone (40 °F - 140 °F)"
+    source_url: "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/danger-zone-40f-140f"
+    verified_on: null
+    unverified: true
+
+  - id: FSIS_HOT_1H
+    description: "If the temperature is above 90 °F (32 °C), the limit is 1 hour."
+    applies_to: [cooked_food]
+    hot_threshold_c: 32.0
+    limit_minutes: 60
+    expected_text: "Never leave perishable food out for more than 2 hours (or 1 hour if it's hotter than 90 °F outside)."
+    source_name: "USDA FSIS - Danger Zone (40 °F - 140 °F)"
+    source_url: "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/danger-zone-40f-140f"
+    verified_on: null
+    unverified: true
+
+  - id: WHO_HOT_HOLD_60C
+    description: "Keep cooked food piping hot (more than 60 °C) prior to serving."
+    applies_to: [hot_hold]
+    hot_hold_min_c: 60
+    limit_minutes: null
+    expected_text: "Keep cooked food piping hot (more than 60°C) prior to serving."
+    source_name: "WHO - Five Keys to Safer Food Manual (2006)"
+    source_url: "https://www.who.int/publications/i/item/9789241594639"
+    verified_on: null
+    unverified: true
+
+  - id: RICE_COOL_1H
+    description: "Cooked rice: cool and refrigerate within 1 hour (Bacillus cereus). Without a fridge, eat it within 1 hour."
+    applies_to: [cooked_rice]
+    limit_minutes: 60
+    expected_text: "Cool rice as quickly as possible (ideally within 1 hour)."
+    source_name: "NHS / UK Food Standards Agency - storing cooked rice"
+    source_url: "https://www.food.gov.uk/"
+    verified_on: null
+    unverified: true
+
+  - id: CDC_FORMULA_2H
+    description: "Prepared infant formula: use within 2 hours of preparation."
+    applies_to: [infant_formula]
+    limit_minutes: 120
+    expected_text: "Use prepared infant formula within 2 hours of preparation."
+    source_name: "CDC - Infant Formula Preparation and Storage"
+    source_url: "https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/"
+    verified_on: null
+    unverified: true
+
+  - id: CDC_FORMULA_FEED_1H
+    description: "Once feeding starts, use formula within 1 hour and discard leftovers."
+    applies_to: [infant_formula_feeding]
+    limit_minutes: 60
+    expected_text: "Use within 1 hour from when feeding begins. If your baby does not finish, throw away the leftover formula."
+    source_name: "CDC - Infant Formula Preparation and Storage"
+    source_url: "https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/"
+    verified_on: null
+    unverified: true
+
+  - id: POLICY_CHILD_STRICT
+    kind: policy
+    description: "Strict mode for babies and young children: always apply the 1-hour limit (as on a hot day), serve right away, keep no leftovers."
+    applies_to: [audience_child]
+    limit_minutes: 60
+    expected_text: "Project policy: more conservative than WHO/FSIS 2-hour rule."
+    source_name: "Al Tiempo project policy (based on FSIS_HOT_1H)"
+    source_url: "https://github.com/Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out/blob/main/rules/food_rules.yaml"
+    verified_on: "2026-11-03"
+    unverified: false
+
+  - id: FSIS_OUTAGE_FRIDGE_4H
+    description: "A closed refrigerator keeps food safe for about 4 hours without power."
+    applies_to: [outage_fridge]
+    limit_minutes: 240
+    expected_text: "The refrigerator will keep food safe for up to 4 hours during a power outage. Keep the door closed as much as possible."
+    source_name: "USDA FSIS / FoodSafety.gov - Food Safety During Power Outage"
+    source_url: "https://www.foodsafety.gov/food-safety-charts/food-safety-during-power-outage"
+    verified_on: null
+    unverified: true
+
+  - id: FSIS_OUTAGE_FREEZER_FULL_48H
+    description: "A full, closed freezer holds temperature for about 48 hours."
+    applies_to: [outage_freezer_full]
+    limit_minutes: 2880
+    expected_text: "A full freezer will hold the temperature for approximately 48 hours (24 hours if it is half full) if the door remains closed."
+    source_name: "USDA FSIS / FoodSafety.gov - Food Safety During Power Outage"
+    source_url: "https://www.foodsafety.gov/food-safety-charts/food-safety-during-power-outage"
+    verified_on: null
+    unverified: true
+
+  - id: FSIS_OUTAGE_FREEZER_HALF_24H
+    description: "A half-full, closed freezer holds temperature for about 24 hours."
+    applies_to: [outage_freezer_half]
+    limit_minutes: 1440
+    expected_text: "A full freezer will hold the temperature for approximately 48 hours (24 hours if it is half full) if the door remains closed."
+    source_name: "USDA FSIS / FoodSafety.gov - Food Safety During Power Outage"
+    source_url: "https://www.foodsafety.gov/food-safety-charts/food-safety-during-power-outage"
+    verified_on: null
+    unverified: true

@@ -1,0 +1,4 @@
+strands-agents>=1.63
+bedrock-agentcore>=1.25
+boto3>=1.40
+pyyaml>=6.0
