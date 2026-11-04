@@ -75,3 +75,8 @@
 - Cómo lo supe: CloudTrail mostró el `sub` real del token: `repo:Josegas@80491054/...@1444850797:ref:refs/heads/main`. GitHub usa ahora un sujeto **inmutable** (IDs del dueño y del repo), y el rol esperaba `repo:Josegas/...`.
 - Qué decidí: el prefijo sale de `gh api repos/OWNER/REPO/actions/oidc/customization/sub` y va en `cdk.json` (`githubOidcSubPrefix`). Es más seguro: si alguien borra y recrea un repo con el mismo nombre, no puede desplegar.
 - Extra: actions con Node 24 (`setup-node@v7`, `configure-aws-credentials@v6`) y runner fijo `ubuntu-24.04` para que nada cambie mientras evalúan.
+
+## 2026-11-04 — Presupuesto, límites y arranque rápido (antes de congelar funciones)
+- Pregunta del usuario: ¿limitar el presupuesto hace más lento o peor al chatbot?
+- Respuesta: no. AWS Budgets solo mide y avisa; lo único que afecta al usuario es el *kill switch* (apaga la demo al 100%). Con $5 y un gasto normal estimado de ≈ $3, el margen era poco: un abuso al tope diario lo activaría en ~4 días.
+- Qué decidí: presupuesto $10; *throttling* 10 req/s (ráfaga 20) porque el sondeo de recordatorios cada 15 s comparte el límite; y **warm-up**: al abrir la página la web llama `/api/warm`, que arranca la sesión de AgentCore y construye el agente sin llamar al modelo (0 tokens). Tope propio de 1,000 al día para que no se pueda abusar. El primer mensaje esperaba ~6.4 s por el arranque de la sesión (el agente en sí tarda ~1.9 s).

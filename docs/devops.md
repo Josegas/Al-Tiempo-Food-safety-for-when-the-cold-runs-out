@@ -3,7 +3,7 @@
 ## Arquitectura en AWS
 ```
 Celular/navegador ──HTTPS──► CloudFront ──► S3 privado (web, OAC)
-                               └─ /api/* ─► API Gateway HTTP API (límite: 3 req/s, ráfaga 10)
+                               └─ /api/* ─► API Gateway HTTP API (límite: 10 req/s, ráfaga 20)
                                               └─► Lambda API (tope diario de conversaciones en DynamoDB)
                                                     └─► AgentCore Runtime (agente Strands, auth IAM, ARM64)
                                                           ├─► Bedrock: Nova 2 Lite vía *application inference profile* (etiquetado)
@@ -17,7 +17,7 @@ Costos: presupuesto por etiqueta project=al-tiempo + "kill switch" (Budget Actio
 ## Dos stacks de CDK (infra/)
 | Stack | Quién lo despliega | Qué tiene |
 |---|---|---|
-| `AlTiempoAccess` | Un admin, **una vez** (`make deploy-access`) | Usuario IAM `al-tiempo-dev` + grupo con política de mínimo privilegio; rol `al-tiempo-github-deploy` (OIDC, solo rama `main`); presupuesto mensual de $5 con alertas por correo; tema SNS de alarmas |
+| `AlTiempoAccess` | Un admin, **una vez** (`make deploy-access`) | Usuario IAM `al-tiempo-dev` + grupo con política de mínimo privilegio; rol `al-tiempo-github-deploy` (OIDC, solo rama `main`); presupuesto mensual de $10 con alertas por correo; tema SNS de alarmas |
 | `AlTiempoApp` | `al-tiempo-dev` (`make deploy`) o GitHub Actions | Todo el producto (ver arquitectura) |
 
 ## Cómo desplegar (orden)

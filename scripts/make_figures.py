@@ -193,7 +193,7 @@ def architecture() -> None:
         d,
         (790, y0, 1130, y0 + 170),
         "API Gateway + Lambda",
-        "3 req/s, burst 10. Daily cap of 500 chats (DynamoDB counter)",
+        "10 req/s, burst 20. Daily caps in DynamoDB; warm-up on page load",
         ORANGE,
     )
     arrow(d, (330, y0 + 85), (400, y0 + 85))
@@ -276,7 +276,7 @@ def architecture() -> None:
     d.rounded_rectangle((40, oy, 1660, oy + 80), radius=14, fill="#ffffff", outline=GRID, width=2)
     d.text(
         (64, oy + 24),
-        "Ops: CloudWatch dashboard + 3 alarms to email · $5 budget with automatic kill switch · GitHub Actions + OIDC",
+        "Ops: CloudWatch dashboard + 3 alarms to email · $10 budget with automatic kill switch · GitHub Actions + OIDC",
         font=font(22),
         fill=INK_2,
     )
