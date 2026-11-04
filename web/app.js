@@ -101,6 +101,14 @@ const I18N = {
       })[d.rule_id] || null,
       aria: (d) => `Línea de tiempo. ${d.cooked_known ? `Cocinado a las ${d.cooked_at_hhmm}. Límite: ${d.eat_by_hhmm}. ` : ""}Ahora son las ${d.now_hhmm}.`,
     },
+    sh: {
+      title: "Plan de tandas", batch: (i, n) => `Tanda ${i} · ${n} porciones`,
+      cook: "Cocinar", serve: "Servir", discard: "Desechar",
+      hot: (c) => `Mantener arriba de ${c} °C todo el servicio.`,
+      by: (src) => src ? `Decide: ${src}` : "Decide: nuestra regla más estricta para bebés y niños",
+      print: "Imprimir plan", people: (n) => `${n} personas`,
+      aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
+    },
     offline: {
       banner: "Sin conexión. Las respuestas necesitan internet; mientras tanto, usa la regla básica.",
       title: "Sin conexión: regla básica",
@@ -182,6 +190,14 @@ const I18N = {
         CDC_FORMULA_FEED_1H: "Why 1 hour: the CDC says to use formula within 1 hour of when feeding begins, and throw out what is left.",
       })[d.rule_id] || null,
       aria: (d) => `Timeline. ${d.cooked_known ? `Cooked at ${d.cooked_at_hhmm}. Limit: ${d.eat_by_hhmm}. ` : ""}Now it is ${d.now_hhmm}.`,
+    },
+    sh: {
+      title: "Batch plan", batch: (i, n) => `Batch ${i} · ${n} portions`,
+      cook: "Cook", serve: "Serve", discard: "Discard",
+      hot: (c) => `Keep above ${c} °C for the whole service.`,
+      by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
+      print: "Print plan", people: (n) => `${n} people`,
+      aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
     },
     offline: {
       banner: "You are offline. Answers need internet; meanwhile, use the basic rule.",
@@ -413,7 +429,7 @@ function botMessage(answer, metrics, decision) {
   const body = el("div", "ans");
   renderAnswer(body, answer);
   m.appendChild(body);
-  const tl = safeWindowTimeline(decision);
+  const tl = safeWindowTimeline(decision) || shelterTimeline(decision);
   if (tl) m.appendChild(tl);
   m.appendChild(decisionTrail(metrics));
   const meta = el("div", "meta");
@@ -422,6 +438,7 @@ function botMessage(answer, metrics, decision) {
   btn.append(icon("speaker"), el("span", "", t("listen")));
   btn.addEventListener("click", () => speak(answer, btn));
   meta.appendChild(btn);
+  if (decision && decision.kind === "shelter_plan" && tl) meta.appendChild(printButton(m));
   if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
   m.appendChild(meta);
   return addNode(m);
@@ -508,6 +525,82 @@ function safeWindowTimeline(d) {
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
 }
+
+// ---------------------------------------------------------------- shelter batch timeline
+// One row per batch: cook -> serve -> discard. Every time comes from `decision.batches` (the
+// engine's plan_shelter_batches output, passed through by the API); nothing is computed here
+// except where to draw each time on a shared axis.
+function shelterTimeline(d) {
+  if (!d || d.kind !== "shelter_plan" || !Array.isArray(d.batches) || !d.batches.length) return null;
+  const T = t("sh");
+  const ok = d.batches.every((b) => HHMM.test(b.start_cooking_hhmm || "") && HHMM.test(b.ready_hhmm || "") && HHMM.test(b.discard_hhmm || ""));
+  if (!ok) return null;
+  const fig = el("figure", "tl sh");
+  fig.setAttribute("aria-label", T.aria(d));
+  const cap = el("figcaption", "tl-title", T.title);
+  if (d.people) cap.appendChild(el("span", "sh-people", ` · ${T.people(d.people)}`));
+  fig.appendChild(cap);
+
+  // Shared axis from the first "cook" to the last "discard" (same day; batches don't cross midnight).
+  const t0 = Math.min(...d.batches.map((b) => toMin(b.start_cooking_hhmm)));
+  const t1 = Math.max(...d.batches.map((b) => toMin(b.discard_hhmm)));
+  const span = Math.max(t1 - t0, 1);
+  const at = (hhmm) => `${(((toMin(hhmm) - t0) / span) * 100).toFixed(1)}%`;
+
+  const list = el("ol", "sh-list");
+  d.batches.forEach((b, i) => {
+    const li = el("li", "sh-batch");
+    li.appendChild(el("p", "sh-name", T.batch(i + 1, b.portions)));
+    const track = el("div", "sh-track");
+    track.setAttribute("aria-hidden", "true");
+    const cook = el("span", "sh-seg sh-cook");
+    cook.style.left = at(b.start_cooking_hhmm);
+    cook.style.width = `calc(${at(b.ready_hhmm)} - ${at(b.start_cooking_hhmm)})`;
+    const serve = el("span", "sh-seg sh-serve");
+    serve.style.left = at(b.ready_hhmm);
+    serve.style.width = `calc(${at(b.discard_hhmm)} - ${at(b.ready_hhmm)})`;
+    const end = el("span", "sh-end");
+    end.style.left = at(b.discard_hhmm);
+    track.append(cook, serve, end);
+    li.appendChild(track);
+    const pts = el("dl", "tl-points sh-points");
+    const point = (cls, label, value) => {
+      const w = el("div", `tl-pt ${cls}`);
+      w.append(el("dt", "", label), el("dd", "", value));
+      pts.appendChild(w);
+    };
+    point("pt-cook", T.cook, b.start_cooking_hhmm);
+    point("pt-now", T.serve, b.ready_hhmm);
+    point("pt-limit pt-end", T.discard, b.discard_hhmm);
+    li.appendChild(pts);
+    list.appendChild(li);
+  });
+  fig.appendChild(list);
+  const hot = d.batches.find((b) => Number.isFinite(b.keep_above_c));
+  if (hot) fig.appendChild(el("p", "tl-why", T.hot(hot.keep_above_c)));
+  fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
+  return fig;
+}
+
+// Prints only this answer (plan text + batch timeline + verifier seal), with the print stylesheet.
+function printButton(msg) {
+  const b = el("button", "listen print-btn");
+  b.type = "button";
+  b.append(icon("print"), el("span", "", t("sh").print));
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".print-target").forEach((x) => x.classList.remove("print-target"));
+    msg.classList.add("print-target");
+    // The printout says which mode produced it (a simulated 38 °C plan must not pass for a real one).
+    msg.dataset.printHead = `Al Tiempo · ${state.mode === "demo" ? t("badgeDemo") : t("badgeLive")}`;
+    document.body.classList.add("printing");
+    window.print();
+  });
+  return b;
+}
+window.addEventListener("afterprint", () => {
+  document.body.classList.remove("printing");
+  document.querySelectorAll(".print-target").forEach((x) => x.classList.remove("print-target"));
+});
 
 // Shows which rules tools ran and what the verifier did, using only the structured `metrics`
 // the backend returned (tools_used, verifier_blocked). Nothing is inferred from the text.

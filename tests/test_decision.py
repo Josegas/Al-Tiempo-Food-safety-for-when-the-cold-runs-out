@@ -96,3 +96,46 @@ def test_reason_passes_the_verifier():
     r = _engine_result()
     text = window_summary(r, "en")
     assert find_unbacked(text, *collect_allowed(json.dumps(r))) == {"times": [], "minutes": []}
+
+
+# ---------------- shelter plan (batch timeline) ----------------
+from agent.decision import shelter_plan_decision  # noqa: E402
+from agent.rules_engine import plan_shelter_batches  # noqa: E402
+
+HOT_DAY = [(datetime(2026, 11, 3, h), 38.0) for h in range(24)]
+
+
+def _plan(hot_hold=False):
+    w = [(datetime(2026, 11, 3, 13, 0), datetime(2026, 11, 3, 15, 0))]
+    return plan_shelter_batches(120, w, ["rice", "beans"], hot_hold, HOT_DAY)
+
+
+def test_shelter_decision_copies_every_batch_time_from_the_engine():
+    plan = _plan()
+    d = shelter_plan_decision(_turn(plan, name="plan_shelter_batches"))
+    assert d["kind"] == "shelter_plan" and d["people"] == 120 and d["hot_hold"] is False
+    assert [b["ready_hhmm"] for b in d["batches"]] == [b["ready_hhmm"] for b in plan["batches"]]
+    assert [b["discard_hhmm"] for b in d["batches"]] == ["14:00", "15:00"]
+    assert [b["start_cooking_hhmm"] for b in d["batches"]] == ["12:00", "13:00"]
+    assert d["batches"][0]["portions"] == 60
+    assert d["source"] == {"kind": "official", "name": "U.S. FDA"}
+    assert "sources" not in d and "assumptions" not in d
+
+
+def test_shelter_decision_hot_holding():
+    d = shelter_plan_decision(_turn(_plan(hot_hold=True), name="plan_shelter_batches"))
+    assert d["hot_hold"] is True and d["batches"][0]["keep_above_c"] == 60
+    assert d["source"]["name"] == "WHO"
+
+
+def test_no_shelter_decision_for_other_tools_or_errors():
+    assert shelter_plan_decision(_turn(_plan(), name="plan_meals")) is None
+    assert shelter_plan_decision(_turn({"error": "No valid service windows"}, name="plan_shelter_batches")) is None  # fmt: skip
+    assert (
+        shelter_plan_decision(_turn(_plan(), name="plan_shelter_batches", status="error")) is None
+    )
+
+
+def test_safe_window_wins_over_shelter_in_the_same_turn():
+    turn = _turn(_engine_result()) + _turn(_plan(), name="plan_shelter_batches")
+    assert safe_window_decision(turn)["kind"] == "safe_window"

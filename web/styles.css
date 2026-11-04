@@ -187,8 +187,21 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 .tl-expired .tl-fill { background: var(--red); }
 .tl-expired .tl-status { color: var(--red-ink); }
 
-.meta { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
-.listen { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px 0 10px; border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--forest); }
+/* Shelter batch timeline: one row per batch, cook -> serve -> discard, on a shared axis. */
+.sh-people { font-weight: 400; color: var(--muted); }
+.sh-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.sh-batch { padding-top: 10px; border-top: 1px solid var(--line); }
+.sh-batch:first-child { padding-top: 0; border-top: 0; }
+.sh-name { font-weight: 700; font-size: .9rem; color: var(--ink); margin: 0 0 4px; }
+.sh-track { position: relative; height: 10px; margin: 6px 4px 10px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+.sh-seg { position: absolute; top: 0; bottom: 0; }
+.sh-cook { background: var(--amber); border-radius: 999px 0 0 999px; }
+.sh-serve { background: var(--emerald); border-radius: 0 999px 999px 0; }
+.sh-end { position: absolute; top: 50%; width: 4px; height: 20px; margin: -10px 0 0 -2px; border-radius: 2px; background: var(--red); }
+.pt-cook dd { color: var(--amber-ink); }
+
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
+.listen { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 40px; padding: 0 14px 0 10px; border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--forest); }
 .listen:hover { border-color: var(--emerald); }
 .listen:disabled { cursor: progress; opacity: .7; }
 .latency { font-family: var(--f-mono); font-size: .78rem; color: var(--muted); }
@@ -280,4 +293,18 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ------------------------------------------------------------------ print ("Print plan") */
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; }
+  .skip, .topbar, .modebar, .footer, .intro, .how, .panel-head, .composer, .welcome, .netbar, .meta, .msg-typing { display: none !important; }
+  .layout, .panel, .chat { display: block !important; position: static !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; background: #fff !important; }
+  body.printing .msg:not(.print-target) { display: none !important; }
+  .msg { animation: none; break-inside: avoid; }
+  .msg-bot { border-left: 0; padding: 0; }
+  .print-target::before { content: attr(data-print-head); display: block; font-family: var(--f-display); font-size: 1.3rem; color: var(--forest); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .tl, .sh-batch { break-inside: avoid; }
+  .tl, .seal, .sh-track, .sh-seg, .sh-end { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
