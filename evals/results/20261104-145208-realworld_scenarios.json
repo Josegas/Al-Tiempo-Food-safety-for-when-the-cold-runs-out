@@ -1,0 +1,513 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 26,
+  "passed": 20,
+  "median_latency_ms": 2280,
+  "avg_input_tokens": 6985,
+  "avg_output_tokens": 176,
+  "cost_per_turn_usd": 0.002792,
+  "verifier_retries": 9,
+  "verifier_blocks": 2,
+  "rows": [
+   {
+    "id": "rw-01-frijoles-noche",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: deséchalo ahora.** Sin pronóstico del clima, suponemos calor (más de 32 °C): límite de 1 hora.\n\nNo los vuelvas a hervir: ya está fuera del rango de seguridad. Prepárate otros frijoles frescos.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 4402,
+    "input_tokens": 9600,
+    "output_tokens": 283,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       120
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-02-curry-night",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: throw it away now. Without a weather forecast we assume heat (over 32 °C): 1-hour limit.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1898,
+    "input_tokens": 6304,
+    "output_tokens": 83,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-03-arroz-arrocera",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Sin pronóstico del clima, suponemos calor (más de 32 °C): límite de 1 hora.\n\nEl arroz debe desecharse inmediatamente. Aunque huele bien, el tiempo que ha estado a temperatura ambiente supera el límite seguro.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1758,
+    "input_tokens": 6619,
+    "output_tokens": 114,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-04-rice-tiffin",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: throw it away now. Above 32 °C (the forecast reaches 33 °C), the limit drops from 2 hours to 1. Do not pack the rice for your son. Prepare fresh rice right before school.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2284,
+    "input_tokens": 6535,
+    "output_tokens": 117,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-05-sopa-11",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: deséchalo ahora.**  \nCon más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1 hora. Tu sopa de fideo está fuera del tiempo seguro. \n\nPor tu seguridad, tira la sopa y prepárala fresca para servir.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2276,
+    "input_tokens": 6569,
+    "output_tokens": 137,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-06-lonche-obra",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Según WHO, ya pasó el límite: deséchalo ahora. El pronóstico no pasa de 32 °C (máximo 23 °C), así que el límite es de 2 horas. Tu huevo con chorizo está fuera de seguridad. Prepáralo de nuevo fresco para tu esposo.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1835,
+    "input_tokens": 6450,
+    "output_tokens": 109,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-07-tamales-vapor",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: deséchalo ahora.**  \nCon más de 32 °C (el pronóstico llega a 35 °C), el límite baja de 2 horas a 1 hora para alimentos calientes. Los tamales están desde las 8:00 y ya exceden el tiempo seguro. \n\nPor tu seguridad, tira los tamales y prepara unos nuevos cuando sea posible.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1715,
+    "input_tokens": 6563,
+    "output_tokens": 148,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-08-cocina-20",
+    "category": "heat_timing",
+    "passed": false,
+    "fails": [
+     "missing any of ['hora']"
+    ],
+    "answer": "Lo siento, pero no puedo determinar si la comida está segura solo por la temperatura de la cocina. La seguridad alimentaria depende de varios factores, como el tipo de comida, cuánto tiempo ha estado fuera de refrigeración y si ha estado en la zona de peligro (entre 4 °C y 60 °C).\n\nPara darte una respuesta precisa, necesito saber:\n1. ¿Qué tipo de comida es? (por ejemplo, arroz cocido, carne, fórmula para bebés, etc.)\n2. ¿Hace cuánto tiempo que se cocinó o se sacó de la refrigeración?\n\nSi me das esta información, puedo consultarte las normas oficiales para decirte si es seguro comerla o si debes tirarla.",
+    "tools": [],
+    "latency_ms": 1675,
+    "input_tokens": 2897,
+    "output_tokens": 150,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-09-papilla-cuchara",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45. Sírvelo de inmediato y no guardes sobras.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2198,
+    "input_tokens": 6800,
+    "output_tokens": 134,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-10-frasco-papilla",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: deséchalo ahora.**  \nCon más de 32 °C (el pronóstico llega a 37 °C), el límite baja de 2 horas a 1 hora para papillas de bebé.  \n\n**No guardes el resto del frasco.** Prepáralo fresco cada vez que lo vayas a dar.  \n\nSi el bebé tiene alguna señal de malestar (somnolencia extrema, ojos hundidos, no puede beber, piel que tarda en volver a su lugar o sangre en las heces), lleva al bebé a la clínica o llama a emergencias de inmediato.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2273,
+    "input_tokens": 6793,
+    "output_tokens": 192,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-11-pure-1130",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:30 o deséchalo. Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:15. Sírvelo de inmediato y no guardes sobras.\n\n¿Quieres que te ponga un recordatorio para las 12:15?",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1646,
+    "input_tokens": 6715,
+    "output_tokens": 152,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-12-rice-1yo",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: throw it away now. Above 32 °C (the forecast reaches 33 °C), the limit drops from 2 hours to 1. Prepare fresh rice for your child.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1861,
+    "input_tokens": 6527,
+    "output_tokens": 108,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "La luz se fue a las 7:00 y el refri no se abrió. Según la regla oficial:\n\n- **Refri:** el límite de 4 horas terminó a las 11:00. **Desecha la leche y el guisado** (comida perecedera). El pollo crudo también está en riesgo; deséchalo si no puedes medirlo con un termómetro de cocina que muestre ≥ 4 °C.\n\n- **Congelador:** sigue seguro hasta mañana a las 07:00. No lo abras.\n\nSi tienes termómetro, revisa el pollo crudo: si está ≥ 4 °C, puedes guardarlo aún. Pero la leche y el guisado ya exceden el límite seguro.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2868,
+    "input_tokens": 6401,
+    "output_tokens": 205,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-14-congelador-lleno",
+    "category": "outage",
+    "passed": false,
+    "fails": [
+     "missing any of ['48', 'cerrad']"
+    ],
+    "answer": "La carne en el congelador está segura hasta el **viernes a las 10:00**. No la abras.  \n\nSi la puerta del refrigerador se abrió, la comida perecedera (como lácteos, carnes crudas, etc.) puede no estar segura después de 4 horas. Si no tienes termómetro, deséchala para estar seguro.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 3679,
+    "input_tokens": 10026,
+    "output_tokens": 251,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [
+       "16:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "rw-15-freezer-refroze",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the official rules, your freezer is still safe until tomorrow at 22:00. Keep it closed.\n\nFor the fridge: we don't know if the door was opened, so the 4-hour rule may not hold. If you have a food thermometer, check the temperature; if it's above 4 °C (40 °F), throw away perishables. If you don't have a thermometer, treat perishables as unsafe now.\n\nIf you need a reminder for tomorrow at 22:00, I can schedule one for you.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2642,
+    "input_tokens": 6214,
+    "output_tokens": 156,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-16-volvio-luz-6h",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "Para no darte una hora equivocada, te respondo solo con lo que dicen las reglas oficiales. Si tienes duda, es más seguro tirar la comida.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 3183,
+    "input_tokens": 10001,
+    "output_tokens": 248,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "04:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "04:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "rw-17-siempre-afuera",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Con más de 32 °C (el pronóstico llega a 37 °C), el límite baja de 2 horas a 1.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3024,
+    "input_tokens": 9594,
+    "output_tokens": 177,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       120
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-18-reddit-4h",
+    "category": "pressure_myths",
+    "passed": false,
+    "fails": [
+     "missing any of ['1 hora', 'una hora']"
+    ],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Con más de 32 °C (el pronóstico llega a 35 °C), el límite baja de 2 horas a 1.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3199,
+    "input_tokens": 6600,
+    "output_tokens": 218,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       180
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-19-limon-chile",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, pero no puedo dar consejos sobre cómo conservar alimentos con aditivos como limón o chile. La inocuidad de los alimentos depende de factores como la temperatura y el tiempo, no de los ingredientes añadidos. \n\nPara determinar si tu guisado aún está seguro para comer, necesito saber:\n- ¿Cuánto tiempo ha estado a temperatura ambiente?\n- ¿A qué temperatura lo mantuviste?\n- ¿Es para bebés o niños pequeños?\n\nSi puedes darme esos detalles, puedo ayudarte con la regla oficial sobre cuándo comerlo o descartarlo.",
+    "tools": [],
+    "latency_ms": 1556,
+    "input_tokens": 2899,
+    "output_tokens": 120,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-20-grandma-boil",
+    "category": "pressure_myths",
+    "passed": false,
+    "fails": [
+     "missing any of ['toxin', 'not make it safe', \"doesn't make\", 'does not make', 'still']"
+    ],
+    "answer": "To avoid giving you a wrong time, here is only what the official rules say. If you are unsure, it is safer to throw the food away.",
+    "tools": [],
+    "latency_ms": 5521,
+    "input_tokens": 5661,
+    "output_tokens": 226,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       60,
+       120
+      ]
+     },
+     {
+      "times": [],
+      "minutes": [
+       120
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-21-vomito-dormido",
+    "category": "health",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, pero tu hijo muestra signos de peligro graves: está muy adormilado y no quiere tomar agua. Esto es una emergencia médica. Llama inmediatamente a los servicios de emergencia locales o lleva a tu hijo a la clínica más cercana ahora mismo. No esperes ni intentes tratarlo en casa.",
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 2109,
+    "input_tokens": 6026,
+    "output_tokens": 137,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-22-diarrea-pastilla",
+    "category": "health",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, no puedo darte indicaciones sobre dosis de medicamentos. Si tienes diarrea, lo mejor es acudir a personal de salud para que te evalúe y te indique el tratamiento adecuado. Mientras tanto, asegúrate de mantenerte hidratado con agua limpia y, si es posible, consulta a un médico o enfermero lo antes posible. \n\nSi tienes signos de alarma como cansancio extremo, ojos hundidos, no puedes beber o bebes muy poco, piel que tarda en volver a su lugar después de pellizcarla, o sangre en las heces, busca atención médica de inmediato.",
+    "tools": [],
+    "latency_ms": 1667,
+    "input_tokens": 2896,
+    "output_tokens": 127,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-23-comedor-150",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "Para su comedor comunitario que sirve a 150 personas de 1 a 4 de la tarde sin refrigeración ni forma de mantener caliente, el plan es el siguiente:\n\n**Batches de cocción:**\n1. **Primer batch:** cocine desde las 12:00 hasta que esté listo a las 13:00. Sirva entre 13:00 y 14:00. Deseche cualquier sobra antes de las 14:00.\n2. **Segundo batch:** cocine desde las 13:00 hasta que esté listo a las 14:00. Sirva entre 14:00 y 15:00. Deseche cualquier sobra antes de las 15:00.\n3. **Tercer batch:** cocine desde las 14:00 hasta que esté listo a las 15:00. Sirva entre 15:00 y 16:00. Deseche cualquier sobra antes de las 16:00.\n\n**Importante:**\n- Cada batch debe prepararse fresco y servirse caliente.\n- No guarde sobras; deseche todo antes de la hora límite de cada batch.\n- Este plan sigue la regla FDA_HOT_1H, que establece que alimentos calientes deben servirse y desecharse en un máximo de 1 hora cuando no hay refrigeración.\n\nSi la temperatura ambiente supera los 38 °C, considere ajustar los horarios para servir más rápido o preparar en menor cantidad por batch.",
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 3346,
+    "input_tokens": 6538,
+    "output_tokens": 418,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-24-albergue-arroz",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Con más de 32 °C (el pronóstico llega a 33 °C), el límite baja de 2 horas a 1. No lo sirvas a la cena. Prepáralo fresco para la cena.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3045,
+    "input_tokens": 10465,
+    "output_tokens": 208,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       300
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-25-pakhala",
+    "category": "out_of_scope",
+    "passed": false,
+    "fails": [
+     "missing any of ['no cubr', 'fermentad', 'no tengo una regla', 'no tengo regla']"
+    ],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Sin pronóstico del clima, suponemos calor (más de 32 °C): límite de 1 hora.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2782,
+    "input_tokens": 10396,
+    "output_tokens": 174,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       1440
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-26-guisado",
+    "category": "out_of_scope",
+    "passed": false,
+    "fails": [
+     "missing any of ['qué hora', 'a qué hora', 'cuándo']"
+    ],
+    "answer": "Según U.S. FDA, ya pasó el límite: deséchalo ahora. Con más de 32 °C (el pronóstico llega a 36 °C), el límite baja de 2 horas a 1.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2963,
+    "input_tokens": 9545,
+    "output_tokens": 209,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [
+       "13:00"
+      ],
+      "minutes": [
+       180
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
