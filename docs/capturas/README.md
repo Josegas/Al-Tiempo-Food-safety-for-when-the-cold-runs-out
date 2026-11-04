@@ -12,7 +12,7 @@ contra la demo en vivo, el 2026-11-04. Las de la consola se generaron con APIs d
 | `10-danger-signs.png` | Señales de alarma → 911 | Playwright |
 | `11-baby-rice.png` | Bebé + arroz de hace 5 h → deséchalo | Playwright |
 | `07-cloudwatch-dashboard.png` | Dashboard `al-tiempo` (4 gráficas) | CloudWatch `GetMetricWidgetImage` |
-| `06-github-actions.png` | **Pendiente:** Actions con Deploy en verde (tras arreglar OIDC) | — |
+| `06-github-actions.png` | Deploy en verde desde GitHub con OIDC (2 min 43 s) | Captura del usuario |
 
 En el artículo, la salida de `make smoke` y del presupuesto va como **texto** (mejor para la calificación con IA).
 Imágenes generadas por código: `docs/img/` (`make figures`).

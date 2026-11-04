@@ -214,8 +214,7 @@ $ make smoke
 RESULT: PASS
 ```
 
-![GitHub Actions deploying to AWS with OIDC](capturas/06-github-actions.png)
-[TODO: screenshot 06]
+![GitHub Actions deploying to AWS with OIDC: tests, ARM64 package, CDK deploy and smoke test, all green](capturas/06-github-actions.png)
 
 ![CloudWatch dashboard al-tiempo](capturas/07-cloudwatch-dashboard.png)
 
