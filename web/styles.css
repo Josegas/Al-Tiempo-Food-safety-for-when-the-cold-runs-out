@@ -2,8 +2,8 @@
    One dominant accent (emerald). Amber = simulated / caution. Red = throw away / escalate. */
 
 @font-face { font-family: "Fraunces AT"; src: url("fonts/fraunces-display.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Atkinson Hyperlegible"; src: url("fonts/atkinson-bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "AlTiempo Text"; src: url("fonts/altiempo-text-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "AlTiempo Text"; src: url("fonts/altiempo-text-bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "AlTiempo Mono"; src: url("fonts/altiempo-mono-medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 
 :root {
@@ -25,7 +25,7 @@
   --line-strong: #C7C4B2;
 
   --f-display: "Fraunces AT", Georgia, "Times New Roman", serif;
-  --f-text: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-text: "AlTiempo Text", "Segoe UI", system-ui, sans-serif; /* Atkinson Hyperlegible, zero without slash */
   --f-mono: "AlTiempo Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --r-panel: 22px;
