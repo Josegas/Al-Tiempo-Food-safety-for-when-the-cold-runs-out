@@ -183,3 +183,14 @@ def test_outage_clears_dish_window(monkeypatch):
     track_outage(tool_context=c, outage_started_at="06:00", fridge_door_opened=False)
     r = j(schedule_reminder(at="09:45", message="Check the fridge", tool_context=c))
     assert r["at_local"] == "09:45" and r["message"] == "Check the fridge"
+
+
+def test_safe_window_summary_is_built_in_code():
+    """Live screenshot showed "I can set a reminder for 13:00" while the reminder was 12:45."""
+    w = j(compute_safe_window(food_type="cooked_food", tool_context=ctx("I cooked beans at 12:00")))
+    assert w["summary"] == (
+        "According to U.S. FDA, eat it before 13:00 or throw it away. I can remind you at 12:45."
+    )
+    b = j(compute_safe_window(food_type="cooked_rice", audience="infant",
+                              tool_context=ctx("rice I cooked 5 hours ago", language="es")))  # fmt: skip
+    assert b["summary"].endswith("ya pasó el límite: deséchalo ahora.")

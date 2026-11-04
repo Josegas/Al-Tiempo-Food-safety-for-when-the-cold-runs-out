@@ -25,6 +25,31 @@ def resolve_cooked_at(user_text, cooked_at, minutes_ago, now):
     return None, "unknown", None
 
 
+def window_summary(r: dict, language: str) -> str:
+    """The key sentence, built in code: the model relays it instead of composing times itself."""
+    src_info = r["deciding_source"]
+    if src_info.get("kind") == "policy":
+        src = (
+            "nuestra regla más estricta para bebés y niños pequeños"
+            if language == "es"
+            else "our stricter rule for babies and young children"
+        )
+    else:
+        src = src_info["source_name"].split(" - ")[0]
+    eat_by, remind = r["eat_by_hhmm"], r["reminder_at"][11:16]
+    if language == "es":
+        if r["status"] == "discard_now":
+            return f"Según {src}, ya pasó el límite: deséchalo ahora."
+        text = f"Según {src}, cómelo antes de las {eat_by} o deséchalo. Puedo recordártelo a las {remind}."
+        return text + (
+            " Sírvelo de inmediato y no guardes sobras." if r["serve_immediately"] else ""
+        )
+    if r["status"] == "discard_now":
+        return f"According to {src}, the time limit has passed: throw it away now."
+    text = f"According to {src}, eat it before {eat_by} or throw it away. I can remind you at {remind}."
+    return text + (" Serve it right away and keep no leftovers." if r["serve_immediately"] else "")
+
+
 @tool(context=True)
 def compute_safe_window(
     food_type: str,
@@ -64,6 +89,7 @@ def compute_safe_window(
     result["time_source"] = time_source
     result["now_hhmm"] = now.strftime("%H:%M")
     result["forecast_source"] = source
+    result["summary"] = window_summary(result, tool_context.agent.state.get("language") or "en")
     # Remembered for schedule_reminder: the reminder's time and text come from here, not the model.
     tool_context.agent.state.set(
         "last_window",

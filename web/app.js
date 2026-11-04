@@ -86,10 +86,23 @@ function render() {
   }
 }
 
+// Shows **bold** from the model as <strong> without innerHTML (no HTML injection possible).
+function appendRich(el, text) {
+  String(text).split(/\*\*(.+?)\*\*/g).forEach((part, i) => {
+    if (i % 2) {
+      const b = document.createElement("strong");
+      b.textContent = part;
+      el.appendChild(b);
+    } else if (part) {
+      el.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
 function addMessage(kind, text, extra) {
   const div = document.createElement("div");
   div.className = `msg ${kind}`;
-  div.textContent = text;
+  appendRich(div, text);
   if (extra) div.appendChild(extra);
   $("#chat").appendChild(div);
   div.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -151,7 +164,7 @@ async function send(prompt) {
 async function speak(text, btn) {
   btn.disabled = true;
   try {
-    const { ok, data } = await api("/api/voice", { method: "POST", body: JSON.stringify({ text, language: state.lang }) });
+    const { ok, data } = await api("/api/voice", { method: "POST", body: JSON.stringify({ text: text.replace(/\*\*/g, ""), language: state.lang }) });
     if (ok && data.audio_base64) await new Audio(`data:audio/mpeg;base64,${data.audio_base64}`).play();
   } finally { btn.disabled = false; }
 }
