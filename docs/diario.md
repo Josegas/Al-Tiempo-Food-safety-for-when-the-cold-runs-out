@@ -56,3 +56,14 @@
 - Qué decidí: siempre `cdk diff` primero; los cambios de IAM los aprueba el dueño de la cuenta en su terminal (`make deploy-access`, `make deploy`). En CI se despliega sin aprobación solo desde `main` (ya revisado en el PR).
 - Error evitado: con `environment:` en el job de GitHub, el claim `sub` del token OIDC cambia a `repo:...:environment:production` y AWS rechazaría el rol (que confía en `ref:refs/heads/main`). Se quitó.
 - Error evitado: el *kill switch* (Budget Action) apuntaba a roles que aún no existían en el primer despliegue; se movió al stack de la app, junto a esos roles.
+
+## 2026-11-03 19:45 — Primer despliegue en AWS + error real medido #3 (recordatorio sin hora)
+- Qué intenté: `make deploy-access`, `make dev-profile`, `make deploy` y `make smoke` contra la demo viva.
+- Qué pasó: todo en verde (health, ventana segura 13:00, recordatorio entregado en 92 s). Pero el texto de 1 de 3 recordatorios entregados fue "Eat the beans now, discard after": **sin hora**. Lo escribía el modelo (argumento `message` de la tool) y el verificador solo revisa la respuesta final, no los argumentos de las tools. Además el modelo lo programó a la hora límite (13:00), no a `reminder_at` (12:45).
+- Cómo lo supe: el ítem en DynamoDB (`message`) y el log del smoke test.
+- Qué decidí: `compute_safe_window` guarda la ventana en `agent.state`; `schedule_reminder` toma de ahí la hora (`reminder_at`) y arma el texto **en código** ("Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"). Si el estado es `discard_now`, no programa nada. La fuente citada ahora es la regla que **decide** la hora (`deciding_source`: FDA 1 h a 38 °C), no la primera de la lista. 3 tests de regresión.
+
+## 2026-11-03 20:10 — Error real medido #4 (modo apagón leído al revés)
+- Qué pasó: en la demo viva, "se fue la luz a las 06:00" (son las 12:00) → el modelo dijo "you have until 10:00 to keep fridge items safe". El motor decía bien `fridge_status: discard_perishables_or_check_thermometer`; el modelo lo interpretó mal. También dijo "freezer safe until 06:00" sin decir que es pasado mañana.
+- Qué decidí: el motor devuelve `summary` en es/en armado en código ("the 4-hour limit ended at 10:00…", "until Friday 06:00") y el prompt pide repetirlo. Probado contra Bedrock: ahora responde bien en ambos idiomas. 2 tests de regresión.
+- Pendiente honesto: a veces el modelo dice "reminder set for 13:00" aunque se programó a las 12:45 (15 min antes; es más seguro, pero inexacto).
