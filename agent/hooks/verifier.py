@@ -33,6 +33,9 @@ DURATION_RE = re.compile(
 )
 ISO_TIME_RE = re.compile(r"T(\d{2}):(\d{2})")
 HHMM_RE = re.compile(r"^(\d{2}):(\d{2})$")
+# The prompt shows the answer shape with placeholders ("eat it before HH:MM", "<rule / source>").
+# Eval bug: with no tool result, the model once copied "antes de las HH:MM" into the answer.
+PLACEHOLDER_RE = re.compile(r"\bHH:MM\b|<\s*(rule|regla)\b", re.IGNORECASE)
 # Durations up to this size are about food. Bigger numbers (e.g. "24 hours" freezer) are
 # still checked against the allowed set.
 MAX_RETRIES = 1
@@ -174,7 +177,9 @@ class VerifierHook(HookProvider):
                         self.allowed_times |= t
                         self.allowed_minutes |= m  # durations the user said ("hace 5 horas")
         bad = find_unbacked(text, self.allowed_times, self.allowed_minutes)
-        if not bad["times"] and not bad["minutes"]:
+        if PLACEHOLDER_RE.search(text):
+            bad["placeholder"] = "copied a template placeholder; with no tool time, give no time"
+        if not bad["times"] and not bad["minutes"] and "placeholder" not in bad:
             return
         self.violations.append(bad)
 

@@ -275,17 +275,22 @@ def track_outage(
 
     fridge_ok = now < fridge_until and door_rule_holds
     freezer_ok = now < freezer_until and fridge_door_opened is not True
+    # A deadline is only given when its rule applies (door kept closed). Otherwise there is no
+    # time to give: the model can't relay one, and the verifier blocks any time it invents.
+    # (Eval found it: "door opened" -> the model said "safe until 15:00 if the thermometer...".)
+    fridge_time = door_rule_holds
+    freezer_time = fridge_door_opened is not True
 
     return {
         "summary": outage_summary(
             now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer.limit_minutes // 60
         ),
         "elapsed_minutes": max(elapsed, 0),
-        "fridge_safe_until": fridge_until.isoformat(),
-        "fridge_safe_until_hhmm": _fmt(fridge_until),
+        "fridge_safe_until": fridge_until.isoformat() if fridge_time else None,
+        "fridge_safe_until_hhmm": _fmt(fridge_until) if fridge_time else None,
         "fridge_status": "ok" if fridge_ok else "discard_perishables_or_check_thermometer",
-        "freezer_safe_until": freezer_until.isoformat(),
-        "freezer_safe_until_hhmm": _fmt(freezer_until),
+        "freezer_safe_until": freezer_until.isoformat() if freezer_time else None,
+        "freezer_safe_until_hhmm": _fmt(freezer_until) if freezer_time else None,
         "freezer_status": "ok" if freezer_ok else "check_ice_crystals_or_discard",
         "rule_ids": [fridge.id, freezer.id],
         "sources": [fridge.source(), freezer.source()],
@@ -351,7 +356,7 @@ def outage_summary(now, fridge_until, freezer_until, fridge_ok, freezer_ok, free
                 )
             freezer = (
                 f"Congelador: no lo abras; la comida sigue dentro de la regla de {freezer_hours} horas "
-                f"hasta el {zday} a las {zh}."
+                f"hasta {zday if zday in ('hoy', 'mañana') else 'el ' + zday} a las {zh}."
                 if freezer_ok
                 else "Congelador: revisa si la comida aún tiene cristales de hielo; si no, deséchala."
             )

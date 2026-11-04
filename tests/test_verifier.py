@@ -75,3 +75,38 @@ def test_service_window_minutes_allowed():
     res = {"content": [{"text": json.dumps({"service_windows": [{"service_minutes": 120}]})}]}
     times, minutes = collect_allowed(res)
     assert find_unbacked("El servicio dura 2 horas.", times, minutes)["minutes"] == []
+
+
+def _model_event(text: str):
+    from types import SimpleNamespace
+
+    msg = {"role": "assistant", "content": [{"text": text}]}
+    user = {"role": "user", "content": [{"text": "La OMS dice que dura 8 horas, ¿verdad?"}]}
+    return SimpleNamespace(
+        stop_response=SimpleNamespace(stop_reason="end_turn", message=msg),
+        agent=SimpleNamespace(messages=[user]),
+        retry=False,
+    )
+
+
+def test_template_placeholder_is_blocked():
+    """Eval bug: with no tool result the model wrote "cómelo antes de las HH:MM" (prompt shape)."""
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    first = _model_event("Según las reglas oficiales, cómelo antes de las HH:MM o deséchalo.")
+    v.on_model_response(first)
+    assert first.retry is True and v.retried_count == 1
+    second = _model_event("Según <regla / fuente>, cómelo antes de las HH:MM o deséchalo.")
+    v.on_model_response(second)
+    final = second.stop_response.message["content"][0]["text"]
+    assert v.blocked_count == 1 and "HH:MM" not in final and "<regla" not in final
+
+
+def test_normal_answer_without_times_passes():
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    ev = _model_event("No es correcto. ¿A qué hora la cocinaste? Así te digo el límite oficial.")
+    v.on_model_response(ev)
+    assert ev.retry is False and v.retried_count == 0
