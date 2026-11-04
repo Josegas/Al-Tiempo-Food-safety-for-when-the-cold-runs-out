@@ -15,6 +15,8 @@
 | Reminders delivered on the live system | **9 / 9**, 4–45 s after the scheduled minute | `make smoke` + DynamoDB `delay_s` (2026-11-04) |
 | Live agent time per turn (median, 15 turns) | **1,942 ms** | AgentCore logs, `conversation_turn` events |
 | Live end to end, first message of a new session | **≈ 6.4 s** median (6 scenarios) | HTTPS from Culiacán to CloudFront |
+| First message with warm-up (`/api/warm`), click 5 s after opening | **2.0 s** median (was 6.2 s, same browser test) | Playwright, 6 scenarios, live demo, 2026-11-04 |
+| First message if clicked instantly | 5.8 s median (warm-up still running; no worse than before) | same |
 | Live end to end, follow-up turns in the same session | **2.1–3.0 s** | same |
 | Live tokens per turn / cost | 6,244 in / 113 out → **$0.0024** | AgentCore logs × AWS Price List API price |
 
