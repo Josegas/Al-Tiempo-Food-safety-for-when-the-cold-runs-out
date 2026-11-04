@@ -67,3 +67,11 @@
 - Qué pasó: en la demo viva, "se fue la luz a las 06:00" (son las 12:00) → el modelo dijo "you have until 10:00 to keep fridge items safe". El motor decía bien `fridge_status: discard_perishables_or_check_thermometer`; el modelo lo interpretó mal. También dijo "freezer safe until 06:00" sin decir que es pasado mañana.
 - Qué decidí: el motor devuelve `summary` en es/en armado en código ("the 4-hour limit ended at 10:00…", "until Friday 06:00") y el prompt pide repetirlo. Probado contra Bedrock: ahora responde bien en ambos idiomas. 2 tests de regresión.
 - Pendiente honesto: a veces el modelo dice "reminder set for 13:00" aunque se programó a las 12:45 (15 min antes; es más seguro, pero inexacto).
+
+## 2026-11-03 21:00 — Error real #5: la frase clave también se arma en código + error de OIDC
+- Qué pasó (1): en la captura de la demo el modelo ofreció "a reminder for 13:00" y luego lo programó a las 12:45. El verificador lo deja pasar porque 13:00 sí viene del motor.
+- Qué decidí: `compute_safe_window` devuelve `summary` armado en código ("According to U.S. FDA, eat it before 13:00 or throw it away. I can remind you at 12:45."), igual que el apagón. Evals completos otra vez: **36/36**, reintentos del verificador **2 → 0**, $0.00221 por turno.
+- Qué pasó (2): el primer despliegue desde GitHub falló: `Not authorized to perform sts:AssumeRoleWithWebIdentity`.
+- Cómo lo supe: CloudTrail mostró el `sub` real del token: `repo:Josegas@80491054/...@1444850797:ref:refs/heads/main`. GitHub usa ahora un sujeto **inmutable** (IDs del dueño y del repo), y el rol esperaba `repo:Josegas/...`.
+- Qué decidí: el prefijo sale de `gh api repos/OWNER/REPO/actions/oidc/customization/sub` y va en `cdk.json` (`githubOidcSubPrefix`). Es más seguro: si alguien borra y recrea un repo con el mismo nombre, no puede desplegar.
+- Extra: actions con Node 24 (`setup-node@v7`, `configure-aws-credentials@v6`) y runner fijo `ubuntu-24.04` para que nada cambie mientras evalúan.
