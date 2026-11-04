@@ -76,7 +76,7 @@ make smoke           # end-to-end check of the live demo
 - **Safety regression tests:** every real unsafe answer we found becomes a test (see `docs/diario.md`).
 - **Evals drive decisions:** 18 bilingual scenarios picked the model (Nova Lite 8/18, Nova Pro
   15/18, **Nova 2 Lite 18/18**). The suite now has **50 scenarios** (incl. 15 adversarial) and passes
-  **98/100** over two runs at $0.00225 per turn, with 0 unsafe answers (`docs/metrics.md`,
+  **99/100** over two runs at $0.00227 per turn, with 0 unsafe answers (`docs/metrics.md`,
   `docs/costs.md`). Every number we publish is in `docs/sources.md`.
 - **Load-tested guardrails:** `make loadtest` shows normal traffic answered and bursts stopped
   before they reach the model (`docs/costs.md`).

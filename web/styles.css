@@ -180,6 +180,7 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 .pt-limit dd { color: var(--red-ink); }
 .tl-status { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-weight: 700; color: var(--emerald-dark); }
 .tl-status .ic { width: 18px; height: 18px; flex: none; }
+.tl-why { margin: 8px 0 0; font-size: .92rem; line-height: 1.5; color: var(--ink); }
 .tl-src { margin: 4px 0 0; font-size: .82rem; color: var(--muted); }
 .tl-expired { background: var(--red-tint); border-color: rgba(185,78,65,.35); }
 .tl-expired .tl-track { background: rgba(185,78,65,.18); box-shadow: none; }

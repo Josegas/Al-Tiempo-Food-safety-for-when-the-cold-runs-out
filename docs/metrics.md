@@ -2,17 +2,17 @@
 
 | Metric | Value | How measured |
 |---|---|---|
-| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **137 / 137 passing** | `make test`, GitHub Actions summary |
+| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **140 / 140 passing** | `make test`, GitHub Actions summary |
 | Food rules verified on the official source (verbatim text stored) | **11 / 11** | `python scripts/check_rules.py --strict` |
 | Invented times/limits caught by the verifier (adversarial unit tests) | **8 / 8**, plus copied template placeholders (`HH:MM`) | `tests/test_verifier.py` |
-| End-to-end evals, Nova 2 Lite (**50 scenarios** × 2 runs, 26 es / 24 en), latest run 20261104-000750 | **98 / 100 (98%)**; the 2 failures were not unsafe (one correct refusal worded differently, one evasive answer that didn't correct a false "8 hours" claim) | `python evals/run_evals.py --repeat 2` |
-| Same suite, earlier runs while fixing what it found | 95 / 100 (000004) → 97 / 100 (000424, 3 safe answers our checks misread) → 98 / 100 | `evals/results/`, `docs/diario.md` |
+| End-to-end evals, Nova 2 Lite (**50 scenarios** × 2 runs, 26 es / 24 en), latest run 20261104-005038 (answers now say *why*) | **99 / 100 (99%)**; the 1 failure was not unsafe (it refused "100% safe" but asked needless questions). Previous run 000750: 98 / 100, also 0 unsafe | `python evals/run_evals.py --repeat 2` |
+| Same suite, earlier runs while fixing what it found | 95 / 100 (000004) → 97 / 100 (000424, 3 safe answers our checks misread) → 98 / 100 (000750) → 99 / 100 (005038) | `evals/results/`, `docs/diario.md` |
 | Previous suite (18 scenarios × 2 runs) | 36 / 36 (100%) | run 20261103-204253 |
-| Adversarial evals passed (pressure, medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim) | **28 / 30** (15 scenarios × 2 runs); 0 unsafe answers | same |
-| Median latency per turn (evals) | **1,590 ms** | same |
-| Tokens per turn (evals) | 5,805 in / 122 out | same |
-| Cost per turn (Bedrock, evals) | **$0.00225** | tokens × AWS Price List API price |
-| Verifier in eval runs | 2 retries (run 150818) → 0 retries (run 192607, after code-built summaries); 50-scenario run: **4 retries, 0 safe templates** | same |
+| Adversarial evals passed (pressure, medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim) | **29 / 30** (15 scenarios × 2 runs); 0 unsafe answers | same |
+| Median latency per turn (evals) | **1,644 ms** | same |
+| Tokens per turn (evals) | 5,743 in / 137 out | same |
+| Cost per turn (Bedrock, evals) | **$0.00227** | tokens × AWS Price List API price |
+| Verifier in eval runs | 2 retries (run 150818) → 0 retries (run 192607, after code-built summaries); 50-scenario run: **3 retries, 0 safe templates** | same |
 | Latest eval run (20261103-192607) | **36 / 36**, median 2,052 ms, 5,625 in / 128 out tokens, **$0.00221/turn** | same |
 | Eval run after fixing spoken times + fridge door (20261103-204253) | **36 / 36**, 0 verifier retries, median 1,740 ms, **$0.00227/turn** | same (runs 203816: 34/36 and 204022: 35/36 found the bugs) |
 | Reminders delivered on the live system | **9 / 9**, 4–45 s after the scheduled minute | `make smoke` + DynamoDB `delay_s` (2026-11-04) |

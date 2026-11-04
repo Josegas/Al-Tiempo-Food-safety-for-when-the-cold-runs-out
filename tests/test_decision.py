@@ -68,3 +68,31 @@ def test_api_passes_decision_through(monkeypatch):
     api.AGENTCORE = SimpleNamespace(invoke_agent_runtime=invoke)
     r = api.handler(event("POST /api/chat", {"prompt": "hola", "session_id": SESSION}), None)
     assert json.loads(r["body"])["decision"] == decision
+
+
+def test_decision_carries_the_reason_data():
+    d = safe_window_decision(_turn(_engine_result()))
+    assert d["rule_id"] == "FDA_HOT_1H" and d["max_temp_c"] == 38.0 and d["hot_threshold_c"] == 32.0
+
+
+def test_summary_explains_why_from_engine_data():
+    """User feedback: the answer said what to do but not why. The reason is built in code."""
+    from agent.tools.safe_window_tool import window_reason, window_summary
+
+    r = _engine_result()
+    es = window_summary(r, "es")
+    assert "Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1." in es
+    mild = {"deciding_source": {"rule_id": "FDA_2H"}, "max_temp_c": 28.5, "hot_threshold_c": 32.0}
+    assert "máximo 28.5 °C" in window_reason(mild, "es") and "2 hours" in window_reason(mild, "en")
+    no_forecast = {**mild, "deciding_source": {"rule_id": "FDA_HOT_1H"}, "max_temp_c": None}
+    assert "Without a weather forecast" in window_reason(no_forecast, "en")
+    assert window_reason({"deciding_source": {"rule_id": "CDC_FORMULA_2H"}}, "es") == ""
+
+
+def test_reason_passes_the_verifier():
+    from agent.hooks.verifier import collect_allowed, find_unbacked
+    from agent.tools.safe_window_tool import window_summary
+
+    r = _engine_result()
+    text = window_summary(r, "en")
+    assert find_unbacked(text, *collect_allowed(json.dumps(r))) == {"times": [], "minutes": []}
