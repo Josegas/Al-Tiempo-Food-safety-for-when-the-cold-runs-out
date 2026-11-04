@@ -200,3 +200,20 @@
 ## 2026-11-04 15:00 — bug: "¿sabes qué hora es?" en modo Real
 - Qué pasó: en modo Real el agente respondió "no tengo acceso a la hora actual".
 - Causa: ninguna herramienta devolvía la hora actual (solo venía dentro del resultado de la ventana segura), y el verificador bloquea cualquier hora que no venga de una herramienta.
+
+## 2026-11-04 15:05 — arreglo de seguimientos, objeciones, "por qué" y tono
+- Qué decidí:
+  - Seguimientos: el verificador acepta los resultados del motor del turno anterior **solo si el mensaje nuevo no trae hora ni duración propia**. Si trae una ("¿y el arroz de las 11:30?"), hay que pasar otra vez por el motor (con test). Una hora inventada en un seguimiento se sigue bloqueando (con test).
+  - Respaldo seguro: responde al punto del usuario con el texto de `rules/objections.yaml` y nunca sale igual dos veces seguidas (con test).
+  - Objeciones ("estaba tapado", "lo probé", "lo hiervo", "limón o chile", "siempre lo hemos hecho", "ya me lo comí", "¿se lo doy al perro?"): las detecta el **código** y le pasa al modelo el texto con su porqué y su fuente. Cada porqué tiene su frase textual de la fuente (OMS Cinco claves, FDA, NHS, OMS hoja de inocuidad). Las que la fuente no dice tal cual van como `adapted` o `policy`.
+  - Cada regla de `food_rules.yaml` tiene `why` (es/en) con su `why_text` textual; `check_rules.py` lo exige.
+  - Tono: "lo más seguro es no comerlo y tirarlo", una línea de empatía y un consejo para la próxima vez.
+  - Herramienta `get_current_time` (en modo Simulado avisa que es el reloj de la demo).
+- Error mío en el camino: la primera versión le ponía "(fuente: OMS)" a toda la objeción, y el modelo escribió "Según la OMS, taparla no la enfría", cosa que la OMS no dice. Ahora solo el porqué va con su fuente.
+- Otro: con la herramienta de la hora, el modelo empezó a decir "Son las 12:00" en preguntas de comida. La limité a cuando el usuario pregunta la hora.
+- Resultado: tabla en `docs/metrics.md`. Casos reales leídos a mano: de 15 sí / 4 dudosos / 7 no pasó a 16 / 7 / 3, y de 2 respuestas inseguras a 1. Ajustadas 99/100, nuevas 18/18, adversariales 8/10 (las mismas 2), seguimientos 11/11.
+
+## 2026-11-04 15:16 — consejos de higiene (dentro del límite de 45 min)
+- Qué hice: `rules/hygiene_tips.yaml` con 4 consejos de la OMS "Cinco claves" (tabla y cuchillo para lo crudo, lavado de manos, lavar frutas y verduras, agua segura), con texto textual sacado del PDF con `pdftotext`. El código elige como máximo 1 por las palabras del usuario. El modelo no lo ve ni lo cambia. La API lo manda aparte (`hygiene_tip`) y la web lo muestra como nota pequeña debajo de la decisión. Sin cantidades ni diluciones: solo "si usas un desinfectante, sigue las instrucciones de su etiqueta".
+- Cómo lo probé: 3 casos de evaluación (ensalada → lavar; misma tabla → separar; frijoles → ningún consejo), 3/3; Playwright a 375 y 1440 px en es/en, sin errores de consola ni scroll horizontal (`docs/capturas/ui/*-17-hygiene-tip.png`, con respuestas reales del backend local).
+- Tropiezo: servidores locales viejos de las pruebas de la mañana seguían ocupando los puertos 8092–8098 y respondían vacío. No tuve permiso para cerrarlos; usé el puerto 8188.

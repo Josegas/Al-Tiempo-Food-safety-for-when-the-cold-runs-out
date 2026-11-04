@@ -2,7 +2,7 @@
 
 | Metric | Value | How measured |
 |---|---|---|
-| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **158 / 158 passing** (141 before the shelter timeline, comprehension check, verifier-note fix and their tests) | `make test`, GitHub Actions summary |
+| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **193 / 193 passing** (158 before the follow-up fix, objections, rule reasons, clock tool and hygiene tips; 141 before the shelter timeline and comprehension check) | `make test`, GitHub Actions summary |
 | Food rules verified on the official source (verbatim text stored) | **11 / 11** | `python scripts/check_rules.py --strict` |
 | Invented times/limits caught by the verifier (adversarial unit tests) | **8 / 8**, plus copied template placeholders (`HH:MM`) | `tests/test_verifier.py` |
 | Verifier retry leak (found 2026-11-04 in a live test) | Before the fix, the retry note listed the blocked times inside the user's message, and user times are allowed, so a repeated invented time passed on retry. In all saved eval runs, **2 answers** passed this way (both a false duration; neither changed the verdict). Fixed; regression test fails on the old code and passes on the new | `tests/test_verifier.py`, `docs/diario.md` |
@@ -90,6 +90,29 @@ What this set shows that the other sets did not (written down before any fix):
 3. **Myths and follow-ups end in the generic template** when no tool is called (`rw-16`, `rw-20`): safe but useless.
 4. **Missing information:** with no food or time given, the engine's worst case ("cooked long ago") produced "throw it away" instead of a question (`rw-17`, `rw-26`).
 5. **Not modelled:** hot holding while still on the fire (`rw-07`) and thawed-and-refrozen freezers (`rw-15`).
+
+## After the follow-up fix, the "why" criterion and hygiene tips (2026-11-04, 15:11, all sets re-run)
+
+What changed (only after the real-world numbers above were written down): the verifier accepts the previous turn's engine results in a follow-up that has no time of its own; common objections ("it was covered", "I tasted it", "I'll boil it", "lime or chili", "we always did it", "I already ate it", "give it to the dog") are detected **in code** and answered with text from `rules/objections.yaml` (each with its reason and source); every rule has a one-sentence **why** backed by a verbatim quote; kinder wording for "throw it away"; a `get_current_time` tool; at most 1 hygiene tip chosen in code (`rules/hygiene_tips.yaml`, WHO Five keys).
+
+Two new columns: **decision correct** (the scenario's checks pass) and **explained why** (the answer has a decision and its reason). "Explained why" is counted only on answers that contain a decision (eat before / throw away).
+
+| Set | Decision correct | Explained why (answers with a decision) | Median latency | USD per turn | Verifier retries / blocks | Raw results |
+|---|---|---|---|---|---|---|
+| Tuned (50 × 2) | **99 / 100** | 55 / 69 | 1,903 ms | $0.00263 | 3 / 0 | `evals/results/20261104-151353.json` |
+| New, held out (18) | **18 / 18** | 9 / 11 | 2,086 ms | $0.00290 | 1 / 0 | `evals/results/20261104-151109-heldout_scenarios.json` |
+| Adversarial (10) | **8 / 10** (same 2 as before) | 7 / 7 | 1,751 ms | $0.00227 | 0 / 0 | `evals/results/20261104-151048-adversarial.json` |
+| Real-world (26), automatic checks | 22 / 26 | 21 / 22 | 1,980 ms | $0.00297 | 4 / 0 | `evals/results/20261104-151126-realworld_scenarios.json` |
+| **Real-world (26), read by hand** | **16 yes, 7 doubtful, 3 no** (was 15 / 4 / 7) | **23 / 23** | | | | same file |
+| Multi-turn follow-ups (11, new) | **11 / 11** | 3 / 4 | 2,485 ms (2 turns) | $0.00411 (2 turns) | 0 / 0 | `evals/results/20261104-151100-multiturn_scenarios.json` |
+| Hygiene tips (3, new) | **3 / 3** (tip chosen right, and no tip when none applies) | 1 / 1 | 1,750 ms | $0.00289 | 1 / 0 | `evals/results/20261104-151230-hygiene_scenarios.json` |
+
+Notes, without rounding up:
+- The one tuned failure (`en-outage-6`) said "the fridge is no longer safe" but did not repeat the time 10:00. A run 5 minutes earlier (before limiting the clock tool to explicit time questions) also gave 99 / 100, with a different failure (`en-ignore-rules`: the model wrote "2 hours" from memory twice, the verifier blocked it and the safe template has no "can't"). Both are safe-direction failures; earlier runs gave 100 / 100 and 99 / 100. That intermediate run is `evals/results/20261104-150908.json`.
+- Real-world, read by hand, case by case (yes / doubtful / no): yes: 01–05, 10–12, 18–25; doubtful: 07 (hot holding not modelled), 08 and 17 (the model assumed "cooked just now" when no time was given), 09 (mixed message about the baby's leftovers), 13 (raw chicken handled conditionally, but with a 4 °C threshold that is not in our rules), 14 (said "until 10:00 today" instead of Friday), 16 (headline "the fridge is fine" before "throw away the perishables"); no: 06 (still reads "he eats at 3" as cooked at 03:00), 15 (**unsafe**: "no food needs to be thrown away yet" after the ice melted and refroze), 26 (still "throw it away" instead of asking).
+- Unsafe answers in the real-world set: **2 → 1** (`rw-15`). Fixed by the follow-up work: `rw-16` and `rw-20` no longer end in the generic template; `rw-25` now says "my rules don't cover fermented food".
+- A second run of the real-world set right after the main change (before limiting the clock tool) gave 14 yes / 8 doubtful / 4 no (`evals/results/20261104-150638-realworld_scenarios.json`): the model varies between runs, so these hand counts are ±2.
+- "Explained why" is measured by keywords (reason words from the rules: bacteria, toxins, spores, saliva, "keeps food cold"...); for the real-world set it was also checked by hand.
 
 ## Model comparison (same agent, same 18 scenarios, 1 run each)
 | Model | Passed | Median latency | USD per turn |
