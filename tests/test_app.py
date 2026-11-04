@@ -66,3 +66,11 @@ def test_model_error_returns_safe_fallback(fake, monkeypatch):
     monkeypatch.setattr(app_mod, "build_agent", boom)
     r = app_mod.invoke({"prompt": "hola", "language": "es"})
     assert r["error"] == "ZeroDivisionError" and "deséchala" in r["answer"]
+
+
+def test_warmup_builds_session_agent_without_calling_model(fake):
+    ctx = SimpleNamespace(session_id="w" * 40)
+    assert app_mod.invoke({"warmup": True, "language": "es"}, ctx) == {"warm": True}
+    assert len(fake) == 1 and fake[0].calls == 0  # agent ready, no tokens spent
+    app_mod.invoke({"prompt": "hola", "language": "es"}, ctx)
+    assert len(fake) == 1 and fake[0].calls == 1  # first real message reuses the warm agent

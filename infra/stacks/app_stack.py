@@ -263,6 +263,7 @@ class AppStack(Stack):
                 "TABLE_NAME": table.table_name,
                 "RUNTIME_ARN": runtime_arn,
                 "DAILY_CAP": str(self.node.try_get_context("dailyChatCap") or 500),
+                "WARM_CAP": str(self.node.try_get_context("dailyWarmCap") or 1000),
                 "POLLY_ENGINE": "standard",
             },
             log_group=logs.LogGroup(
@@ -283,13 +284,16 @@ class AppStack(Stack):
             http_api=http_api,
             stage_name="$default",
             auto_deploy=True,
-            throttle=apigw.ThrottleSettings(rate_limit=3, burst_limit=10),
+            throttle=apigw.ThrottleSettings(
+                rate_limit=10, burst_limit=20
+            ),  # cost: per request; daily caps bound the model
         )
         integration = integrations.HttpLambdaIntegration("ApiIntegration", api_fn)
         for method, path in [
             (apigw.HttpMethod.POST, "/api/chat"),
             (apigw.HttpMethod.GET, "/api/reminders"),
             (apigw.HttpMethod.POST, "/api/voice"),
+            (apigw.HttpMethod.POST, "/api/warm"),
             (apigw.HttpMethod.GET, "/api/health"),
         ]:
             http_api.add_routes(path=path, methods=[method], integration=integration)

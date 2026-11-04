@@ -84,6 +84,15 @@ def invoke(payload: dict, context=None) -> dict:
     payload = payload if isinstance(payload, dict) else {}
     prompt = str(payload.get("prompt", "")).strip()[:MAX_PROMPT_CHARS]
     language = payload.get("language") if payload.get("language") in ("en", "es") else "en"
+    if payload.get("warmup") is True:
+        # Called when the page opens: AgentCore starts this session's microVM, imports run and the
+        # agent is built now, so the user's first real message is answered in ~2 s, not ~6 s.
+        # No model call, no tokens.
+        session_id = getattr(context, "session_id", None)
+        settings = _settings(payload, session_id)
+        _get_session(session_id, language, settings.demo)
+        log.info(json.dumps({"event": "warmup", "language": language}))
+        return {"warm": True}
     if not prompt:
         return {"error": "empty prompt"}
 

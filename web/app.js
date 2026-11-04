@@ -147,6 +147,7 @@ async function send(prompt) {
     ...(state.mode === "live" && state.coords ? { lat: state.coords.lat, lon: state.coords.lon } : {}),
   };
   try {
+    await state.warm; // if the session is still starting, wait for it instead of starting a 2nd one
     const { data } = await api("/api/chat", { method: "POST", body: JSON.stringify(body) });
     typing.remove();
     const answer = data.answer || t("error");
@@ -183,6 +184,15 @@ async function pollReminders() {
   } catch (e) { /* offline: try again later */ }
 }
 
+// Start this conversation's agent session while the user reads the page, so the first answer
+// takes ~2 s instead of ~6 s. Best effort: if it fails, the chat still works (just slower).
+function warmUp() {
+  state.warm = api("/api/warm", {
+    method: "POST",
+    body: JSON.stringify({ session_id: state.sessionId, language: state.lang, demo: state.mode === "demo" }),
+  }).catch(() => {});
+}
+
 function setMode(mode) {
   state.mode = mode;
   state.sessionId = newSessionId(); // new conversation when switching mode
@@ -192,12 +202,14 @@ function setMode(mode) {
       () => { state.coords = null; }, { timeout: 8000, maximumAge: 3600000 });
   }
   render();
+  warmUp();
 }
 
-document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => { state.lang = b.dataset.lang; state.sessionId = newSessionId(); render(); }));
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => { state.lang = b.dataset.lang; state.sessionId = newSessionId(); render(); warmUp(); }));
 document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("#prompt").value; $("#prompt").value = ""; send(v); });
 $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#form").requestSubmit(); } });
 
 render();
+warmUp();
 setInterval(pollReminders, 15000);
