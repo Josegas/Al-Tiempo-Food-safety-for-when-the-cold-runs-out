@@ -9,7 +9,7 @@
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **140** automated tests. **99 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and the one failure was not unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
+| **Technical Execution** | Live on AWS. **141** automated tests. **99 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and the one failure was not unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
 | **Communication** | Demo with no login, buttons for 7 ready-made scenarios, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
@@ -195,7 +195,7 @@ We will **not** claim fewer illnesses from a pilot this small. That needs a larg
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 140 pytest tests cover:
+**Deterministic core, tested.** 141 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
 - reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace 5 horas"*, *"2 pm"*);
 - the verifier, the API and the reminder Lambdas.
@@ -215,7 +215,7 @@ We ran the same agent with three Bedrock models:
 
 ![Eval pass rate by model](img/model-evals.png)
 
-**Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, that suite passed **36/36** over two runs.
+**Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, that 18-scenario suite passed **36/36** over two runs.
 
 **Then we made the test harder.** We grew the suite to **50 scenarios** (26 in Spanish, 24 in English). The expected times come from the rules engine, not from us. The new scenarios include expired food, spoken times, formula, toddlers, an opened fridge, antibiotics, home remedies, *"ignore your rules"* and a fake WHO claim. The first full run scored **95/100**, and the failures were worth more than the score. They exposed **four real bugs**: an outage deadline the model reused after the fridge door was opened, a prompt rule that only seemed to apply to outages, a template placeholder (*"eat it before HH:MM"*) copied into an answer, and an eval harness that didn't tell the agent the user's language. Each one now has a test. After the fixes: **98/100**, and **99/100** in the latest run (with the *why* sentence added), median **1,644 ms**, **$0.00227** per turn, and **0** safe-template fallbacks. No failure was unsafe: they were correct refusals in different words, an evasive answer that didn't correct a false claim, and one that asked needless questions. We report them as they are.
 
@@ -289,7 +289,7 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 - **What failed:** during testing, *"I cooked beans at 12:00"* got *"the beans must be thrown away now"*. The correct answer was *"eat them before 13:00"*.
 - **How we found it:** we reproduced it 3 times and logged the tool inputs. The model (Nova Lite at that time) did three different things: it passed the right time, asked again, or **left the time out**. With no time, the tool correctly applied the worst case: "unknown time = discard".
 - **What we changed:** the user's own words are now read **in code** (`agent/time_parse.py`, Spanish and English), and they win over whatever the model sends. We added 20 time-reading tests and 3 regression tests.
-- **How much it improved:** the same message now gets *"eat them before 13:00"*. On the full eval suite, moving to Nova 2 Lite raised the pass rate from **8/18 (44%) to 18/18 (100%)**, then **36/36** over two runs.
+- **How much it improved:** the same message now gets *"eat them before 13:00"*. On the full eval suite, moving to Nova 2 Lite raised the pass rate from **8/18 (44%) to 18/18 (100%)**, then **36/36** over two runs of the original 18-scenario suite (now **99/100** on the larger 50-scenario suite).
 
 **The opposite error was worse.** *"Can I give my baby the rice I cooked 5 hours ago?"* once got *"eat it before 13:00"*. The verifier did not catch it, because 13:00 *did* come from the tool: the error was in the input, not the output.
 - **The fix:** a `minutes_ago` input, and a `discard_now` status from the engine.
@@ -298,9 +298,9 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 
 **Two more real bugs, found on the live system:**
 - **Reminder text:** the first live reminders were written by the model, and one of the first three arrived as *"Eat the beans now, discard after"*, with no time. Reminder time and text are now built in code from the engine result.
-- **Outage mode:** the model once told a user at 12:00 *"you have until 10:00"* for the fridge. The engine had the correct verdict; the model misread it. The engine now returns a plain-language summary in both languages, and the model only relays it. We applied the same idea to the safe-window answer. In the next full eval run, verifier retries dropped from **2 to 0** and the suite still passed **36/36**.
+- **Outage mode:** the model once told a user at 12:00 *"you have until 10:00"* for the fridge. The engine had the correct verdict; the model misread it. The engine now returns a plain-language summary in both languages, and the model only relays it. We applied the same idea to the safe-window answer. In the next full eval run, verifier retries dropped from **2 to 0** and the 18-scenario suite still passed **36/36**.
 
-**A user test after launch:** a tester wrote *"cooked it around half past three in the afternoon"* in Spanish (*"a las 3 y media de la tarde"*). Our time reader understood **03:00**. The verifier noticed that the model's 15:30 didn't match and fell back to the safe template, so nobody was told to eat unsafe food, but the answer was clumsy. The reader now understands "y media", "y cuarto", "menos cuarto", "al mediodía" and hours written as words. We added 12 regression tests with the tester's exact sentence. In the same round, the model sometimes ignored *"I kept the fridge closed"*, so door and freezer state are now read from the user's words too. The full eval suite is back to **36/36** with **0** verifier retries.
+**A user test after launch:** a tester wrote *"cooked it around half past three in the afternoon"* in Spanish (*"a las 3 y media de la tarde"*). Our time reader understood **03:00**. The verifier noticed that the model's 15:30 didn't match and fell back to the safe template, so nobody was told to eat unsafe food, but the answer was clumsy. The reader now understands "y media", "y cuarto", "menos cuarto", "al mediodía" and hours written as words. We added 12 regression tests with the tester's exact sentence. In the same round, the model sometimes ignored *"I kept the fridge closed"*, so door and freezer state are now read from the user's words too. The 18-scenario eval suite we had then was back to **36/36** with **0** verifier retries.
 
 **Other challenges:**
 - **Sources that block automated readers:** USDA FSIS returned HTTP 403, so we cite the FDA pages that publish the same rules and that we could check word by word.

@@ -105,45 +105,60 @@ def title(d, text, sub="", x=50, y=36):
 
 
 # ---------------------------------------------------------------------------
+def clock_art(d, cx: int, cy: int, r: int, temp: str = "38 °C") -> None:
+    """Sun + clock (12:00, red deadline hand) + thermometer, plain shapes (original artwork)."""
+    import math
+
+    k = r / 180  # every size below was designed for r = 180
+    for i in range(12):
+        a = i * math.pi / 6
+        d.line(
+            [
+                (cx + (r + 26 * k) * math.cos(a), cy + (r + 26 * k) * math.sin(a)),
+                (cx + (r + 62 * k) * math.cos(a), cy + (r + 62 * k) * math.sin(a)),
+            ],
+            fill="#f3b13b",
+            width=round(14 * k),
+        )
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill="#ffffff", outline=ORANGE, width=round(16 * k))
+    for i in range(12):
+        a = i * math.pi / 6
+        d.line(
+            [
+                (cx + (r - 40 * k) * math.cos(a), cy + (r - 40 * k) * math.sin(a)),
+                (cx + (r - 18 * k) * math.cos(a), cy + (r - 18 * k) * math.sin(a)),
+            ],
+            fill=INK_2,
+            width=round(6 * k),
+        )
+    d.line([(cx, cy), (cx, cy - 140 * k)], fill=INK, width=round(12 * k))  # 12:00
+    d.line([(cx, cy), (cx + 95 * k, cy)], fill=RED, width=round(12 * k))  # deadline hand
+    d.ellipse((cx - 16 * k, cy - 16 * k, cx + 16 * k, cy + 16 * k), fill=INK)
+    # thermometer
+    tx, ty = cx + 300 * k, cy + 120 * k
+    d.rounded_rectangle(
+        (tx - 22 * k, ty - 260 * k, tx + 22 * k, ty + 40 * k),
+        radius=round(22 * k),
+        fill="#ffffff",
+        outline=INK_2,
+        width=round(6 * k),
+    )
+    d.rounded_rectangle(
+        (tx - 10 * k, ty - 170 * k, tx + 10 * k, ty + 40 * k), radius=round(10 * k), fill=RED
+    )
+    d.ellipse(
+        (tx - 45 * k, ty + 10 * k, tx + 45 * k, ty + 100 * k),
+        fill=RED,
+        outline=INK_2,
+        width=round(6 * k),
+    )
+    d.text((tx - 50 * k, ty - 330 * k), temp, font=font(round(38 * k), True), fill=RED)
+
+
 def cover() -> None:
     img, d = canvas(1600, 840)
     d.rectangle((0, 0, 1600, 840), fill="#fff7ef")
-    # sun + clock + thermometer, drawn with plain shapes (original artwork)
-    cx, cy, r = 1210, 380, 180
-    for i in range(12):
-        import math
-
-        a = i * math.pi / 6
-        d.line(
-            [
-                (cx + (r + 26) * math.cos(a), cy + (r + 26) * math.sin(a)),
-                (cx + (r + 62) * math.cos(a), cy + (r + 62) * math.sin(a)),
-            ],
-            fill="#f3b13b",
-            width=14,
-        )
-    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill="#ffffff", outline=ORANGE, width=16)
-    for i in range(12):
-        a = i * math.pi / 6
-        d.line(
-            [
-                (cx + (r - 40) * math.cos(a), cy + (r - 40) * math.sin(a)),
-                (cx + (r - 18) * math.cos(a), cy + (r - 18) * math.sin(a)),
-            ],
-            fill=INK_2,
-            width=6,
-        )
-    d.line([(cx, cy), (cx, cy - 140)], fill=INK, width=12)  # 12:00
-    d.line([(cx, cy), (cx + 95, cy)], fill=RED, width=12)  # deadline hand
-    d.ellipse((cx - 16, cy - 16, cx + 16, cy + 16), fill=INK)
-    # thermometer
-    tx, ty = 1510, 500
-    d.rounded_rectangle(
-        (tx - 22, ty - 260, tx + 22, ty + 40), radius=22, fill="#ffffff", outline=INK_2, width=6
-    )
-    d.rounded_rectangle((tx - 10, ty - 170, tx + 10, ty + 40), radius=10, fill=RED)
-    d.ellipse((tx - 45, ty + 10, tx + 45, ty + 100), fill=RED, outline=INK_2, width=6)
-    d.text((tx - 50, ty - 330), "38 °C", font=font(38, True), fill=RED)
+    clock_art(d, 1210, 380, 180)
 
     d.text((80, 150), "Al Tiempo", font=font(110, True), fill=INK)
     d.text((86, 290), "Food safety for when the cold runs out", font=font(42), fill=INK_2)
@@ -347,7 +362,7 @@ def verifier() -> None:
     arrow(d, (xs[3], r2 + 80), (xs[2] + w, r2 + 80))
     d.text(
         (40, 770),
-        "Measured: 8 of 8 invented times blocked in adversarial tests; 0 of 36 eval answers needed the template.",
+        "Measured: 8 of 8 invented times blocked in adversarial tests; 0 of 100 eval answers needed the template.",
         font=font(22, True),
         fill=INK,
     )
@@ -407,9 +422,42 @@ def model_chart() -> None:
     img.save(OUT / "model-evals.png", optimize=True)
 
 
+# ---------------------------------------------------------------------------
+def video_thumbnail() -> None:
+    """YouTube thumbnail, 1280x720 (16:9). Few, big words: it is seen at phone size."""
+    img, d = canvas(1280, 720)
+    d.rectangle((0, 0, 1280, 720), fill="#fff7ef")
+    d.rectangle((0, 0, 1280, 16), fill=ORANGE)
+    clock_art(d, 840, 380, 175, temp="")
+    d.text((60, 70), "38 °C.", font=font(96, True), fill=RED)
+    d.text((60, 175), "No fridge.", font=font(96, True), fill=INK)
+    d.text((60, 330), "Eat it before", font=font(64, True), fill=INK_2)
+    d.text((60, 405), "13:00", font=font(150, True), fill=ORANGE)
+    d.text((60, 620), "Al Tiempo · AI food-safety agent", font=font(36, True), fill=INK)
+    img.save(OUT / "thumbnail-video.png", optimize=True)
+
+
+def article_thumbnail() -> None:
+    """Article card image, 1600x900 (16:9): name, promise and one measured number."""
+    img, d = canvas(1600, 900)
+    d.rectangle((0, 0, 1600, 900), fill="#fff7ef")
+    d.rectangle((0, 0, 1600, 18), fill=ORANGE)
+    clock_art(d, 1170, 440, 210)
+    d.text((80, 140), "Al Tiempo", font=font(120, True), fill=INK)
+    lines = ["Until what time is", "cooked food safe", "without a fridge?"]
+    for i, ln in enumerate(lines):
+        d.text((86, 320 + i * 72), ln, font=font(58, True), fill=INK_2)
+    d.text((86, 590), "Official rules + today's heat forecast", font=font(36), fill=INK)
+    d.text((86, 650), "Strands Agents · Amazon Bedrock AgentCore", font=font(30, True), fill=ORANGE)
+    d.text((86, 760), "Health · English / Español", font=font(30), fill=INK_2)
+    img.save(OUT / "thumbnail-article.png", optimize=True)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     cover()
+    video_thumbnail()
+    article_thumbnail()
     architecture()
     verifier()
     model_chart()
