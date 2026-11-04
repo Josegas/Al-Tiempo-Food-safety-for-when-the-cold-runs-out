@@ -109,6 +109,12 @@ const I18N = {
       print: "Imprimir plan", people: (n) => `${n} personas`,
       aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
     },
+    quiz: {
+      q: "Pregunta rápida: según la respuesta, ¿hasta qué hora se puede comer?",
+      ok: "¡Correcto!", no: (c) => `La hora correcta es ${c}.`,
+      panel: (pct, n) => `Comprensión: ${pct} % correcto (n = ${n})`,
+      note: "Anónimo: solo se cuenta si acertaste, sin datos personales.",
+    },
     offline: {
       banner: "Sin conexión. Las respuestas necesitan internet; mientras tanto, usa la regla básica.",
       title: "Sin conexión: regla básica",
@@ -198,6 +204,12 @@ const I18N = {
       by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
       print: "Print plan", people: (n) => `${n} people`,
       aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
+    },
+    quiz: {
+      q: "Quick question: according to the answer, until what time can it be eaten?",
+      ok: "Correct!", no: (c) => `The right time is ${c}.`,
+      panel: (pct, n) => `Comprehension: ${pct}% correct (n = ${n})`,
+      note: "Anonymous: we only count whether you got it right, no personal data.",
     },
     offline: {
       banner: "You are offline. Answers need internet; meanwhile, use the basic rule.",
@@ -432,6 +444,8 @@ function botMessage(answer, metrics, decision) {
   const tl = safeWindowTimeline(decision) || shelterTimeline(decision);
   if (tl) m.appendChild(tl);
   m.appendChild(decisionTrail(metrics));
+  const quiz = quizBlock(decision);
+  if (quiz) m.appendChild(quiz);
   const meta = el("div", "meta");
   const btn = el("button", "listen");
   btn.type = "button";
@@ -524,6 +538,56 @@ function safeWindowTimeline(d) {
   if (why) fig.appendChild(el("p", "tl-why", why));
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
+}
+
+// ---------------------------------------------------------------- comprehension check
+// One tap after a safe window. The 3 options and the right one come from the rules engine
+// (`decision.quiz`); the browser only compares the tapped option with `quiz.correct` and sends
+// true/false. Nothing else is stored: no session id, no text.
+function quizBlock(d) {
+  if (!d || d.kind !== "safe_window" || !d.quiz || !Array.isArray(d.quiz.options)) return null;
+  const options = d.quiz.options.filter((o) => HHMM.test(o));
+  if (options.length < 2 || !options.includes(d.quiz.correct)) return null;
+  const Q = t("quiz");
+  const box = el("div", "quiz");
+  box.setAttribute("role", "group");
+  const label = el("p", "quiz-q", Q.q);
+  label.id = `quiz-${Math.random().toString(36).slice(2, 9)}`;
+  box.setAttribute("aria-labelledby", label.id);
+  const row = el("div", "quiz-opts");
+  const result = el("p", "quiz-result");
+  result.setAttribute("aria-live", "polite");
+  options.forEach((opt) => {
+    const b = el("button", "quiz-opt", opt);
+    b.type = "button";
+    b.addEventListener("click", async () => {
+      const correct = opt === d.quiz.correct;
+      row.querySelectorAll("button").forEach((x) => {
+        x.disabled = true;
+        if (x.textContent === d.quiz.correct) x.classList.add("is-correct");
+      });
+      if (!correct) b.classList.add("is-wrong");
+      b.setAttribute("aria-pressed", "true");
+      result.textContent = correct ? Q.ok : Q.no(d.quiz.correct);
+      try {
+        const { ok, data } = await api("/api/comprehension", { method: "POST", body: JSON.stringify({ correct }) });
+        if (ok && Number.isInteger(data.answered) && data.answered > 0 && Number.isInteger(data.correct)) {
+          box.appendChild(comprehensionPanel(data));
+        }
+      } catch { /* offline: the answer is still shown, nothing is stored */ }
+    });
+    row.appendChild(b);
+  });
+  box.append(label, row, result);
+  return box;
+}
+
+function comprehensionPanel(s) {
+  const Q = t("quiz");
+  const pct = Math.round((100 * s.correct) / s.answered);
+  const p = el("p", "quiz-panel");
+  p.append(el("strong", "", Q.panel(pct, s.answered)), el("span", "", ` ${Q.note}`));
+  return p;
 }
 
 // ---------------------------------------------------------------- shelter batch timeline

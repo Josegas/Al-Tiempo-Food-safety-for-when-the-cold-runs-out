@@ -139,3 +139,36 @@ def test_no_shelter_decision_for_other_tools_or_errors():
 def test_safe_window_wins_over_shelter_in_the_same_turn():
     turn = _turn(_engine_result()) + _turn(_plan(), name="plan_shelter_batches")
     assert safe_window_decision(turn)["kind"] == "safe_window"
+
+
+# ---------------- comprehension check (one-tap question after a safe window) ----------------
+from agent.rules_engine import comprehension_options  # noqa: E402
+
+
+def test_quiz_options_are_deterministic_and_include_the_engine_time():
+    eat_by, now = datetime(2026, 11, 3, 13, 0), datetime(2026, 11, 3, 12, 0)
+    q = comprehension_options(eat_by, now)
+    assert q == {"options": ["12:30", "13:00", "14:00"], "correct": "13:00"}
+    assert comprehension_options(eat_by, now) == q  # same input, same options
+    # 30 min earlier would already be past: the second distractor is 2 h later instead
+    q2 = comprehension_options(datetime(2026, 11, 3, 12, 15), now)
+    assert q2 == {"options": ["12:15", "13:15", "14:15"], "correct": "12:15"}
+
+
+def test_decision_carries_quiz_only_when_there_is_time_left():
+    d = safe_window_decision(_turn(_engine_result(now_h=12, cooked_h=12)))
+    assert d["quiz"]["correct"] == d["eat_by_hhmm"] == "13:00"
+    assert d["quiz"]["options"] == ["12:30", "13:00", "14:00"]
+    assert (
+        safe_window_decision(_turn(_engine_result(now_h=12, cooked_h=10)))["quiz"] is None
+    )  # expired
+    r = _engine_result(now_h=12, cooked_h=12)
+    r["time_source"] = "unknown"
+    assert safe_window_decision(_turn(r))["quiz"] is None
+
+
+def test_quiz_never_reaches_the_model():
+    # The distractors live only in the API response, not in the tool result the model and the
+    # verifier see, so the verifier can't be tricked into allowing "14:00".
+    r = _engine_result(now_h=12, cooked_h=12)
+    assert "quiz" not in r and "14:00" not in json.dumps(r)

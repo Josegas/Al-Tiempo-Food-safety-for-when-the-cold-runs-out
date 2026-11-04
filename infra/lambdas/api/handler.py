@@ -6,6 +6,8 @@ Routes:
   POST /api/voice      {text, language}  -> mp3 (base64) from Amazon Polly
   POST /api/warm       {session_id, language, demo} -> starts the AgentCore session (no model call)
   GET  /api/health
+  POST /api/comprehension {correct: bool} -> anonymous counters (no session, no text, no IP)
+  GET  /api/comprehension                 -> {answered, correct}
 No prompt text is logged (privacy): only sizes, latency and outcome.
 """
 
@@ -36,6 +38,8 @@ WARM_CAP = int(os.getenv("WARM_CAP", "1000"))  # warm-ups start a session: cappe
 SESSION_RE = re.compile(r"^[A-Za-z0-9-]{33,100}$")
 VOICES = {"es": "Mia", "en": "Joanna"}  # es-MX / en-US
 MAX_VOICE_CHARS = 600
+QUIZ_CAP = int(os.getenv("QUIZ_CAP", "2000"))  # comprehension answers per day (anti-spam)
+STATS_KEY = {"pk": "STATS", "sk": "comprehension"}  # one aggregate item, nothing personal
 
 MESSAGES = {
     "cap": {
@@ -190,6 +194,32 @@ def voice(body: dict) -> dict:
     return _resp(200, {"audio_base64": base64.b64encode(audio).decode("ascii")})
 
 
+def _stats(item: dict | None) -> dict:
+    item = item or {}
+    return {"answered": int(item.get("answered", 0)), "correct": int(item.get("correct", 0))}
+
+
+def comprehension(body: dict) -> dict:
+    """One-tap check after a safe window. Only two atomic counters are stored."""
+    if not isinstance(body.get("correct"), bool):
+        return _resp(400, {"error": "correct must be true or false"})
+    if not _take_daily_slot("quiz", QUIZ_CAP):
+        _log(route="comprehension", outcome="daily_cap")
+        return _resp(429, {"error": "daily_cap"})
+    out = TABLE.update_item(
+        Key=STATS_KEY,
+        UpdateExpression="ADD answered :one, correct :c",
+        ExpressionAttributeValues={":one": 1, ":c": 1 if body["correct"] else 0},
+        ReturnValues="UPDATED_NEW",
+    )
+    _log(route="comprehension", outcome="ok")
+    return _resp(200, _stats((out or {}).get("Attributes")))
+
+
+def comprehension_stats() -> dict:
+    return _resp(200, _stats(TABLE.get_item(Key=STATS_KEY).get("Item")))
+
+
 def handler(event: dict, _context) -> dict:
     route = event.get("routeKey", "")
     try:
@@ -208,6 +238,10 @@ def handler(event: dict, _context) -> dict:
         return voice(body)
     if route == "POST /api/warm":
         return warm(body)
+    if route == "POST /api/comprehension":
+        return comprehension(body)
+    if route == "GET /api/comprehension":
+        return comprehension_stats()
     if route == "GET /api/health":
         return _resp(200, {"ok": True})
     return _resp(404, {"error": "not found"})

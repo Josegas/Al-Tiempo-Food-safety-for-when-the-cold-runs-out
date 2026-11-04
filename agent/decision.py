@@ -7,6 +7,9 @@ always matches the engine. Returns None when this turn did not compute a safe wi
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta
+
+from agent.rules_engine import comprehension_options
 
 FIELDS = ("food_type", "cooked_at_hhmm", "now_hhmm", "eat_by_hhmm", "status", "limit_minutes",
           "minutes_left", "serve_immediately")  # fmt: skip
@@ -57,6 +60,18 @@ def safe_window_decision(new_messages: list[dict]) -> dict | None:
     decision["hot_threshold_c"] = window.get("hot_threshold_c")
     # Cooking time unknown -> the engine assumed "long ago": don't draw a made-up start point.
     decision["cooked_known"] = window.get("time_source") != "unknown"
+    # Comprehension check: built here, outside the model loop, so the distractor times never
+    # reach the model or the verifier's list of allowed times.
+    quiz = None
+    if decision["status"] == "eat_before_deadline" and decision["cooked_known"]:
+        try:
+            eat_by = datetime.fromisoformat(str(window.get("eat_by")))
+            left = window.get("minutes_left")
+            now = eat_by - timedelta(minutes=left) if isinstance(left, int) else None
+            quiz = comprehension_options(eat_by, now)
+        except ValueError:
+            quiz = None
+    decision["quiz"] = quiz
     return decision
 
 

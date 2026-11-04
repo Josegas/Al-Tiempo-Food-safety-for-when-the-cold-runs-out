@@ -295,6 +295,8 @@ class AppStack(Stack):
             (apigw.HttpMethod.POST, "/api/voice"),
             (apigw.HttpMethod.POST, "/api/warm"),
             (apigw.HttpMethod.GET, "/api/health"),
+            (apigw.HttpMethod.POST, "/api/comprehension"),
+            (apigw.HttpMethod.GET, "/api/comprehension"),
         ]:
             http_api.add_routes(path=path, methods=[method], integration=integration)
 

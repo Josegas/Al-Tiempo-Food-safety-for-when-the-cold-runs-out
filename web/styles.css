@@ -200,6 +200,20 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 .sh-end { position: absolute; top: 50%; width: 4px; height: 20px; margin: -10px 0 0 -2px; border-radius: 2px; background: var(--red); }
 .pt-cook dd { color: var(--amber-ink); }
 
+/* Comprehension check: one tap, options come from the rules engine. */
+.quiz { margin-top: 12px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-card); background: var(--paper); }
+.quiz-q { margin: 0 0 8px; font-weight: 700; font-size: .92rem; color: var(--forest); }
+.quiz-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.quiz-opt { min-height: 44px; min-width: 84px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--ivory); font-family: var(--f-mono); font-weight: 500; font-size: 1rem; color: var(--ink); cursor: pointer; }
+.quiz-opt:hover:not(:disabled) { border-color: var(--emerald); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.is-correct { background: var(--emerald-tint); border-color: var(--emerald); color: var(--emerald-dark); }
+.quiz-opt.is-wrong { background: var(--red-tint); border-color: rgba(185,78,65,.5); color: var(--red-ink); }
+.quiz-result { margin: 8px 0 0; font-weight: 700; font-size: .92rem; color: var(--ink); }
+.quiz-result:empty { display: none; }
+.quiz-panel { margin: 6px 0 0; font-size: .85rem; color: var(--muted); }
+.quiz-panel strong { color: var(--forest); }
+
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
 .listen { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 40px; padding: 0 14px 0 10px; border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--forest); }
 .listen:hover { border-color: var(--emerald); }
@@ -299,7 +313,7 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 @media print {
   @page { margin: 14mm; }
   body { background: #fff; color: #000; }
-  .skip, .topbar, .modebar, .footer, .intro, .how, .panel-head, .composer, .welcome, .netbar, .meta, .msg-typing { display: none !important; }
+  .skip, .topbar, .modebar, .footer, .intro, .how, .panel-head, .composer, .welcome, .netbar, .meta, .quiz, .msg-typing { display: none !important; }
   .layout, .panel, .chat { display: block !important; position: static !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; background: #fff !important; }
   body.printing .msg:not(.print-target) { display: none !important; }
   .msg { animation: none; break-inside: avoid; }
