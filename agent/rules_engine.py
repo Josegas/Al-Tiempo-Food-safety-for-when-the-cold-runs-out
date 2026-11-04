@@ -123,6 +123,8 @@ class SafeWindow:
     # Status at `now`: "eat_before_deadline" or "discard_now" (deadline already passed).
     status: str = "eat_before_deadline"
     minutes_left: int | None = None
+    # The rule whose deadline is eat_by (the one to cite: "According to <source>...").
+    deciding_source: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -194,13 +196,14 @@ def compute_safe_window(
         assumptions.append("Strict mode for babies/young children: serve now, keep no leftovers.")
 
     # Deadline = earliest deadline among all applied rules.
-    deadlines: list[datetime] = []
+    deadlines: list[tuple[datetime, Rule]] = []
     for r in applied:
         if r.limit_minutes is None:
             continue
         base = feeding_started_at if r.id == "CDC_FORMULA_FEED_1H" else start
-        deadlines.append(base + timedelta(minutes=r.limit_minutes))
-    eat_by = min(deadlines)
+        deadlines.append((base + timedelta(minutes=r.limit_minutes), r))
+    eat_by = min(d for d, _ in deadlines)
+    deciding = next(r for d, r in deadlines if d == eat_by)  # first = official before policy
     limit = int((eat_by - start).total_seconds() // 60)
 
     lead = min(REMINDER_LEAD_MINUTES, max(limit // 4, 1))
@@ -221,6 +224,7 @@ def compute_safe_window(
         assumptions=assumptions,
         unverified_rules_used=any(r.unverified for r in unique),
         **_status(eat_by, now),
+        deciding_source=deciding.source(),
     )
 
 
@@ -273,6 +277,9 @@ def track_outage(
     freezer_ok = now < freezer_until and fridge_door_opened is not True
 
     return {
+        "summary": outage_summary(
+            now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer.limit_minutes // 60
+        ),
         "elapsed_minutes": max(elapsed, 0),
         "fridge_safe_until": fridge_until.isoformat(),
         "fridge_safe_until_hhmm": _fmt(fridge_until),
@@ -285,6 +292,71 @@ def track_outage(
         "assumptions": assumptions,
         "unverified_rules_used": fridge.unverified or freezer.unverified,
     }
+
+
+_DAYS = {
+    "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "es": ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"],
+}
+
+
+def _day(when: datetime, now: datetime, lang: str) -> str:
+    delta = (when.date() - now.date()).days
+    if delta == 0:
+        return "today" if lang == "en" else "hoy"
+    if delta == 1:
+        return "tomorrow" if lang == "en" else "mañana"
+    return _DAYS[lang][when.weekday()]
+
+
+def outage_summary(now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer_hours) -> dict:
+    """Plain-language verdict built in code, so the model only has to relay it (es/en)."""
+    out: dict = {}
+    for lang in ("en", "es"):
+        fh, zh = _fmt(fridge_until), _fmt(freezer_until)
+        zday = _day(freezer_until, now, lang)
+        if lang == "en":
+            if fridge_ok:
+                fridge = f"Fridge: keep the door closed; food stays within the rule until {fh}."
+            elif now >= fridge_until:
+                fridge = (
+                    f"Fridge: the 4-hour limit ended at {fh}. Throw away perishable food from "
+                    "the fridge, or check it with a food thermometer."
+                )
+            else:
+                fridge = (
+                    "Fridge: the door was opened (or we don't know), so the 4-hour rule may not "
+                    "hold. Check with a food thermometer; if you can't, treat perishable food as unsafe."
+                )
+            freezer = (
+                f"Freezer: keep it closed; food stays within the {freezer_hours}-hour rule until {zday} {zh}."
+                if freezer_ok
+                else "Freezer: check for ice crystals; if the food has none, throw it away."
+            )
+        else:
+            if fridge_ok:
+                fridge = (
+                    f"Refri: no abras la puerta; la comida sigue dentro de la regla hasta las {fh}."
+                )
+            elif now >= fridge_until:
+                fridge = (
+                    f"Refri: el límite de 4 horas terminó a las {fh}. Desecha la comida perecedera "
+                    "del refri o revísala con un termómetro de cocina."
+                )
+            else:
+                fridge = (
+                    "Refri: la puerta se abrió (o no sabemos), así que la regla de 4 horas puede no "
+                    "cumplirse. Revisa con un termómetro de cocina; si no puedes, trata la comida "
+                    "perecedera como insegura."
+                )
+            freezer = (
+                f"Congelador: no lo abras; la comida sigue dentro de la regla de {freezer_hours} horas "
+                f"hasta el {zday} a las {zh}."
+                if freezer_ok
+                else "Congelador: revisa si la comida aún tiene cristales de hielo; si no, deséchala."
+            )
+        out[lang] = f"{fridge} {freezer}"
+    return out
 
 
 # ---------------------------------------------------------------------------

@@ -18,12 +18,14 @@ def j(s):
     return json.loads(s)
 
 
-def ctx(user_text: str = ""):
-    """Minimal stand-in for Strands ToolContext: only .agent.messages is used."""
+def ctx(user_text: str = "", language: str = "en"):
+    """Minimal stand-in for Strands ToolContext: .agent.messages and .agent.state (get/set)."""
     msgs = [{"role": "user", "content": [{"text": user_text}]}] if user_text else []
-    state = {"session_id": "test-session"}
+    state = {"session_id": "test-session", "language": language}
     return SimpleNamespace(
-        agent=SimpleNamespace(messages=msgs, state=SimpleNamespace(get=state.get))
+        agent=SimpleNamespace(
+            messages=msgs, state=SimpleNamespace(get=state.get, set=state.__setitem__)
+        )
     )
 
 
@@ -151,3 +153,33 @@ def test_invalid_timezone_falls_back_to_utc():
         assert tz().key == "UTC"
     finally:
         set_current(RequestSettings())
+
+
+def test_reminder_time_and_text_come_from_rules_engine(monkeypatch):
+    """Real bug (live smoke test): the model wrote "Eat the beans now, discard after" (no time)."""
+    monkeypatch.delenv("REMINDER_LAMBDA_ARN", raising=False)
+    c = ctx("cociné frijoles a las 12:00", language="es")
+    w = j(compute_safe_window(food_type="cooked_food", tool_context=c))
+    r = j(schedule_reminder(at="15:00", message="Eat the beans now, discard after", tool_context=c))
+    assert r["at_local"] == w["reminder_at"][11:16]  # the model's 15:00 is ignored
+    assert "13:00" in r["message"] and "FDA" in r["message"]
+    assert r["message"].startswith("Al Tiempo: come la comida antes de las 13:00")
+    assert r["summary"].startswith(f"Recordatorio programado para las {r['at_local']}")
+
+
+def test_no_reminder_when_food_must_be_discarded(monkeypatch):
+    monkeypatch.delenv("REMINDER_LAMBDA_ARN", raising=False)
+    c = ctx("can I give my baby the rice I cooked 5 hours ago?")
+    w = j(compute_safe_window(food_type="cooked_rice", audience="infant", tool_context=c))
+    assert w["status"] == "discard_now"
+    r = j(schedule_reminder(at="13:00", message="Eat the rice", tool_context=c))
+    assert r["scheduled"] is False and "throw it away" in r["error"]
+
+
+def test_outage_clears_dish_window(monkeypatch):
+    monkeypatch.delenv("REMINDER_LAMBDA_ARN", raising=False)
+    c = ctx("cociné frijoles a las 12:00")
+    compute_safe_window(food_type="cooked_food", tool_context=c)
+    track_outage(tool_context=c, outage_started_at="06:00", fridge_door_opened=False)
+    r = j(schedule_reminder(at="09:45", message="Check the fridge", tool_context=c))
+    assert r["at_local"] == "09:45" and r["message"] == "Check the fridge"

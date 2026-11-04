@@ -31,4 +31,5 @@ def track_outage(
         return out({"error": "outage_started_at not understood; ask the user for the time."})
     result = engine_track_outage(started, now, fridge_door_opened, freezer_fullness)
     result["now_hhmm"] = now.strftime("%H:%M")
+    tool_context.agent.state.set("last_window", None)  # a later reminder is not about a dish
     return out(result)

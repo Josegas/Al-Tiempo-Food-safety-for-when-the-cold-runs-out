@@ -18,6 +18,24 @@ from agent.tools._common import now_local, out, parse_local, tz
 
 E164 = re.compile(r"^\+[1-9]\d{7,14}$")
 
+# (es noun, es pronoun suffix, en noun)
+FOOD_WORDS = {
+    "cooked_rice": ("el arroz", "o", "the rice"),
+    "infant_formula": ("la fórmula", "a", "the formula"),
+}
+
+
+def reminder_text(window: dict, language: str) -> str:
+    """Deterministic reminder text built from the rules-engine result (the LLM never writes times)."""
+    es, suffix, en = FOOD_WORDS.get(window["food_type"], ("la comida", "a", "the food"))
+    eat_by = window["eat_by_hhmm"]
+    src = window["source_name"].split(" - ")[0]  # short publisher name: fits in one SMS
+    if language == "es":
+        return (
+            f"Al Tiempo: come {es} antes de las {eat_by}. Después, deséchal{suffix}. Fuente: {src}"
+        )
+    return f"Al Tiempo: eat {en} before {eat_by}. After that, throw it away. Source: {src}"
+
 
 @tool(context=True)
 def schedule_reminder(
@@ -35,6 +53,18 @@ def schedule_reminder(
         channel: 'web' (shown in the app) or 'sms'.
         contact: Phone number in E.164 format (+52...), only for sms.
     """
+    state = tool_context.agent.state
+    window = state.get("last_window")
+    if window:
+        if window["status"] == "discard_now":
+            return out(
+                {
+                    "scheduled": False,
+                    "error": "food is already past its limit: tell the user to throw it away now",
+                }
+            )
+        at = window["reminder_at_hhmm"]  # code wins over the model's arguments
+        message = reminder_text(window, state.get("language") or "en")
     when_local = parse_local(at)
     if when_local is None:
         return out({"scheduled": False, "error": "time not understood"})
@@ -50,13 +80,20 @@ def schedule_reminder(
         fire_utc = when_local.replace(tzinfo=tz()).astimezone(UTC)
 
     reminder_id = uuid.uuid4().hex[:12]
-    session_id = tool_context.agent.state.get("session_id")
+    session_id = state.get("session_id")
     result = {
         "reminder_id": reminder_id,
         "at_local": when_local.strftime("%H:%M"),
+        "message": message[:160],
         "channel": channel,
         "demo_accelerated": demo_mode(),
     }
+    at_hhmm = result["at_local"]
+    result["summary"] = (
+        f'Recordatorio programado para las {at_hhmm}: "{result["message"]}"'
+        if (state.get("language") or "en") == "es"
+        else f'Reminder set for {at_hhmm}: "{result["message"]}"'
+    )
     lambda_arn = os.getenv("REMINDER_LAMBDA_ARN")
     role_arn = os.getenv("SCHEDULER_ROLE_ARN")
     if not lambda_arn or not role_arn:
