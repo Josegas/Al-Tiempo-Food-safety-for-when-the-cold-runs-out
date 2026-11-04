@@ -20,6 +20,7 @@ from collections import OrderedDict
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
 from agent.agent import build_agent, clean_answer
+from agent.decision import safe_window_decision
 from agent.request_context import RequestSettings, set_current
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -133,7 +134,11 @@ def invoke(payload: dict, context=None) -> dict:
     }
     entry["in"], entry["out"] = usage["inputTokens"], usage["outputTokens"]
     log.info(json.dumps(record))  # structured log -> CloudWatch Logs Insights / metric filters
-    return {"answer": clean_answer(str(result)), "metrics": record}
+    response = {"answer": clean_answer(str(result)), "metrics": record}
+    decision = safe_window_decision(agent.messages[n_before:])
+    if decision:  # optional: lets the web draw the safe-window timeline from the engine's numbers
+        response["decision"] = decision
+    return response
 
 
 def demo_flag(settings: RequestSettings) -> bool:

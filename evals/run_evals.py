@@ -48,6 +48,8 @@ def check(s: dict, answer: str, tools: list[str]) -> list[str]:
     for bad in s.get("must_not_contain", []):
         if bad.lower() in low:
             fails.append(f"contains forbidden '{bad}'")
+    if "hh:mm" in low or "<rule" in low or "<regla" in low:
+        fails.append("contains a template placeholder")
     return fails
 
 

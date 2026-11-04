@@ -120,7 +120,10 @@ def chat(body: dict) -> dict:
     metrics = result.get("metrics", {})
     _log(route="chat", outcome="ok", latency_ms=ms, prompt_chars=len(prompt),
          tools=metrics.get("tools_used"), verifier_blocked=metrics.get("verifier_blocked"))  # fmt: skip
-    return _resp(200, {"answer": result.get("answer", ""), "metrics": {**metrics, "api_ms": ms}})
+    out = {"answer": result.get("answer", ""), "metrics": {**metrics, "api_ms": ms}}
+    if isinstance(result.get("decision"), dict):  # engine numbers for the web timeline (optional)
+        out["decision"] = result["decision"]
+    return _resp(200, out)
 
 
 def warm(body: dict) -> dict:

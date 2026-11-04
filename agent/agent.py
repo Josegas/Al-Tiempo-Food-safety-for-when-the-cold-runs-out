@@ -45,6 +45,9 @@ def build_agent(language: str = "en", messages: list | None = None) -> tuple[Age
         messages=messages,
         callback_handler=None,
     )
+    # Tools build their summaries in this language. app.py sets it too; setting it here makes
+    # local chat and evals behave like production (eval bug: Spanish user got an English summary).
+    agent.state.set("language", language if language in ("en", "es") else "en")
     return agent, verifier
 
 

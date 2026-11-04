@@ -1,4 +1,5 @@
 import dataclasses
+import json
 from datetime import datetime
 
 import pytest
@@ -260,3 +261,14 @@ def test_outage_summary_after_fridge_limit_says_discard():
 def test_outage_summary_before_limit_door_closed():
     r = re_.track_outage(datetime(2026, 11, 4, 6), datetime(2026, 11, 4, 9), False, "half")
     assert "until 10:00" in r["summary"]["en"] and "until tomorrow 06:00" in r["summary"]["en"]
+    assert "hasta mañana a las 06:00" in r["summary"]["es"]  # not "hasta el mañana"
+
+
+def test_outage_door_opened_gives_no_fridge_deadline():
+    """Eval bug: with the door opened the model still said "safe until 15:00" (the engine's
+    unused deadline). No rule applies, so no time is returned and the verifier blocks any."""
+    r = re_.track_outage(datetime(2026, 11, 4, 11), datetime(2026, 11, 4, 12), True, "full")
+    assert r["fridge_safe_until_hhmm"] is None and r["freezer_safe_until_hhmm"] is None
+    assert "15:00" not in json.dumps(r)
+    closed = re_.track_outage(datetime(2026, 11, 4, 11), datetime(2026, 11, 4, 12), False, "full")
+    assert closed["fridge_safe_until_hhmm"] == "15:00"
