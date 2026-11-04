@@ -13,7 +13,13 @@ DEMO_DATE = date.fromisoformat(load_fixture("hot_day_38c")["date"])
 
 
 def tz() -> ZoneInfo:
-    return ZoneInfo(os.getenv("DEFAULT_TIMEZONE", "America/Mazatlan"))
+    from agent.request_context import current
+
+    name = current().timezone or os.getenv("DEFAULT_TIMEZONE", "America/Mazatlan")
+    try:
+        return ZoneInfo(name)
+    except (KeyError, ValueError):  # unknown/invalid IANA name from a client
+        return ZoneInfo("UTC")
 
 
 def today() -> date:

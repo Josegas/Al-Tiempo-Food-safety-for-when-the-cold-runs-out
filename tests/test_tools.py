@@ -21,7 +21,10 @@ def j(s):
 def ctx(user_text: str = ""):
     """Minimal stand-in for Strands ToolContext: only .agent.messages is used."""
     msgs = [{"role": "user", "content": [{"text": user_text}]}] if user_text else []
-    return SimpleNamespace(agent=SimpleNamespace(messages=msgs))
+    state = {"session_id": "test-session"}
+    return SimpleNamespace(
+        agent=SimpleNamespace(messages=msgs, state=SimpleNamespace(get=state.get))
+    )
 
 
 def test_forecast_demo_fixture():
@@ -66,7 +69,7 @@ def test_meals_tool_no_times():
 
 def test_reminder_dry_run_without_infra(monkeypatch):
     monkeypatch.delenv("REMINDER_LAMBDA_ARN", raising=False)
-    r = j(schedule_reminder(at="13:00", message="Eat the beans"))
+    r = j(schedule_reminder(at="13:00", message="Eat the beans", tool_context=ctx()))
     assert r["dry_run"] is True and r["at_local"] == "13:00"
 
 
@@ -117,3 +120,34 @@ def test_user_text_relative_time_baby_rice():
 def test_outage_reads_time_from_user_text():
     r = j(track_outage(tool_context=ctx("se fue la luz a las 06:00"), fridge_door_opened=False))
     assert r["fridge_safe_until_hhmm"] == "10:00"
+
+
+def test_reminder_sms_needs_valid_number(monkeypatch):
+    r = j(
+        schedule_reminder(at="13:00", message="x", channel="sms", contact="123", tool_context=ctx())
+    )
+    assert r["scheduled"] is False
+
+
+def test_request_context_overrides_demo_and_timezone():
+    from agent.request_context import RequestSettings, set_current
+    from agent.tools._common import tz
+
+    set_current(RequestSettings(demo=False, timezone="Asia/Kolkata"))
+    try:
+        assert tz().key == "Asia/Kolkata"
+        r = j(get_forecast())  # demo off and no location -> no forecast, worst case
+        assert r["available"] is False
+    finally:
+        set_current(RequestSettings())
+
+
+def test_invalid_timezone_falls_back_to_utc():
+    from agent.request_context import RequestSettings, set_current
+    from agent.tools._common import tz
+
+    set_current(RequestSettings(timezone="../../etc/passwd"))
+    try:
+        assert tz().key == "UTC"
+    finally:
+        set_current(RequestSettings())
