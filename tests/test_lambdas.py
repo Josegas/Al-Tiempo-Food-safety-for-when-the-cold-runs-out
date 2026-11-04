@@ -143,3 +143,54 @@ def test_warm_has_its_own_daily_cap_and_validation(api):
     api.TABLE = FakeTable(cap_reached=True)
     r = api.handler(event("POST /api/warm", {"session_id": SESSION}), None)
     assert r["statusCode"] == 429 and api._calls == []
+
+
+class StatsTable(FakeTable):
+    """Fake of the two atomic counters (ADD answered :one, correct :c)."""
+
+    def __init__(self, cap_reached=False):
+        super().__init__(cap_reached)
+        self.stats, self.calls = {"answered": 0, "correct": 0}, []
+
+    def update_item(self, **kw):
+        if kw["Key"].get("pk") != "STATS":
+            return super().update_item(**kw)  # the daily slot
+        self.calls.append(kw)
+        vals = kw["ExpressionAttributeValues"]
+        self.stats["answered"] += vals[":one"]
+        self.stats["correct"] += vals[":c"]
+        return {"Attributes": dict(self.stats)}
+
+    def get_item(self, Key):
+        return {"Item": dict(self.stats)} if self.stats["answered"] else {}
+
+
+def test_comprehension_counts_atomically_and_stores_nothing_personal(api):
+    api.TABLE = StatsTable()
+    r = api.handler(event("POST /api/comprehension", {"correct": True}), None)
+    assert r["statusCode"] == 200 and json.loads(r["body"]) == {"answered": 1, "correct": 1}
+    r = api.handler(
+        event("POST /api/comprehension", {"correct": False, "session_id": SESSION}), None
+    )
+    assert json.loads(r["body"]) == {"answered": 2, "correct": 1}
+    call = api.TABLE.calls[-1]
+    assert call["UpdateExpression"].startswith("ADD ")  # atomic, no read-modify-write
+    assert SESSION not in json.dumps(call)  # the session id is never stored
+    r = api.handler(event("GET /api/comprehension"), None)
+    assert json.loads(r["body"]) == {"answered": 2, "correct": 1}
+
+
+@pytest.mark.parametrize("body", [{}, {"correct": "yes"}, {"correct": 1}])
+def test_comprehension_rejects_bad_input(api, body):
+    api.TABLE = StatsTable()
+    assert api.handler(event("POST /api/comprehension", body), None)["statusCode"] == 400
+    assert api.TABLE.calls == []
+
+
+def test_comprehension_has_a_daily_cap_and_empty_stats(api):
+    api.TABLE = StatsTable(cap_reached=True)
+    assert (
+        api.handler(event("POST /api/comprehension", {"correct": True}), None)["statusCode"] == 429
+    )
+    r = api.handler(event("GET /api/comprehension"), None)
+    assert json.loads(r["body"]) == {"answered": 0, "correct": 0}

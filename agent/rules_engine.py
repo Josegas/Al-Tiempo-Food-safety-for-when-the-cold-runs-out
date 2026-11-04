@@ -243,6 +243,19 @@ def _status(eat_by: datetime, now: datetime | None) -> dict:
     }
 
 
+def comprehension_options(eat_by: datetime, now: datetime | None = None) -> dict:
+    """One-tap comprehension check shown after a safe window (never sent to the model).
+
+    The engine's eat-by time plus 2 deterministic distractors: one hour later (the common
+    misreading "2 hours, not 1") and 30 min earlier if that is still ahead of `now`, otherwise
+    two hours later. Sorted by time, so the right answer is not always in the same place.
+    """
+    later = eat_by + timedelta(hours=1)
+    earlier = eat_by - timedelta(minutes=30)
+    other = earlier if now is None or earlier > now else eat_by + timedelta(hours=2)
+    return {"options": [_fmt(t) for t in sorted({eat_by, later, other})], "correct": _fmt(eat_by)}
+
+
 # ---------------------------------------------------------------------------
 # 3. Power-outage mode
 # ---------------------------------------------------------------------------

@@ -101,6 +101,34 @@ const I18N = {
       })[d.rule_id] || null,
       aria: (d) => `Línea de tiempo. ${d.cooked_known ? `Cocinado a las ${d.cooked_at_hhmm}. Límite: ${d.eat_by_hhmm}. ` : ""}Ahora son las ${d.now_hhmm}.`,
     },
+    sh: {
+      title: "Plan de tandas", batch: (i, n) => `Tanda ${i} · ${n} porciones`,
+      cook: "Cocinar", serve: "Servir", discard: "Desechar",
+      hot: (c) => `Mantener arriba de ${c} °C todo el servicio.`,
+      by: (src) => src ? `Decide: ${src}` : "Decide: nuestra regla más estricta para bebés y niños",
+      print: "Imprimir plan", people: (n) => `${n} personas`,
+      aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
+    },
+    quiz: {
+      q: "Pregunta rápida: según la respuesta, ¿hasta qué hora se puede comer?",
+      ok: "¡Correcto!", no: (c) => `La hora correcta es ${c}.`,
+      panel: (pct, n) => `Comprensión: ${pct} % correcto (n = ${n})`,
+      note: "Anónimo: solo se cuenta si acertaste, sin datos personales.",
+    },
+    inside: {
+      summary: "Ver por dentro", forecast: "Pronóstico usado", engine: "Motor de reglas", verifier: "Verificador",
+      fcDemo: "Simulado: un día guardado de 38 °C, igual para todos.",
+      fcLive: (t) => `Pronóstico real por hora (Open-Meteo): máximo ${t} °C en esas horas.`,
+      fcNone: "Sin pronóstico para esas horas: se asume más de 32 °C (el caso más seguro).",
+      fcLiveAny: "Modo real: pronóstico por hora de Open-Meteo si compartiste tu ubicación; si no, se asume calor.",
+      fcNotUsed: "Esta respuesta no necesitó el pronóstico.",
+      tools: "Herramientas", rule: "Regla que decide", noEngine: "En esta respuesta no se calculó ninguna hora.",
+      unknown: "Hora de cocción desconocida: el motor asume el peor caso.",
+      vOk: "Aprobó la respuesta a la primera: no encontró horas ni límites que el motor no diera.",
+      vRetry: (n) => `Pidió ${n === 1 ? "una corrección" : `${n} correcciones`} al modelo y después aprobó.`,
+      vBlock: "Bloqueó la respuesta del modelo y usó la respuesta segura armada con el motor.",
+      model: (i, o, ms) => `Modelo: ${i} tokens de entrada, ${o} de salida · ${ms} ms`,
+    },
     offline: {
       banner: "Sin conexión. Las respuestas necesitan internet; mientras tanto, usa la regla básica.",
       title: "Sin conexión: regla básica",
@@ -182,6 +210,34 @@ const I18N = {
         CDC_FORMULA_FEED_1H: "Why 1 hour: the CDC says to use formula within 1 hour of when feeding begins, and throw out what is left.",
       })[d.rule_id] || null,
       aria: (d) => `Timeline. ${d.cooked_known ? `Cooked at ${d.cooked_at_hhmm}. Limit: ${d.eat_by_hhmm}. ` : ""}Now it is ${d.now_hhmm}.`,
+    },
+    sh: {
+      title: "Batch plan", batch: (i, n) => `Batch ${i} · ${n} portions`,
+      cook: "Cook", serve: "Serve", discard: "Discard",
+      hot: (c) => `Keep above ${c} °C for the whole service.`,
+      by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
+      print: "Print plan", people: (n) => `${n} people`,
+      aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
+    },
+    quiz: {
+      q: "Quick question: according to the answer, until what time can it be eaten?",
+      ok: "Correct!", no: (c) => `The right time is ${c}.`,
+      panel: (pct, n) => `Comprehension: ${pct}% correct (n = ${n})`,
+      note: "Anonymous: we only count whether you got it right, no personal data.",
+    },
+    inside: {
+      summary: "Look inside", forecast: "Forecast used", engine: "Rules engine", verifier: "Verifier",
+      fcDemo: "Simulated: a saved 38 °C day, the same for everyone.",
+      fcLive: (t) => `Real hourly forecast (Open-Meteo): up to ${t} °C in those hours.`,
+      fcNone: "No forecast for those hours: assumed above 32 °C (the safest case).",
+      fcLiveAny: "Live mode: Open-Meteo hourly forecast if you shared your location; otherwise heat is assumed.",
+      fcNotUsed: "This answer did not need the forecast.",
+      tools: "Tools", rule: "Deciding rule", noEngine: "No time was calculated in this answer.",
+      unknown: "Cooking time unknown: the engine assumes the worst case.",
+      vOk: "Approved the answer on the first try: no time or limit the engine didn't produce.",
+      vRetry: (n) => `Asked the model for ${n === 1 ? "one correction" : `${n} corrections`}, then approved.`,
+      vBlock: "Blocked the model's answer and used the safe answer built from the engine.",
+      model: (i, o, ms) => `Model: ${i} input tokens, ${o} output · ${ms} ms`,
     },
     offline: {
       banner: "You are offline. Answers need internet; meanwhile, use the basic rule.",
@@ -413,17 +469,22 @@ function botMessage(answer, metrics, decision) {
   const body = el("div", "ans");
   renderAnswer(body, answer);
   m.appendChild(body);
-  const tl = safeWindowTimeline(decision);
+  const tl = safeWindowTimeline(decision) || shelterTimeline(decision);
   if (tl) m.appendChild(tl);
   m.appendChild(decisionTrail(metrics));
+  const quiz = quizBlock(decision);
+  if (quiz) m.appendChild(quiz);
   const meta = el("div", "meta");
   const btn = el("button", "listen");
   btn.type = "button";
   btn.append(icon("speaker"), el("span", "", t("listen")));
   btn.addEventListener("click", () => speak(answer, btn));
   meta.appendChild(btn);
+  if (decision && decision.kind === "shelter_plan" && tl) meta.appendChild(printButton(m));
   if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
   m.appendChild(meta);
+  const inside = insideView(metrics, decision);
+  if (inside) m.appendChild(inside);
   return addNode(m);
 }
 
@@ -508,6 +569,191 @@ function safeWindowTimeline(d) {
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
 }
+
+// ---------------------------------------------------------------- "Look inside" (closed by default)
+// forecast used -> rules engine output -> verifier decision, for each answer. Uses only what the
+// backend already returns (`metrics`, `decision`); nothing is inferred from the model's text.
+const FORECAST_TOOLS = new Set(["compute_safe_window", "plan_meals", "plan_shelter_batches", "get_forecast"]);
+
+function insideView(metrics, d) {
+  if (!metrics || !Array.isArray(metrics.tools_used)) return null;
+  const I = t("inside");
+  const det = el("details", "inside");
+  det.appendChild(el("summary", "", I.summary));
+  const steps = el("ol", "inside-steps");
+  const step = (title, ...lines) => {
+    const li = el("li");
+    li.appendChild(el("p", "inside-k", title));
+    lines.filter(Boolean).forEach((x) => li.appendChild(typeof x === "string" ? el("p", "inside-v", x) : x));
+    steps.appendChild(li);
+  };
+
+  // 1. Forecast
+  const usedForecast = metrics.tools_used.some((x) => FORECAST_TOOLS.has(x));
+  let fc = I.fcNotUsed;
+  if (metrics.demo && (usedForecast || d)) fc = I.fcDemo;
+  else if (d && d.kind === "safe_window") fc = Number.isFinite(d.max_temp_c) ? I.fcLive(Math.round(d.max_temp_c * 10) / 10) : I.fcNone;
+  else if (usedForecast || d) fc = I.fcLiveAny;
+  step(I.forecast, fc);
+
+  // 2. Rules engine: tools that ran, deciding rule + source, times exactly as the engine sent them
+  const names = [...new Set(metrics.tools_used)].map((x) => t("tools")[x] || x).join(", ");
+  const lines = [names ? `${I.tools}: ${names}` : null];
+  if (d && (d.kind === "safe_window" || d.kind === "shelter_plan")) {
+    const rule = el("p", "inside-v");
+    rule.append(`${I.rule}: `);
+    const ids = d.kind === "safe_window" ? [d.rule_id] : (d.rule_ids || []);
+    ids.filter(Boolean).forEach((id) => { rule.append(el("code", "inside-chip", id), " "); });
+    if (d.source && d.source.name) rule.append(`(${d.source.name})`);
+    lines.push(rule);
+    if (d.kind === "safe_window") {
+      const T = t("tl");
+      lines.push(d.cooked_known
+        ? `${T.cooked} ${d.cooked_at_hhmm} · ${T.limit} ${d.eat_by_hhmm} (${d.limit_minutes} min)${d.reminder_at_hhmm && d.status !== "discard_now" ? ` · ${T.remind} ${d.reminder_at_hhmm}` : ""}`
+        : I.unknown);
+    } else {
+      const S = t("sh");
+      (d.batches || []).forEach((b, i) => lines.push(`${S.batch(i + 1, b.portions)}: ${S.cook} ${b.start_cooking_hhmm} · ${S.serve} ${b.ready_hhmm} · ${S.discard} ${b.discard_hhmm}`));
+    }
+  } else {
+    lines.push(I.noEngine);
+  }
+  step(I.engine, ...lines);
+
+  // 3. Verifier, from the backend's counters for this turn
+  const blocked = Number(metrics.verifier_blocked) || 0, retried = Number(metrics.verifier_retried) || 0;
+  const model = Number.isInteger(metrics.input_tokens) && Number.isInteger(metrics.output_tokens) && Number.isInteger(metrics.latency_ms)
+    ? I.model(metrics.input_tokens, metrics.output_tokens, metrics.latency_ms) : null;
+  step(I.verifier, blocked ? I.vBlock : retried ? I.vRetry(retried) : I.vOk, model);
+  det.appendChild(steps);
+  return det;
+}
+
+// ---------------------------------------------------------------- comprehension check
+// One tap after a safe window. The 3 options and the right one come from the rules engine
+// (`decision.quiz`); the browser only compares the tapped option with `quiz.correct` and sends
+// true/false. Nothing else is stored: no session id, no text.
+function quizBlock(d) {
+  if (!d || d.kind !== "safe_window" || !d.quiz || !Array.isArray(d.quiz.options)) return null;
+  const options = d.quiz.options.filter((o) => HHMM.test(o));
+  if (options.length < 2 || !options.includes(d.quiz.correct)) return null;
+  const Q = t("quiz");
+  const box = el("div", "quiz");
+  box.setAttribute("role", "group");
+  const label = el("p", "quiz-q", Q.q);
+  label.id = `quiz-${Math.random().toString(36).slice(2, 9)}`;
+  box.setAttribute("aria-labelledby", label.id);
+  const row = el("div", "quiz-opts");
+  const result = el("p", "quiz-result");
+  result.setAttribute("aria-live", "polite");
+  options.forEach((opt) => {
+    const b = el("button", "quiz-opt", opt);
+    b.type = "button";
+    b.addEventListener("click", async () => {
+      const correct = opt === d.quiz.correct;
+      row.querySelectorAll("button").forEach((x) => {
+        x.disabled = true;
+        if (x.textContent === d.quiz.correct) x.classList.add("is-correct");
+      });
+      if (!correct) b.classList.add("is-wrong");
+      b.setAttribute("aria-pressed", "true");
+      result.textContent = correct ? Q.ok : Q.no(d.quiz.correct);
+      try {
+        const { ok, data } = await api("/api/comprehension", { method: "POST", body: JSON.stringify({ correct }) });
+        if (ok && Number.isInteger(data.answered) && data.answered > 0 && Number.isInteger(data.correct)) {
+          box.appendChild(comprehensionPanel(data));
+        }
+      } catch { /* offline: the answer is still shown, nothing is stored */ }
+    });
+    row.appendChild(b);
+  });
+  box.append(label, row, result);
+  return box;
+}
+
+function comprehensionPanel(s) {
+  const Q = t("quiz");
+  const pct = Math.round((100 * s.correct) / s.answered);
+  const p = el("p", "quiz-panel");
+  p.append(el("strong", "", Q.panel(pct, s.answered)), el("span", "", ` ${Q.note}`));
+  return p;
+}
+
+// ---------------------------------------------------------------- shelter batch timeline
+// One row per batch: cook -> serve -> discard. Every time comes from `decision.batches` (the
+// engine's plan_shelter_batches output, passed through by the API); nothing is computed here
+// except where to draw each time on a shared axis.
+function shelterTimeline(d) {
+  if (!d || d.kind !== "shelter_plan" || !Array.isArray(d.batches) || !d.batches.length) return null;
+  const T = t("sh");
+  const ok = d.batches.every((b) => HHMM.test(b.start_cooking_hhmm || "") && HHMM.test(b.ready_hhmm || "") && HHMM.test(b.discard_hhmm || ""));
+  if (!ok) return null;
+  const fig = el("figure", "tl sh");
+  fig.setAttribute("aria-label", T.aria(d));
+  const cap = el("figcaption", "tl-title", T.title);
+  if (d.people) cap.appendChild(el("span", "sh-people", ` · ${T.people(d.people)}`));
+  fig.appendChild(cap);
+
+  // Shared axis from the first "cook" to the last "discard" (same day; batches don't cross midnight).
+  const t0 = Math.min(...d.batches.map((b) => toMin(b.start_cooking_hhmm)));
+  const t1 = Math.max(...d.batches.map((b) => toMin(b.discard_hhmm)));
+  const span = Math.max(t1 - t0, 1);
+  const at = (hhmm) => `${(((toMin(hhmm) - t0) / span) * 100).toFixed(1)}%`;
+
+  const list = el("ol", "sh-list");
+  d.batches.forEach((b, i) => {
+    const li = el("li", "sh-batch");
+    li.appendChild(el("p", "sh-name", T.batch(i + 1, b.portions)));
+    const track = el("div", "sh-track");
+    track.setAttribute("aria-hidden", "true");
+    const cook = el("span", "sh-seg sh-cook");
+    cook.style.left = at(b.start_cooking_hhmm);
+    cook.style.width = `calc(${at(b.ready_hhmm)} - ${at(b.start_cooking_hhmm)})`;
+    const serve = el("span", "sh-seg sh-serve");
+    serve.style.left = at(b.ready_hhmm);
+    serve.style.width = `calc(${at(b.discard_hhmm)} - ${at(b.ready_hhmm)})`;
+    const end = el("span", "sh-end");
+    end.style.left = at(b.discard_hhmm);
+    track.append(cook, serve, end);
+    li.appendChild(track);
+    const pts = el("dl", "tl-points sh-points");
+    const point = (cls, label, value) => {
+      const w = el("div", `tl-pt ${cls}`);
+      w.append(el("dt", "", label), el("dd", "", value));
+      pts.appendChild(w);
+    };
+    point("pt-cook", T.cook, b.start_cooking_hhmm);
+    point("pt-now", T.serve, b.ready_hhmm);
+    point("pt-limit pt-end", T.discard, b.discard_hhmm);
+    li.appendChild(pts);
+    list.appendChild(li);
+  });
+  fig.appendChild(list);
+  const hot = d.batches.find((b) => Number.isFinite(b.keep_above_c));
+  if (hot) fig.appendChild(el("p", "tl-why", T.hot(hot.keep_above_c)));
+  fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
+  return fig;
+}
+
+// Prints only this answer (plan text + batch timeline + verifier seal), with the print stylesheet.
+function printButton(msg) {
+  const b = el("button", "listen print-btn");
+  b.type = "button";
+  b.append(icon("print"), el("span", "", t("sh").print));
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".print-target").forEach((x) => x.classList.remove("print-target"));
+    msg.classList.add("print-target");
+    // The printout says which mode produced it (a simulated 38 °C plan must not pass for a real one).
+    msg.dataset.printHead = `Al Tiempo · ${state.mode === "demo" ? t("badgeDemo") : t("badgeLive")}`;
+    document.body.classList.add("printing");
+    window.print();
+  });
+  return b;
+}
+window.addEventListener("afterprint", () => {
+  document.body.classList.remove("printing");
+  document.querySelectorAll(".print-target").forEach((x) => x.classList.remove("print-target"));
+});
 
 // Shows which rules tools ran and what the verifier did, using only the structured `metrics`
 // the backend returned (tools_used, verifier_blocked). Nothing is inferred from the text.

@@ -1,0 +1,310 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 18,
+  "passed": 18,
+  "median_latency_ms": 1987,
+  "avg_input_tokens": 6071,
+  "avg_output_tokens": 122,
+  "cost_per_turn_usd": 0.002341,
+  "verifier_retries": 1,
+  "verifier_blocks": 0,
+  "rows": [
+   {
+    "id": "ho-es-tamales-1115",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:15 o deséchalo. Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:00.\n\n¿Quieres que te ponga un recordatorio para las 12:00?",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1844,
+    "input_tokens": 6486,
+    "output_tokens": 128,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-curry-1150",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:50 or throw it away. Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:35.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1997,
+    "input_tokens": 6263,
+    "output_tokens": 100,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-sopa-20min",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:40 o deséchalo. Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:25.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1733,
+    "input_tokens": 6473,
+    "output_tokens": 110,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-rice-1140",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:40 or throw it away. Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:25.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2118,
+    "input_tokens": 6366,
+    "output_tokens": 101,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-toddler-1120",
+    "category": "child",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:20 o deséchalo. Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:05. Sírvelo de inmediato y no guardes sobras.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2186,
+    "input_tokens": 6638,
+    "output_tokens": 136,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-formula-1145",
+    "category": "child",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:45 or throw it away. Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:30. Serve it right away and keep no leftovers.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1939,
+    "input_tokens": 6500,
+    "output_tokens": 122,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-huevos-7am",
+    "category": "safe_window_expired",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: deséchalo ahora.**  \nCon más de 32 °C (el pronóstico llega a 33 °C), el límite baja de 2 horas a 1 hora. Los huevos están fuera del rango seguro. No los comas. \n\nSi necesitas más ayuda, avísame.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1932,
+    "input_tokens": 6465,
+    "output_tokens": 130,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-rice-1030",
+    "category": "safe_window_expired",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: throw it away now. Above 32 °C (the forecast reaches 37 °C), the limit drops from 2 hours to 1.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1978,
+    "input_tokens": 6347,
+    "output_tokens": 90,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-outage-9-full",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "La comida en el refri está segura hasta las 13:00. La comida en el congelador está segura hasta el viernes a las 09:00. Mantén las puertas cerradas.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1624,
+    "input_tokens": 6268,
+    "output_tokens": 99,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-outage-830-half",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Summary**  \nFridge: keep the door closed; food stays within the rule until **12:30**.  \nFreezer: keep it closed; food stays within the 24‑hour rule until tomorrow **08:30**.\n\nBoth are still safe right now. Do not open the fridge or freezer doors.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1788,
+    "input_tokens": 6059,
+    "output_tokens": 122,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-outage-media-hora",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "La comida en el refri aguanta hasta las **15:30** de hoy.  \nEl congelador aguanta hasta mañana a las **11:30**.  \n\nMantén las puertas cerradas y no abras ni el refri ni el congelador.",
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1744,
+    "input_tokens": 3390,
+    "output_tokens": 56,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-shelter-dinner",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO and FDA rules, cook the lentils in one batch and serve it from 18:00 to 20:00. The food must be discarded by 20:00. No reminder needed because the discard time matches the end of service.",
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 2301,
+    "input_tokens": 6010,
+    "output_tokens": 130,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-shelter-200",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "Para su comedor con 200 personas que sirve arroz de 13:00 a 14:00 sin mantenerlo caliente, la regla oficial dice:\n\n**Cocine todo el arroz a tiempo completo y sirvalo recién hecho a las 13:00.**  \nNo lo mantenga caliente ni lo guarde para servir después. Según la regla FDA_HOT_1H, el arroz debe servirse antes de las 14:00 o desecharse.\n\n**Plan de cocina:**  \n- Cocine todo el arroz necesario para las 200 personas entre las 12:00 y las 13:00.  \n- Sirva el arroz recién hecho exactamente a las 13:00.  \n\nSi no puede cocinar todo a tiempo, cocine porciones más pequeñas en tandas y sirva cada tanda recién hecha dentro de la ventana de servicio. No guarde arroz caliente por más de 1 hora. Deseche cualquier arroz que no se sirva antes de las 14:00.\n\nLa previsión para hoy llega a 38 °C, por lo que es importante seguir estas instrucciones al pie de la letra.",
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 3818,
+    "input_tokens": 6138,
+    "output_tokens": 309,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-meals-1330",
+    "category": "meals",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the rules, cook lunch soup at **12:30** and eat it by **14:30**. Cook dinner soup at **18:30** and eat it by **21:30**. Do not keep soup at room temperature longer than these times.",
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 2549,
+    "input_tokens": 6205,
+    "output_tokens": 118,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-danger-spain",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the rules, your son needs urgent medical care right now. Call the emergency number **112** in Spain immediately. \n\nIf you can, try to keep him in a safe place and be ready to give any details to the medical team. Do not wait for more advice—call 112 now.",
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 2061,
+    "input_tokens": 5705,
+    "output_tokens": 110,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-danger-ojos",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, pero esto es una emergencia. Lleva a tu bebé a la clínica ahora o llama al **112** inmediatamente. Los ojos hundidos son una señal grave de deshidratación y necesitan atención médica urgente. No esperes ni trates de darle remedios caseros.",
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 2382,
+    "input_tokens": 5947,
+    "output_tokens": 142,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-danger-us-blood",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the official rules, you must go to a clinic now or call 911. Bloody diarrhea is a danger sign that needs immediate medical care. Please get help right away.",
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 1565,
+    "input_tokens": 5702,
+    "output_tokens": 85,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-pollo-manana",
+    "category": "missing_data",
+    "passed": true,
+    "fails": [],
+    "answer": "Según WHO, ya pasó el límite: deséchalo ahora. El pronóstico no pasa de 32 °C (máximo 25 °C), así que el límite es de 2 horas.",
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2624,
+    "input_tokens": 6323,
+    "output_tokens": 119,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       480
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
