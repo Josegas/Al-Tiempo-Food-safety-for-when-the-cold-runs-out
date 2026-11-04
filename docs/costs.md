@@ -20,10 +20,12 @@ Assumption: 1,000 conversation turns (judges + demo + our tests). Free tier/alwa
 | AWS Budgets alerts | free | $0 |
 | **Total** | | **≈ $3–5**, covered by the account's credits |
 
-## Guardrails (so a bot or a bug can't burn the credits)
+## Guardrails (implemented in `infra/`)
 Budgets only **alert**; they don't stop spending. What actually limits cost:
-1. API Gateway throttling (requests per second + burst).
-2. Daily conversation cap stored in DynamoDB (demo answers a friendly "come back tomorrow" when hit).
+1. API Gateway throttling: 3 requests/s, burst 10.
+2. Daily conversation cap (500/day) with an atomic counter in DynamoDB; the demo answers "come back tomorrow".
 3. `max_tokens=800` per model call; the verifier allows at most 1 retry.
-4. Short AgentCore idle session timeout; nothing runs 24/7 (no EC2, no NAT Gateway, no provisioned throughput).
-5. AWS Budgets alert for this project at 50% / 80% / 100% + forecast.
+4. AgentCore idle session timeout 5 min, max session 1 h; nothing runs 24/7 (no EC2, NAT Gateway or provisioned throughput).
+5. Budget `al-tiempo-monthly` ($5, resources tagged `project=al-tiempo`): email at 50/80/100% + forecast.
+6. **Kill switch:** at 100% of the budget, AWS Budgets attaches a DENY policy (Bedrock, AgentCore, Polly) to the runtime and API roles. Detach `al-tiempo-kill-switch` to resume.
+7. Application inference profile so Bedrock spend for this project is visible separately in Cost Explorer.

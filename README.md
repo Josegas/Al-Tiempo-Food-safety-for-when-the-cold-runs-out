@@ -42,8 +42,22 @@ make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
 | AgentCore Runtime entrypoint (structured logs: latency, tokens, verifier blocks) | `agent/app.py` |
 | Forecast: Open-Meteo, or fixtures in demo mode | `agent/forecast.py`, `fixtures/` |
 
+## Deploy to your AWS account
+Infrastructure is AWS CDK (Python) in `infra/`, two stacks: **AlTiempoAccess** (least-privilege
+developer user, GitHub OIDC deploy role, project budget + alarms) and **AlTiempoApp** (AgentCore
+Runtime, API, reminders, web). Step by step: [`docs/devops.md`](docs/devops.md).
+```bash
+make deploy-access   # admin, once (review & approve IAM changes)
+make dev-profile     # admin, once: least-privilege CLI profile "al-tiempo"
+make deploy          # package the agent (ARM64 zip, no Docker) + cdk deploy
+make smoke           # end-to-end check of the live demo
+```
+
 ## Engineering practices
-- **CI (GitHub Actions):** ruff lint/format, pytest + coverage summary, rules policy check.
+- **CI (GitHub Actions):** ruff lint/format, pytest + coverage summary, rules policy check; `cdk synth` on PRs.
+- **CD:** every merge to `main` deploys with GitHub Actions + **OIDC** (no stored AWS keys) and runs a smoke test.
+- **Least privilege & FinOps:** per-project IAM user without admin rights, tagged budget with a
+  **kill switch** (AWS Budgets action), throttling and a daily cap.
 - **Security:** gitleaks secret scan, pip-audit dependency scan, bandit-style static rules, Dependabot.
 - **Policy as code:** a release (`v*` tag) is blocked while any food rule is not verified on its official source.
 - **Safety regression tests:** every real unsafe answer we found becomes a test (see `docs/diario.md`).

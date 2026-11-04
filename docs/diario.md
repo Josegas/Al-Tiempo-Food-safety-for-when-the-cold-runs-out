@@ -45,3 +45,14 @@
 - Qué pasó: USDA FSIS y FoodSafety.gov bloquean lectores automáticos (403). La FDA publica las mismas reglas en páginas que sí pudimos leer palabra por palabra. CDC cambió su URL (la vieja daba 404). La FSA no trae la regla del arroz; el NHS sí.
 - Qué decidí: las 11 reglas quedan verificadas con frase textual (`verified_text`) y fecha; IDs renombrados a FDA_*/NHS_*. La regla del arroz se marca `adapted` y la de niños `policy`. `ALLOW_UNVERIFIED_RULES=false` por defecto y los tests corren en modo producción.
 - Cifras: se actualizaron a las más recientes y se quitaron las que no tenían fuente primaria (ver `docs/sources.md`).
+
+## 2026-11-03 16:00 — Infraestructura en AWS (CDK)
+- Qué intenté: desplegar el agente en AgentCore Runtime.
+- Qué pasó: AgentCore corre en ARM64 (Graviton) y la laptop es x86, sin emulación para Docker.
+- Qué decidí: *direct code deployment* (zip con wheels `aarch64`, Python 3.12), soportado por CloudFormation (`AWS::BedrockAgentCore::Runtime` → `CodeConfiguration`). Zip determinista: mismo código → mismo hash → no se redespliega sin cambios.
+
+## 2026-11-03 16:20 — Seguridad del despliegue
+- Qué pasó: el despliegue automático de los cambios de IAM fue bloqueado (no se deben aplicar permisos "a ciegas"); CDK además exige aprobación interactiva para cambios de IAM.
+- Qué decidí: siempre `cdk diff` primero; los cambios de IAM los aprueba el dueño de la cuenta en su terminal (`make deploy-access`, `make deploy`). En CI se despliega sin aprobación solo desde `main` (ya revisado en el PR).
+- Error evitado: con `environment:` en el job de GitHub, el claim `sub` del token OIDC cambia a `repo:...:environment:production` y AWS rechazaría el rol (que confía en `ref:refs/heads/main`). Se quitó.
+- Error evitado: el *kill switch* (Budget Action) apuntaba a roles que aún no existían en el primer despliegue; se movió al stack de la app, junto a esos roles.
