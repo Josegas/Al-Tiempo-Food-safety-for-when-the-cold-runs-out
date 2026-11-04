@@ -39,6 +39,21 @@ PLACEHOLDER_RE = re.compile(r"\bHH:MM\b|<\s*(rule|regla)\b", re.IGNORECASE)
 # Durations up to this size are about food. Bigger numbers (e.g. "24 hours" freezer) are
 # still checked against the allowed set.
 MAX_RETRIES = 1
+# The retry note is appended to the user's message. Its text lists the blocked times, so it must
+# never count as "times the user typed" (bug found live: the note approved its own blocked times).
+NOTE_PREFIX = "[verifier]"
+
+
+def _user_claims(blocks: list) -> tuple[set[str], set[int]]:
+    times: set[str] = set()
+    minutes: set[int] = set()
+    for block in blocks:
+        text = block.get("text", "") if isinstance(block, dict) else ""
+        if text and not text.startswith(NOTE_PREFIX):
+            t, m = extract_claims(text)
+            times |= t
+            minutes |= m
+    return times, minutes
 
 
 def _normalize_time(h: int, m: int, ampm: str | None) -> str:
@@ -145,11 +160,10 @@ class VerifierHook(HookProvider):
         self.retries = 0
         # Times the user wrote (e.g. "I cooked at 12:30") may be repeated back.
         for msg in event.messages or []:
-            for block in msg.get("content", []) if isinstance(msg, dict) else []:
-                if "text" in block:
-                    t, m = extract_claims(block["text"])
-                    self.allowed_times |= t
-                    self.allowed_minutes |= m
+            if isinstance(msg, dict):
+                t, m = _user_claims(msg.get("content", []))
+                self.allowed_times |= t
+                self.allowed_minutes |= m
 
     def on_tool_result(self, event: AfterToolCallEvent) -> None:
         t, m = collect_allowed(event.result)
@@ -168,14 +182,12 @@ class VerifierHook(HookProvider):
         if resp is None or resp.stop_reason != "end_turn":
             return  # tool-use turns are checked later, on the final answer
         text = "".join(b.get("text", "") for b in resp.message.get("content", []))
-        # Also accept times the user typed in this conversation.
+        # Also accept times the user typed in this conversation (never the verifier's own notes).
         for msg in event.agent.messages:
             if msg.get("role") == "user":
-                for block in msg.get("content", []):
-                    if "text" in block:
-                        t, m = extract_claims(block["text"])
-                        self.allowed_times |= t
-                        self.allowed_minutes |= m  # durations the user said ("hace 5 horas")
+                t, m = _user_claims(msg.get("content", []))
+                self.allowed_times |= t
+                self.allowed_minutes |= m  # durations the user said ("hace 5 horas")
         bad = find_unbacked(text, self.allowed_times, self.allowed_minutes)
         if PLACEHOLDER_RE.search(text):
             bad["placeholder"] = "copied a template placeholder; with no tool time, give no time"
@@ -187,8 +199,10 @@ class VerifierHook(HookProvider):
             self.retries += 1
             self.retried_count += 1
             note = (
-                "[verifier] Your last answer used times/limits that no tool returned: "
-                f"{bad}. Rewrite it using ONLY the exact times and limits from the tool results."
+                f"{NOTE_PREFIX} Your last answer used times/limits that no tool returned in this "
+                f"turn: {bad}. Rewrite it using ONLY the exact times and limits from this turn's "
+                "tool results. If a time comes from an earlier answer (the user didn't understand "
+                "or asks again), call the tool again with the same data instead of repeating it."
             )
             last = event.agent.messages[-1] if event.agent.messages else None
             if last and last.get("role") == "user":
@@ -198,12 +212,16 @@ class VerifierHook(HookProvider):
 
         # Still wrong after retry: replace the answer in place with a safe template.
         self.blocked_count += 1
-        resp.message["content"][:] = [{"text": self.safe_answer()}]
+        state = getattr(event.agent, "state", None)
+        session_window = state.get("last_window") if state is not None else None
+        resp.message["content"][:] = [{"text": self.safe_answer(session_window)}]
 
     # -- helpers --------------------------------------------------------------
-    def safe_answer(self) -> str:
+    def safe_answer(self, session_window: dict | None = None) -> str:
         lang = self.language if self.language in SAFE_TEMPLATE else "en"
         window = ""
+        if not self.last_window and session_window:
+            window = _previous_window_sentence(session_window, lang)
         if self.last_window:
             src = (self.last_window.get("deciding_source") or self.last_window["sources"][-1])[
                 "source_name"
@@ -223,3 +241,36 @@ class VerifierHook(HookProvider):
                     else f"Según {src}, cómelo antes de las {hhmm} o deséchalo. "
                 )
         return SAFE_TEMPLATE[lang].format(window=window)
+
+
+def _previous_window_sentence(w: dict, lang: str) -> str:
+    """Follow-up turn with no tool call ("I didn't understand"): repeat the session's last engine
+    decision, tied to its cooking time so it can't be read as being about another dish.
+    The deadline is compared with the clock in code (not by the model)."""
+    from datetime import datetime
+
+    from agent.tools._common import now_local
+
+    if w.get("time_source") == "unknown" or not w.get("cooked_at_hhmm") or not w.get("eat_by"):
+        return ""  # the engine assumed "cooked long ago": no real time to repeat
+    try:
+        expired = now_local() >= datetime.fromisoformat(w["eat_by"])
+    except (ValueError, TypeError):
+        return ""
+    src = str(w.get("source_name", "")).split(" - ")[0] or (
+        "the rules" if lang == "en" else "las reglas"
+    )
+    cooked, hhmm = w["cooked_at_hhmm"], w["eat_by_hhmm"]
+    if lang == "en":
+        verdict = (
+            "the time limit has passed: throw it away now"
+            if expired
+            else f"eat it before {hhmm} or throw it away"
+        )
+        return f"For the food you cooked at {cooked}: according to {src}, {verdict}. "
+    verdict = (
+        "ya pasó el tiempo límite: deséchalo ahora"
+        if expired
+        else f"cómelo antes de las {hhmm} o deséchalo"
+    )
+    return f"Para lo que cocinaste a las {cooked}: según {src}, {verdict}. "

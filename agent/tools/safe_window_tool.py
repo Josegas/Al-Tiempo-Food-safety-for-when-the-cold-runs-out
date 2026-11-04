@@ -122,6 +122,9 @@ def compute_safe_window(
         {
             "food_type": food_type,
             "eat_by_hhmm": result["eat_by_hhmm"],
+            "eat_by": result["eat_by"],
+            "cooked_at_hhmm": result["cooked_at_hhmm"],
+            "time_source": time_source,
             "reminder_at_hhmm": result["reminder_at"][11:16],
             "status": result["status"],
             "source_name": result["deciding_source"]["source_name"],

@@ -203,6 +203,7 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 /* Comprehension check: one tap, options come from the rules engine. */
 .quiz { margin-top: 12px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-card); background: var(--paper); }
 .quiz-q { margin: 0 0 8px; font-weight: 700; font-size: .92rem; color: var(--forest); }
+.quiz-kicker { display: block; margin-bottom: 2px; font-weight: 400; font-size: .78rem; color: var(--muted); }
 .quiz-opts { display: flex; flex-wrap: wrap; gap: 8px; }
 .quiz-opt { min-height: 44px; min-width: 84px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--ivory); font-family: var(--f-mono); font-weight: 500; font-size: 1rem; color: var(--ink); cursor: pointer; }
 .quiz-opt:hover:not(:disabled) { border-color: var(--emerald); }

@@ -110,7 +110,8 @@ const I18N = {
       aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
     },
     quiz: {
-      q: "Pregunta rápida: según la respuesta, ¿hasta qué hora se puede comer?",
+      kicker: "Comprobación anónima · opcional",
+      q: "¿Se entendió? Toca la hora límite que te dimos arriba:",
       ok: "¡Correcto!", no: (c) => `La hora correcta es ${c}.`,
       panel: (pct, n) => `Comprensión: ${pct} % correcto (n = ${n})`,
       note: "Anónimo: solo se cuenta si acertaste, sin datos personales.",
@@ -220,7 +221,8 @@ const I18N = {
       aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
     },
     quiz: {
-      q: "Quick question: according to the answer, until what time can it be eaten?",
+      kicker: "Anonymous check · optional",
+      q: "Was it clear? Tap the deadline we gave you above:",
       ok: "Correct!", no: (c) => `The right time is ${c}.`,
       panel: (pct, n) => `Comprehension: ${pct}% correct (n = ${n})`,
       note: "Anonymous: we only count whether you got it right, no personal data.",
@@ -640,7 +642,8 @@ function quizBlock(d) {
   const Q = t("quiz");
   const box = el("div", "quiz");
   box.setAttribute("role", "group");
-  const label = el("p", "quiz-q", Q.q);
+  const label = el("p", "quiz-q");
+  label.append(el("span", "quiz-kicker", Q.kicker), el("span", "", Q.q));
   label.id = `quiz-${Math.random().toString(36).slice(2, 9)}`;
   box.setAttribute("aria-labelledby", label.id);
   const row = el("div", "quiz-opts");
