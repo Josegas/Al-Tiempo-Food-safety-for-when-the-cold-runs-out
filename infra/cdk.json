@@ -6,8 +6,9 @@
     "@aws-cdk/aws-iam:minimizePolicies": true,
     "githubRepo": "Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out",
     "githubOidcSubPrefix": "repo:Josegas@80491054/Al-Tiempo-Food-safety-for-when-the-cold-runs-out@1444850797",
-    "monthlyBudgetUsd": 5,
+    "monthlyBudgetUsd": 10,
     "dailyChatCap": 500,
+    "dailyWarmCap": 1000,
     "smsEnabled": false
   }
 }

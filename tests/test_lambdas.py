@@ -128,3 +128,18 @@ def test_reminder_lambda_stores_with_ttl_and_measures_delay(monkeypatch):
     assert item["pk"] == f"SESSION#{SESSION}" and item["expires_at"] > 0
     assert "delay_s" in item
     assert "contact" not in item  # phone number is never stored
+
+
+def test_warm_starts_session_without_prompt(api):
+    r = api.handler(event("POST /api/warm", {"session_id": SESSION, "language": "es"}), None)
+    assert r["statusCode"] == 200 and json.loads(r["body"])["warm"] is True
+    payload = json.loads(api._calls[0]["payload"])
+    assert payload["warmup"] is True and "prompt" not in payload
+    assert api._calls[0]["runtimeSessionId"] == SESSION
+
+
+def test_warm_has_its_own_daily_cap_and_validation(api):
+    assert api.handler(event("POST /api/warm", {"session_id": "short"}), None)["statusCode"] == 400
+    api.TABLE = FakeTable(cap_reached=True)
+    r = api.handler(event("POST /api/warm", {"session_id": SESSION}), None)
+    assert r["statusCode"] == 429 and api._calls == []
