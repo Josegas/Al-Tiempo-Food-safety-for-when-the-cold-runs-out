@@ -1,0 +1,15 @@
+{
+  "name": "Al Tiempo — food safety when the cold runs out",
+  "short_name": "Al Tiempo",
+  "description": "Until what time is cooked food safe without a fridge? Official food-safety rules + today's heat.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F3EA",
+  "theme_color": "#163B32",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

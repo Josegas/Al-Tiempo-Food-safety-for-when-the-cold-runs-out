@@ -1,7 +1,7 @@
 """Local preview of web/ without deploying: serves the files and forwards /api/* to the live API.
 
-    python scripts/dev_server.py            # http://localhost:8000  (API from build/outputs.json)
-    python scripts/dev_server.py --api https://xxxx.cloudfront.net --port 8000
+    python scripts/dev_server.py            # http://localhost:8088  (API from build/outputs.json)
+    python scripts/dev_server.py --api https://xxxx.cloudfront.net --port 8088
 
 Only for development. Uses the deployed backend, so chats count against its daily cap.
 """
@@ -65,14 +65,23 @@ def main() -> None:
     ap.add_argument(
         "--api", default=None, help="base URL of the deployed site (default: build/outputs.json)"
     )
-    ap.add_argument("--port", type=int, default=8000)
+    ap.add_argument("--port", type=int, default=8088)
     args = ap.parse_args()
     api = args.api or json.loads(OUTPUTS.read_text())["AlTiempoApp"]["SiteUrl"]
     Handler.api_base = api.rstrip("/")
-    server = ThreadingHTTPServer(
-        ("127.0.0.1", args.port), partial(Handler, directory=str(ROOT / "web"))
+    handler = partial(Handler, directory=str(ROOT / "web"))
+    server = None
+    for port in range(args.port, args.port + 20):  # busy port (another app)? use the next free one
+        try:
+            server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+            break
+        except OSError:
+            continue
+    if server is None:
+        raise SystemExit(f"No free port between {args.port} and {args.port + 19}")
+    print(
+        f"Al Tiempo local preview: http://localhost:{port}  (API -> {Handler.api_base})", flush=True
     )
-    print(f"Al Tiempo local preview: http://localhost:{args.port}  (API -> {Handler.api_base})")
     server.serve_forever()
 
 
