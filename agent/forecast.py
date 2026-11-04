@@ -20,6 +20,11 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 
 def demo_mode() -> bool:
+    from agent.request_context import current
+
+    req = current()
+    if req.demo is not None:
+        return req.demo
     return os.getenv("DEMO_MODE", "false").lower() == "true"
 
 
@@ -43,6 +48,10 @@ def get_hourly_temps(
     """Returns (hourly temps in local time, source label)."""
     if demo_mode():
         return _parse(load_fixture(scenario)), f"demo fixture '{scenario}'"
+    if lat is None or lon is None:
+        from agent.request_context import current
+
+        lat, lon = current().lat, current().lon
     if lat is None or lon is None:
         return None, "no location given"
     query = urllib.parse.urlencode(
