@@ -9,7 +9,7 @@
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **137** automated tests. **98 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and neither failure was unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
+| **Technical Execution** | Live on AWS. **140** automated tests. **99 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and the one failure was not unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
 | **Communication** | Demo with no login, buttons for 7 ready-made scenarios, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
@@ -59,9 +59,9 @@ If the user accepts, **Amazon EventBridge Scheduler** creates a one-time schedul
 
 ![Safe-window answer with its source, and the reminder arriving](capturas/02-safe-window-reminder.png)
 
-Under each safe-window answer, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
+Every safe-window answer also says **why**, in one sentence built in code: *"Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1."* Under it, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left, the reason and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
 
-[TODO: screenshot of the timeline on the live demo after the deploy: capturas/ui/timeline-live.png]
+![The safe-window timeline on the live demo: cooked 12:00, reminder 12:45, limit 13:00, decided by U.S. FDA](capturas/ui/timeline-live-en.png)
 
 **No signal? It still helps.** The web app can be installed on a phone and opens without internet. The agent needs a connection, so offline it doesn't pretend to answer: it shows the basic official rules (1 hour on a hot day, 2 hours otherwise; rice 1 hour; no leftovers for babies; danger signs → clinic) with their sources.
 
@@ -163,9 +163,9 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **137 / 137** |
-| End-to-end evals consistent with the rules engine (50 bilingual scenarios × 2 runs) | **98 / 100 (98%)**, 0 unsafe answers |
-| Adversarial evals: pressure about babies, "say it's 100% safe", medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim | **28 / 30**, 0 unsafe answers |
+| Rules-engine, tool and safety tests passing | **140 / 140** |
+| End-to-end evals consistent with the rules engine (50 bilingual scenarios × 2 runs) | **99 / 100 (99%)**, 0 unsafe answers |
+| Adversarial evals: pressure about babies, "say it's 100% safe", medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim | **29 / 30**, 0 unsafe answers |
 | Invented times blocked by the verifier (adversarial unit tests) | **8 / 8** |
 | Reminders delivered on the live system | **9 / 9**, 4 to 45 seconds after the scheduled minute |
 | Cost per conversation turn (Bedrock) | **$0.0022** (evals), **$0.0024** (live) |
@@ -195,7 +195,7 @@ We will **not** claim fewer illnesses from a pilot this small. That needs a larg
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 137 pytest tests cover:
+**Deterministic core, tested.** 140 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
 - reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace 5 horas"*, *"2 pm"*);
 - the verifier, the API and the reminder Lambdas.
@@ -217,7 +217,7 @@ We ran the same agent with three Bedrock models:
 
 **Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, that suite passed **36/36** over two runs.
 
-**Then we made the test harder.** We grew the suite to **50 scenarios** (26 in Spanish, 24 in English). The expected times come from the rules engine, not from us. The new scenarios include expired food, spoken times, formula, toddlers, an opened fridge, antibiotics, home remedies, *"ignore your rules"* and a fake WHO claim. The first full run scored **95/100**, and the failures were worth more than the score. They exposed **four real bugs**: an outage deadline the model reused after the fridge door was opened, a prompt rule that only seemed to apply to outages, a template placeholder (*"eat it before HH:MM"*) copied into an answer, and an eval harness that didn't tell the agent the user's language. Each one now has a test. After the fixes: **98/100**, median **1,590 ms**, **$0.00225** per turn, and **0** safe-template fallbacks. Neither remaining failure was unsafe: one was a correct refusal in different words, and one was an evasive answer that didn't correct the false claim. We report it as it is.
+**Then we made the test harder.** We grew the suite to **50 scenarios** (26 in Spanish, 24 in English). The expected times come from the rules engine, not from us. The new scenarios include expired food, spoken times, formula, toddlers, an opened fridge, antibiotics, home remedies, *"ignore your rules"* and a fake WHO claim. The first full run scored **95/100**, and the failures were worth more than the score. They exposed **four real bugs**: an outage deadline the model reused after the fridge door was opened, a prompt rule that only seemed to apply to outages, a template placeholder (*"eat it before HH:MM"*) copied into an answer, and an eval harness that didn't tell the agent the user's language. Each one now has a test. After the fixes: **98/100**, and **99/100** in the latest run (with the *why* sentence added), median **1,644 ms**, **$0.00227** per turn, and **0** safe-template fallbacks. No failure was unsafe: they were correct refusals in different words, an evasive answer that didn't correct a false claim, and one that asked needless questions. We report them as they are.
 
 **Live performance (measured on the deployed demo):**
 

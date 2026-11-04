@@ -88,6 +88,17 @@ const I18N = {
       title: "La ventana segura", cooked: "Cocinado", now: "Ahora", remind: "Aviso", limit: "Límite",
       left: (m) => `Quedan ${fmtLeft(m, "es")} para comerlo.`, expired: "Ya pasó el límite: deséchalo.",
       by: (src) => src ? `Decide: ${src}` : "Decide: nuestra regla más estricta para bebés y niños",
+      why: (d, t) => ({
+        FDA_HOT_1H: t == null
+          ? "Por qué 1 hora: no tenemos el pronóstico del clima, así que suponemos calor (más de 32 °C), el caso más seguro."
+          : `Por qué 1 hora: el pronóstico llega a ${t} °C. Con más de 32 °C, la FDA baja el límite de 2 horas a 1: con calor, las bacterias se multiplican más rápido.`,
+        FDA_2H: t == null ? null : `Por qué 2 horas: el pronóstico no pasa de 32 °C (máximo ${t} °C). A temperatura ambiente, la OMS y la FDA dicen máximo 2 horas.`,
+        WHO_COOKED_2H: t == null ? null : `Por qué 2 horas: el pronóstico no pasa de 32 °C (máximo ${t} °C). A temperatura ambiente, la OMS y la FDA dicen máximo 2 horas.`,
+        NHS_RICE_1H: "Por qué 1 hora: el NHS pide refrigerar el arroz cocido dentro de 1 hora. Sin refri, usamos esa hora como límite para comerlo.",
+        POLICY_CHILD_STRICT: "Por qué 1 hora: para bebés y niños pequeños usamos una regla más estricta que la oficial. Los menores de 5 años cargan el 29% del daño por comida contaminada (OMS).",
+        CDC_FORMULA_2H: "Por qué 2 horas: los CDC piden usar la fórmula preparada dentro de 2 horas.",
+        CDC_FORMULA_FEED_1H: "Por qué 1 hora: los CDC piden usar la fórmula dentro de 1 hora desde que el bebé empieza a tomar, y tirar lo que sobre.",
+      })[d.rule_id] || null,
       aria: (d) => `Línea de tiempo. ${d.cooked_known ? `Cocinado a las ${d.cooked_at_hhmm}. Límite: ${d.eat_by_hhmm}. ` : ""}Ahora son las ${d.now_hhmm}.`,
     },
     offline: {
@@ -159,6 +170,17 @@ const I18N = {
       title: "The safe window", cooked: "Cooked", now: "Now", remind: "Reminder", limit: "Limit",
       left: (m) => `${fmtLeft(m, "en")} left to eat it.`, expired: "The limit has passed: throw it away.",
       by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
+      why: (d, t) => ({
+        FDA_HOT_1H: t == null
+          ? "Why 1 hour: we have no weather forecast, so we assume heat (over 32 °C), the safest case."
+          : `Why 1 hour: the forecast reaches ${t} °C. Above 32 °C, the FDA cuts the limit from 2 hours to 1: in the heat, bacteria multiply faster.`,
+        FDA_2H: t == null ? null : `Why 2 hours: the forecast stays at or below 32 °C (max ${t} °C). At room temperature, WHO and the FDA say 2 hours at most.`,
+        WHO_COOKED_2H: t == null ? null : `Why 2 hours: the forecast stays at or below 32 °C (max ${t} °C). At room temperature, WHO and the FDA say 2 hours at most.`,
+        NHS_RICE_1H: "Why 1 hour: the NHS says to refrigerate cooked rice within 1 hour. Without a fridge, we use that hour as the limit to eat it.",
+        POLICY_CHILD_STRICT: "Why 1 hour: for babies and young children we use a rule stricter than the official one. Children under 5 carry 29% of the harm from unsafe food (WHO).",
+        CDC_FORMULA_2H: "Why 2 hours: the CDC says to use prepared formula within 2 hours.",
+        CDC_FORMULA_FEED_1H: "Why 1 hour: the CDC says to use formula within 1 hour of when feeding begins, and throw out what is left.",
+      })[d.rule_id] || null,
       aria: (d) => `Timeline. ${d.cooked_known ? `Cooked at ${d.cooked_at_hhmm}. Limit: ${d.eat_by_hhmm}. ` : ""}Now it is ${d.now_hhmm}.`,
     },
     offline: {
@@ -480,6 +502,9 @@ function safeWindowTimeline(d) {
   const left = expired ? null : (Number.isInteger(d.minutes_left) ? d.minutes_left : (eat - now + 1440) % 1440);
   status.appendChild(el("span", "", expired ? T.expired : T.left(left)));
   fig.appendChild(status);
+  const temp = Number.isFinite(d.max_temp_c) ? String(Math.round(d.max_temp_c * 10) / 10) : null;
+  const why = T.why(d, temp);
+  if (why) fig.appendChild(el("p", "tl-why", why));
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
 }

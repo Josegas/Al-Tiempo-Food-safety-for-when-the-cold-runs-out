@@ -25,6 +25,30 @@ def resolve_cooked_at(user_text, cooked_at, minutes_ago, now):
     return None, "unknown", None
 
 
+def _temp(c: float) -> str:
+    return f"{c:.0f}" if float(c).is_integer() else f"{c:.1f}"
+
+
+def window_reason(r: dict, language: str) -> str:
+    """Why this limit, from the deciding rule and the forecast (empty if nothing to add)."""
+    rule = (r.get("deciding_source") or {}).get("rule_id")
+    t, th = r.get("max_temp_c"), _temp(r.get("hot_threshold_c") or 32)
+    es = language == "es"
+    if rule == "FDA_HOT_1H":
+        if t is None:
+            return (f"Sin pronóstico del clima, suponemos calor (más de {th} °C): límite de 1 hora."
+                    if es else f"Without a weather forecast we assume heat (over {th} °C): 1-hour limit.")  # fmt: skip
+        return (f"Con más de {th} °C (el pronóstico llega a {_temp(t)} °C), el límite baja de 2 horas a 1."
+                if es else f"Above {th} °C (the forecast reaches {_temp(t)} °C), the limit drops from 2 hours to 1.")  # fmt: skip
+    if rule in ("WHO_COOKED_2H", "FDA_2H") and t is not None:
+        return (f"El pronóstico no pasa de {th} °C (máximo {_temp(t)} °C), así que el límite es de 2 horas."
+                if es else f"The forecast stays at or below {th} °C (max {_temp(t)} °C), so the limit is 2 hours.")  # fmt: skip
+    if rule == "NHS_RICE_1H":
+        return ("El arroz cocido tiene un límite más corto: 1 hora."
+                if es else "Cooked rice has a shorter limit: 1 hour.")  # fmt: skip
+    return ""
+
+
 def window_summary(r: dict, language: str) -> str:
     """The key sentence, built in code: the model relays it instead of composing times itself."""
     src_info = r["deciding_source"]
@@ -37,16 +61,18 @@ def window_summary(r: dict, language: str) -> str:
     else:
         src = src_info["source_name"].split(" - ")[0]
     eat_by, remind = r["eat_by_hhmm"], r["reminder_at"][11:16]
+    why = window_reason(r, language)
+    why = f" {why}" if why else ""
     if language == "es":
         if r["status"] == "discard_now":
-            return f"Según {src}, ya pasó el límite: deséchalo ahora."
-        text = f"Según {src}, cómelo antes de las {eat_by} o deséchalo. Puedo recordártelo a las {remind}."
+            return f"Según {src}, ya pasó el límite: deséchalo ahora.{why}"
+        text = f"Según {src}, cómelo antes de las {eat_by} o deséchalo.{why} Puedo recordártelo a las {remind}."
         return text + (
             " Sírvelo de inmediato y no guardes sobras." if r["serve_immediately"] else ""
         )
     if r["status"] == "discard_now":
-        return f"According to {src}, the time limit has passed: throw it away now."
-    text = f"According to {src}, eat it before {eat_by} or throw it away. I can remind you at {remind}."
+        return f"According to {src}, the time limit has passed: throw it away now.{why}"
+    text = f"According to {src}, eat it before {eat_by} or throw it away.{why} I can remind you at {remind}."
     return text + (" Serve it right away and keep no leftovers." if r["serve_immediately"] else "")
 
 

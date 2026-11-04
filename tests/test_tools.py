@@ -191,11 +191,12 @@ def test_safe_window_summary_is_built_in_code():
     """Live screenshot showed "I can set a reminder for 13:00" while the reminder was 12:45."""
     w = j(compute_safe_window(food_type="cooked_food", tool_context=ctx("I cooked beans at 12:00")))
     assert w["summary"] == (
-        "According to U.S. FDA, eat it before 13:00 or throw it away. I can remind you at 12:45."
+        "According to U.S. FDA, eat it before 13:00 or throw it away. Above 32 °C (the forecast "
+        "reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45."
     )
     b = j(compute_safe_window(food_type="cooked_rice", audience="infant",
                               tool_context=ctx("rice I cooked 5 hours ago", language="es")))  # fmt: skip
-    assert b["summary"].endswith("ya pasó el límite: deséchalo ahora.")
+    assert "ya pasó el límite: deséchalo ahora." in b["summary"]
 
 
 @pytest.mark.parametrize(

@@ -46,6 +46,9 @@ def safe_window_decision(new_messages: list[dict]) -> dict | None:
     decision["kind"] = "safe_window"
     decision["reminder_at_hhmm"] = str(window.get("reminder_at", ""))[11:16] or None
     decision["source"] = _short_source(window)
+    decision["rule_id"] = (window.get("deciding_source") or {}).get("rule_id")
+    decision["max_temp_c"] = window.get("max_temp_c")
+    decision["hot_threshold_c"] = window.get("hot_threshold_c")
     # Cooking time unknown -> the engine assumed "long ago": don't draw a made-up start point.
     decision["cooked_known"] = window.get("time_source") != "unknown"
     return decision

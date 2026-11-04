@@ -131,3 +131,9 @@
 - Qué pasó: después de los arreglos, la corrida 20261104-000424 dio 97/100. Leí las 3 respuestas que fallaron: las 3 eran seguras (ninguna confirmó "la OMS dice 8 horas" ni dijo "100% seguro").
 - Por qué fallaron: mis revisiones de texto. "no puedo decirte que **es 100% seguro comer**" contiene la frase prohibida dentro de una negación; "deséchalo ahora" y "¿hace cuántas horas?" no estaban en la lista de respuestas aceptables.
 - Qué decidí: ajustar solo esos 2 escenarios a su intención (no confirmar lo falso), escribirlo en su campo `note` y hacer una corrida nueva completa en vez de recalificar la anterior. Reporto las dos corridas.
+
+## 2026-11-04 01:00 — decir el porqué, no solo el qué
+- Qué intenté: revisar la respuesta en vivo como usuario ("cómelo antes de las 13:00").
+- Qué pasó: decía qué hacer, pero no por qué. Sin el porqué, "1 hora" parece arbitrario y es más fácil ignorarlo.
+- Cómo lo supe: mi propia prueba en la demo en vivo.
+- Qué decidí: el motor ya calculaba la temperatura máxima del pronóstico y la regla que decide; ahora las devuelve (`max_temp_c`, `rule_id`). Con eso, el código arma una frase corta para la respuesta y la voz ("Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1.") y la tarjeta muestra un "Por qué" más completo. El modelo no escribe el porqué, solo lo repite, y el verificador lo acepta porque los números salen del motor. 3 tests nuevos (140 en total).

@@ -125,6 +125,9 @@ class SafeWindow:
     minutes_left: int | None = None
     # The rule whose deadline is eat_by (the one to cite: "According to <source>...").
     deciding_source: dict = field(default_factory=dict)
+    # Why: hottest forecast hour in the window (None = no forecast -> assumed hot).
+    max_temp_c: float | None = None
+    hot_threshold_c: float = 32.0
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -225,6 +228,8 @@ def compute_safe_window(
         unverified_rules_used=any(r.unverified for r in unique),
         **_status(eat_by, now),
         deciding_source=deciding.source(),
+        max_temp_c=None if max_t is None else round(max_t, 1),
+        hot_threshold_c=hot.hot_threshold_c,
     )
 
 

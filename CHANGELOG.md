@@ -12,6 +12,7 @@ fixes are made; every change is listed here.
   13:00 or throw it away". A one-time EventBridge Scheduler reminder fires at the exact minute.
 - **Meal planning**, **power-outage mode**, **strict mode for babies and young children**,
   **shelter batch planner**, **danger-sign escalation** (no diagnosis, no doses).
+- Every safe-window answer says **why** ("above 32 °C the limit drops from 2 hours to 1"), built in code.
 - **Safe-window timeline** in the web (cooked → now → reminder → limit), drawn only from the rules
   engine's numbers (`decision` field of `/api/chat`).
 - **Installable web app that opens offline:** without signal it shows the basic official rules
@@ -19,8 +20,8 @@ fixes are made; every change is listed here.
 - English and Spanish, with voice (Amazon Polly).
 
 ### Quality evidence
-- 137 automated tests; 11/11 food rules verified word by word on their official source.
-- End-to-end evals: **98/100** (50 bilingual scenarios × 2 runs, incl. 15 adversarial), 0 unsafe answers.
+- 140 automated tests; 11/11 food rules verified word by word on their official source.
+- End-to-end evals: **99/100** (50 bilingual scenarios × 2 runs, incl. 15 adversarial), 0 unsafe answers.
 - Verifier: invented times, invented limits and copied template placeholders are blocked.
 - Load test: normal traffic 80/80 OK; a 300-request burst never reached the model (throttled).
 
