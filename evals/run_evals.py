@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import statistics
 import sys
 import time
@@ -35,6 +36,20 @@ PRICES = {
 }
 
 
+PLACEHOLDER = re.compile(r"hh:mm|<rule|<regla|\{[a-z_]+\}")
+# An answer "has a decision" if it tells the user to eat by a time or to throw the food away.
+DECISION = re.compile(
+    r"cómelo antes|cómela antes|deséch|desech|tirar|tíra|tirarl|eat it before|throw|discard", re.I
+)
+# "Explained why": the plain reason from rules/*.yaml (or an obvious "because") is in the answer.
+WHY = re.compile(
+    r"bacteri|microbio|germ|toxin|espora|spore|saliva|mantiene el frío|keeps food cold|"
+    r"mantiene la temperatura|keeps its temperature|29%|1 de cada 9|1 in 9|no se puede confiar|"
+    r"can.t rely|no la enfría|no lo enfría|doesn't cool|no indica que sea seguro|doesn't show it|se multiplican|multiply|porque|because",
+    re.I,
+)
+
+
 def tools_called(messages: list) -> list[str]:
     return [b["toolUse"]["name"] for m in messages for b in m["content"] if "toolUse" in b]
 
@@ -49,9 +64,18 @@ def check(s: dict, answer: str, tools: list[str]) -> list[str]:
     for bad in s.get("must_not_contain", []):
         if bad.lower() in low:
             fails.append(f"contains forbidden '{bad}'")
-    if "hh:mm" in low or "<rule" in low or "<regla" in low:
+    if PLACEHOLDER.search(low):
         fails.append("contains a template placeholder")
     return fails
+
+
+def _last_user_index(messages: list) -> int:
+    """Index of the last message the user typed (not a tool result)."""
+    for i in range(len(messages) - 1, -1, -1):
+        m = messages[i]
+        if m.get("role") == "user" and any("text" in b for b in m.get("content", [])):
+            return i
+    return 0
 
 
 def run(model: str, scenarios: list[dict], repeat: int) -> dict:
@@ -61,8 +85,11 @@ def run(model: str, scenarios: list[dict], repeat: int) -> dict:
         for s in scenarios:
             agent, verifier = build_agent(s["lang"])
             t0 = time.perf_counter()
-            try:
-                answer = clean_answer(str(agent(s["prompt"])))
+            answers: list[str] = []
+            try:  # multi-turn scenarios: "turns" (same agent = same session); checks on the last
+                for prompt in s.get("turns") or [s["prompt"]]:
+                    answers.append(clean_answer(str(agent(prompt))))
+                answer = answers[-1]
                 error = None
             except Exception as exc:
                 answer, error = "", type(exc).__name__
@@ -70,9 +97,17 @@ def run(model: str, scenarios: list[dict], repeat: int) -> dict:
             usage = agent.event_loop_metrics.accumulated_usage
             tools = tools_called(agent.messages)
             fails = [f"error {error}"] if error else check(s, answer, tools)
+            if not error and s.get("no_repeat") and len(answers) > 1 and answers[-1] == answers[-2]:
+                fails.append("same answer twice in a row")
+            if not error and s.get("expect_tool_last_turn") is not None:
+                last_turn = agent.messages[_last_user_index(agent.messages) :]
+                if s["expect_tool_last_turn"] not in tools_called(last_turn):
+                    fails.append(f"tool {s['expect_tool_last_turn']} not called in the last turn")
             rows.append({
                 "id": s["id"], "category": s["category"], "passed": not fails, "fails": fails,
-                "answer": answer, "tools": tools, "latency_ms": ms,
+                "answer": answer, "answers": answers, "tools": tools, "latency_ms": ms,
+                "decision_correct": not fails, "has_decision": bool(DECISION.search(answer)),
+                "explained_why": bool(DECISION.search(answer) and WHY.search(answer)),
                 "input_tokens": usage["inputTokens"], "output_tokens": usage["outputTokens"],
                 "verifier_retried": verifier.retried_count, "verifier_blocked": verifier.blocked_count,
                 "verifier_violations": verifier.violations,
@@ -93,6 +128,8 @@ def run(model: str, scenarios: list[dict], repeat: int) -> dict:
         "cost_per_turn_usd": round(cost / len(rows), 6) if cost is not None else None,
         "verifier_retries": sum(r["verifier_retried"] for r in rows),
         "verifier_blocks": sum(r["verifier_blocked"] for r in rows),
+        "with_decision": sum(r["has_decision"] for r in rows),
+        "explained_why": sum(r["explained_why"] for r in rows),
         "rows": rows,
     }
 
@@ -125,6 +162,9 @@ def main() -> None:
         print(f"| {r['model']} | {r['passed']}/{r['runs']} ({pct:.0f}%) | {r['median_latency_ms']} ms | "
               f"{r['avg_input_tokens']}/{r['avg_output_tokens']} | {cost} | "
               f"{r['verifier_retries']} / {r['verifier_blocks']} |")  # fmt: skip
+    for r in results:
+        print(f"\n{r['model']}: {r['passed']} de {r['runs']} con la decisión correcta; "
+              f"{r['explained_why']} de {r['with_decision']} respuestas con decisión explicaron el porqué")  # fmt: skip
     print(f"\nSaved {out.relative_to(ROOT)}")
 
 

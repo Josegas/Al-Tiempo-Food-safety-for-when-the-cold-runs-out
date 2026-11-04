@@ -195,8 +195,8 @@ def test_follow_up_fallback_says_discard_when_the_deadline_passed(monkeypatch):
     monkeypatch.setenv("DEMO_MODE", "true")  # 12:00 > 11:30
     text = VerifierHook(language="en").safe_answer(_session_window(cooked="10:30", eat_by="11:30"))
     assert (
-        "For the food you cooked at 10:30: according to U.S. FDA, the time limit has passed: throw it away now."
-        in text
+        "For the food you cooked at 10:30: according to U.S. FDA, the time limit has passed: the "
+        "safest choice is not to eat it and to throw it away." in text
     )
     assert "11:30" not in text
 
@@ -207,3 +207,91 @@ def test_follow_up_fallback_skips_unknown_cooking_time(monkeypatch):
     monkeypatch.setenv("DEMO_MODE", "true")
     text = VerifierHook(language="es").safe_answer(_session_window(time_source="unknown"))
     assert "cocinaste" not in text and "13:00" not in text
+
+
+def _follow_up_event(messages, text, state=None):
+    from types import SimpleNamespace
+
+    st = state or {}
+    msg = {"role": "assistant", "content": [{"text": text}]}
+    agent = SimpleNamespace(messages=messages, state=SimpleNamespace(get=st.get))
+    return SimpleNamespace(stop_response=SimpleNamespace(stop_reason="end_turn", message=msg), agent=agent, retry=False)  # fmt: skip
+
+
+def _turn_with_tool(v):
+    from types import SimpleNamespace
+
+    v.on_start(SimpleNamespace(messages=[]))
+    v.on_tool_result(SimpleNamespace(result=TOOL_RESULT))
+
+
+def test_follow_up_without_its_own_time_may_repeat_the_engine_results():
+    """Live bug: "pero estaban tapados" -> the model repeated 13:00 from the previous turn ->
+    blocked twice -> generic template. The previous turn's engine results now hold."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    _turn_with_tool(v)  # turn 1: the engine said 13:00
+    v.on_start(SimpleNamespace(messages=[]))  # turn 2: no tool call
+    messages = [{"role": "user", "content": [{"text": "pero estaban tapados"}]}]
+    ev = _follow_up_event(
+        messages, "Taparlos no los enfría: cómelos antes de las 13:00 o deséchalos."
+    )
+    v.on_model_response(ev)
+    assert ev.retry is False and v.violations == []
+
+
+def test_follow_up_with_a_new_time_needs_the_engine_again():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    _turn_with_tool(v)
+    v.on_start(SimpleNamespace(messages=[]))
+    messages = [{"role": "user", "content": [{"text": "¿y el arroz de las 11:30?"}]}]
+    ev = _follow_up_event(messages, "Cómelo antes de las 13:00.")  # 13:00 belongs to the beans
+    v.on_model_response(ev)
+    assert ev.retry is True and v.violations[0]["times"] == ["13:00"]
+
+
+def test_invented_time_in_a_follow_up_is_still_blocked():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="en")
+    _turn_with_tool(v)
+    v.on_start(SimpleNamespace(messages=[]))
+    messages = [{"role": "user", "content": [{"text": "but it was covered"}]}]
+    ev = _follow_up_event(messages, "Covered food is fine until 18:00.")
+    v.on_model_response(ev)
+    assert ev.retry is True and v.violations[0]["times"] == ["18:00"]
+
+
+def test_fallback_answers_the_users_point_and_never_repeats_itself(monkeypatch):
+    from agent.hooks.verifier import VerifierHook
+
+    monkeypatch.setenv("DEMO_MODE", "true")
+    v = VerifierHook(language="es")
+    first = v.safe_answer(_session_window(), ["COVERED"])
+    second = v.safe_answer(_session_window(), ["COVERED"])
+    assert "Taparla no la enfría" in first and "Taparla no la enfría" in second
+    assert "microbios se multiplican" in first  # the rule's why
+    assert first != second
+    assert v.safe_answer(_session_window(), ["COVERED"]) != second
+
+
+def test_code_notes_are_not_the_users_words():
+    from agent.hooks.verifier import _user_claims
+
+    blocks = [{"text": "pero estaban tapados"}, {"text": "[rules] ... 18:00 ... 3 horas"}]
+    assert _user_claims(blocks) == (set(), set())
+
+
+def test_copied_example_placeholder_is_blocked():
+    from agent.hooks.verifier import PLACEHOLDER_RE
+
+    assert PLACEHOLDER_RE.search("Según {fuente}, cómelo antes de las {hora_limite}.")

@@ -36,6 +36,9 @@ def main(strict: bool) -> int:
                 errors.append(f"{rid}: verified rule needs verified_on")
             if not r.get("verified_text"):
                 errors.append(f"{rid}: verified rule needs verified_text (verbatim quote)")
+            why = r.get("why") or {}
+            if not (why.get("es") and why.get("en") and r.get("why_text")):
+                errors.append(f"{rid}: verified rule needs why (es/en) and why_text (verbatim)")
         if r.get("kind", "official") not in ("official", "adapted", "policy"):
             errors.append(f"{rid}: kind must be official, adapted or policy")
         if r.get("kind") == "adapted" and not r.get("adaptation"):

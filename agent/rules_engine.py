@@ -39,6 +39,11 @@ class Rule:
     kind: str = "official"
     hot_threshold_c: float | None = None
     hot_hold_min_c: float | None = None
+    # {"es", "en"}: one plain sentence, backed by why_text in the YAML (not part of the hash)
+    why: dict | None = field(default=None, hash=False, compare=False)
+
+    def why_in(self, language: str) -> str:
+        return str((self.why or {}).get(language if language in ("es", "en") else "en") or "")
 
     def source(self) -> dict:
         return {
@@ -68,6 +73,7 @@ def load_rules(path: str | None = None) -> dict[str, Rule]:
             kind=raw.get("kind", "official"),
             hot_threshold_c=raw.get("hot_threshold_c"),
             hot_hold_min_c=raw.get("hot_hold_min_c"),
+            why=raw.get("why"),
         )
     return rules
 
@@ -378,7 +384,8 @@ def outage_summary(now, fridge_until, freezer_until, fridge_ok, freezer_ok, free
                 if freezer_ok
                 else "Congelador: revisa si la comida aún tiene cristales de hielo; si no, deséchala."
             )
-        out[lang] = f"{fridge} {freezer}"
+        why = load_rules()["FDA_OUTAGE_FRIDGE_4H"].why_in(lang)
+        out[lang] = f"{fridge} {freezer}" + (f" {why}" if why and not fridge_ok else "")
     return out
 
 

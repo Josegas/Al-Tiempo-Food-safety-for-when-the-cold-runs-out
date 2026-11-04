@@ -81,12 +81,18 @@ def test_summary_explains_why_from_engine_data():
 
     r = _engine_result()
     es = window_summary(r, "es")
-    assert "Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1." in es
+    assert (
+        "Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega "
+        "a 38 °C), el límite baja de 2 horas a 1." in es
+    )
     mild = {"deciding_source": {"rule_id": "FDA_2H"}, "max_temp_c": 28.5, "hot_threshold_c": 32.0}
     assert "máximo 28.5 °C" in window_reason(mild, "es") and "2 hours" in window_reason(mild, "en")
     no_forecast = {**mild, "deciding_source": {"rule_id": "FDA_HOT_1H"}, "max_temp_c": None}
-    assert "Without a weather forecast" in window_reason(no_forecast, "en")
-    assert window_reason({"deciding_source": {"rule_id": "CDC_FORMULA_2H"}}, "es") == ""
+    assert "without a weather forecast" in window_reason(no_forecast, "en")
+    assert window_reason({"deciding_source": {"rule_id": "CDC_FORMULA_2H"}}, "es") == (
+        "La fórmula preparada se echa a perder si se queda a temperatura ambiente."
+    )
+    assert window_reason({"deciding_source": {"rule_id": "NOT_A_RULE"}}, "es") == ""
 
 
 def test_reason_passes_the_verifier():

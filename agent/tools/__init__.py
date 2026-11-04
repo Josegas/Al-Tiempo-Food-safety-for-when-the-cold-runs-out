@@ -1,3 +1,4 @@
+from agent.tools.clock_tool import get_current_time
 from agent.tools.danger_signs_tool import check_danger_signs
 from agent.tools.forecast_tool import get_forecast
 from agent.tools.meals_tool import plan_meals
@@ -14,4 +15,5 @@ ALL_TOOLS = [
     plan_shelter_batches,
     schedule_reminder,
     check_danger_signs,
+    get_current_time,
 ]

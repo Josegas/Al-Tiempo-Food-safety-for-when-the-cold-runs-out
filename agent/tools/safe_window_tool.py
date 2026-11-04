@@ -30,23 +30,34 @@ def _temp(c: float) -> str:
 
 
 def window_reason(r: dict, language: str) -> str:
-    """Why this limit, from the deciding rule and the forecast (empty if nothing to add)."""
-    rule = (r.get("deciding_source") or {}).get("rule_id")
+    """Why this limit, in ONE plain sentence: the deciding rule's "why" (rules/*.yaml, backed by
+    its source) plus the forecast data that chose it. Empty if the rule has no "why"."""
+    from agent.rules_engine import load_rules
+
+    rule_id = (r.get("deciding_source") or {}).get("rule_id")
+    rule = load_rules().get(rule_id)
+    why = rule.why_in(language).rstrip(".") if rule else ""
+    if not why:
+        return ""
     t, th = r.get("max_temp_c"), _temp(r.get("hot_threshold_c") or 32)
     es = language == "es"
-    if rule == "FDA_HOT_1H":
+    if rule_id == "FDA_HOT_1H":
         if t is None:
-            return (f"Sin pronóstico del clima, suponemos calor (más de {th} °C): límite de 1 hora."
-                    if es else f"Without a weather forecast we assume heat (over {th} °C): 1-hour limit.")  # fmt: skip
-        return (f"Con más de {th} °C (el pronóstico llega a {_temp(t)} °C), el límite baja de 2 horas a 1."
-                if es else f"Above {th} °C (the forecast reaches {_temp(t)} °C), the limit drops from 2 hours to 1.")  # fmt: skip
-    if rule in ("WHO_COOKED_2H", "FDA_2H") and t is not None:
-        return (f"El pronóstico no pasa de {th} °C (máximo {_temp(t)} °C), así que el límite es de 2 horas."
-                if es else f"The forecast stays at or below {th} °C (max {_temp(t)} °C), so the limit is 2 hours.")  # fmt: skip
-    if rule == "NHS_RICE_1H":
-        return ("El arroz cocido tiene un límite más corto: 1 hora."
-                if es else "Cooked rice has a shorter limit: 1 hour.")  # fmt: skip
-    return ""
+            detail = (f"sin pronóstico del clima suponemos más de {th} °C, así que el límite es de 1 hora"
+                      if es else f"without a weather forecast we assume over {th} °C, so the limit is 1 hour")  # fmt: skip
+        else:
+            detail = (f"con más de {th} °C (el pronóstico llega a {_temp(t)} °C), el límite baja de 2 horas a 1"
+                      if es else f"above {th} °C (the forecast reaches {_temp(t)} °C), the limit drops from 2 hours to 1")  # fmt: skip
+        return f"{why}: {detail}."
+    if rule_id in ("WHO_COOKED_2H", "FDA_2H") and t is not None:
+        detail = (f"el pronóstico no pasa de {th} °C (máximo {_temp(t)} °C), así que el límite es de 2 horas"
+                  if es else f"the forecast stays at or below {th} °C (max {_temp(t)} °C), so the limit is 2 hours")  # fmt: skip
+        return f"{why}: {detail}."
+    if rule_id in ("NHS_RICE_1H", "POLICY_CHILD_STRICT"):
+        return f"{why}; " + (
+            "por eso el límite es de 1 hora." if es else "that is why the limit is 1 hour."
+        )
+    return f"{why}."
 
 
 def window_summary(r: dict, language: str) -> str:
@@ -65,13 +76,17 @@ def window_summary(r: dict, language: str) -> str:
     why = f" {why}" if why else ""
     if language == "es":
         if r["status"] == "discard_now":
-            return f"Según {src}, ya pasó el límite: deséchalo ahora.{why}"
+            return (f"Según {src}, ya pasó el límite: lo más seguro es no comerlo y tirarlo.{why} "
+                    "Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste "
+                    "y te aviso antes de la hora límite.")  # fmt: skip
         text = f"Según {src}, cómelo antes de las {eat_by} o deséchalo.{why} Puedo recordártelo a las {remind}."
         return text + (
             " Sírvelo de inmediato y no guardes sobras." if r["serve_immediately"] else ""
         )
     if r["status"] == "discard_now":
-        return f"According to {src}, the time limit has passed: throw it away now.{why}"
+        return (f"According to {src}, the time limit has passed: the safest choice is not to eat "
+                f"it and to throw it away.{why} I know it's hard to throw food away; next time, "
+                "tell me when you made it and I'll remind you before the deadline.")  # fmt: skip
     text = f"According to {src}, eat it before {eat_by} or throw it away.{why} I can remind you at {remind}."
     return text + (" Serve it right away and keep no leftovers." if r["serve_immediately"] else "")
 
@@ -115,7 +130,9 @@ def compute_safe_window(
     result["time_source"] = time_source
     result["now_hhmm"] = now.strftime("%H:%M")
     result["forecast_source"] = source
-    result["summary"] = window_summary(result, tool_context.agent.state.get("language") or "en")
+    lang = tool_context.agent.state.get("language") or "en"
+    result["why"] = window_reason(result, lang)  # the rule's reason, in one sentence (rules/*.yaml)
+    result["summary"] = window_summary(result, lang)
     # Remembered for schedule_reminder: the reminder's time and text come from here, not the model.
     tool_context.agent.state.set(
         "last_window",

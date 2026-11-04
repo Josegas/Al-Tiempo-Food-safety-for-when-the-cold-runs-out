@@ -191,12 +191,14 @@ def test_safe_window_summary_is_built_in_code():
     """Live screenshot showed "I can set a reminder for 13:00" while the reminder was 12:45."""
     w = j(compute_safe_window(food_type="cooked_food", tool_context=ctx("I cooked beans at 12:00")))
     assert w["summary"] == (
-        "According to U.S. FDA, eat it before 13:00 or throw it away. Above 32 °C (the forecast "
-        "reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45."
+        "According to U.S. FDA, eat it before 13:00 or throw it away. With heat, bacteria multiply "
+        "faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. "
+        "I can remind you at 12:45."
     )
     b = j(compute_safe_window(food_type="cooked_rice", audience="infant",
                               tool_context=ctx("rice I cooked 5 hours ago", language="es")))  # fmt: skip
-    assert "ya pasó el límite: deséchalo ahora." in b["summary"]
+    assert "ya pasó el límite: lo más seguro es no comerlo y tirarlo." in b["summary"]
+    assert "Sé que da lástima tirar comida" in b["summary"]  # empathy + tip for next time
 
 
 @pytest.mark.parametrize(
@@ -238,3 +240,24 @@ def test_reminder_turn_carries_the_engine_facts_it_is_based_on():
     v = VerifierHook()  # the reminder result must not be mistaken for a safe window
     v.on_tool_result(type("E", (), {"result": {"content": [{"text": raw}]}})())
     assert v.last_window is None
+
+
+def test_current_time_tool_in_simulated_mode(monkeypatch):
+    """Live: "¿sabes qué hora es?" -> "no tengo acceso a la hora". Now a tool gives it."""
+    from agent.tools.clock_tool import get_current_time
+
+    monkeypatch.setenv("DEMO_MODE", "true")
+    r = j(get_current_time(tool_context=ctx("¿qué hora es?", language="es")))
+    assert r["now_hhmm"] == "12:00" and r["simulated"] is True and "demo clock" in r["note"]
+    assert r["summary"] == "Son las 12:00 (reloj de la demo, no la hora real)."
+
+
+def test_current_time_tool_in_real_mode(monkeypatch):
+    from agent.hooks.verifier import collect_allowed
+    from agent.tools.clock_tool import get_current_time
+
+    monkeypatch.setenv("DEMO_MODE", "false")
+    raw = get_current_time(tool_context=ctx("what time is it?"))
+    r = j(raw)
+    assert r["simulated"] is False and r["note"] == ""
+    assert r["now_hhmm"] in collect_allowed(raw)[0]  # the verifier lets the model say it
