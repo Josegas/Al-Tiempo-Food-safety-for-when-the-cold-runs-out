@@ -15,7 +15,7 @@ Todas las cifras de abajo están medidas o tienen fuente (`docs/metrics.md`, `do
 | 1:10–1:30 | **Shelter (120 people)** | "For shelters after a disaster, it plans staggered cooking batches so nothing is served outside the safe window, with a discard time for each batch." |
 | 1:30–1:40 | **Baby + rice** y **Danger signs** (rápido) | "Stricter rules for babies. And if a child shows danger signs, it says: call 911 now. No diagnosis, no doses." |
 | 1:40–2:15 | `docs/img/verifier.png`, luego `docs/img/architecture.png` | "The model talks; the rules decide. The language model never calculates a time. A tested rules engine does, with 11 official rules verified word by word. A verifier hook blocks any time the engine didn't produce. It runs on Strands Agents and Amazon Bedrock AgentCore, deployed with CDK and GitHub Actions." |
-| 2:15–2:45 | `docs/img/model-evals.png`, luego la terminal con `make smoke` → RESULT: PASS | "We measured it. 36 of 36 evaluation conversations follow the rules. 8 of 8 invented times are blocked. 9 of 9 live reminders arrived on time. About a quarter of a cent per message." |
+| 2:15–2:45 | `docs/img/model-evals.png`, luego la terminal con `make smoke` → RESULT: PASS | "We measured it. 99 of 100 evaluation conversations follow the rules, and none was unsafe. 8 of 8 invented times are blocked. 9 of 9 live reminders arrived on time. About a quarter of a cent per message." |
 | 2:45–3:00 | La demo + link | "Next: a pilot with a community kitchen, WhatsApp and more languages. Try it in one minute, no login, at the link below." |
 
 ## Antes de grabar
