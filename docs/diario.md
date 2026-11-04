@@ -137,3 +137,7 @@
 - Qué pasó: decía qué hacer, pero no por qué. Sin el porqué, "1 hora" parece arbitrario y es más fácil ignorarlo.
 - Cómo lo supe: mi propia prueba en la demo en vivo.
 - Qué decidí: el motor ya calculaba la temperatura máxima del pronóstico y la regla que decide; ahora las devuelve (`max_temp_c`, `rule_id`). Con eso, el código arma una frase corta para la respuesta y la voz ("Con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1.") y la tarjeta muestra un "Por qué" más completo. El modelo no escribe el porqué, solo lo repite, y el verificador lo acepta porque los números salen del motor. 3 tests nuevos (140 en total).
+
+## 2026-11-04 01:20 — "Demo" → "Simulado"
+- Qué pasó: el botón decía "Demo / En vivo". Para un usuario real, "Demo" suena a "versión falsa" y le resta confianza a toda la app.
+- Qué decidí: nombrar el modo por lo que hace: **Simulado / Real** (*Simulated / Live*). Solo cambian textos de la web; el agente, el backend y las reglas no cambian. En README y artículo se mantiene "demo" solo donde se habla con los jueces.

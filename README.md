@@ -15,7 +15,7 @@ is safe to eat today**, based on official food-safety rules and the hourly heat 
 
 ## Try it in 1 minute
 **Live demo (no login, works on phones): https://d2mnz1h4b0sg0y.cloudfront.net**
-Tap a scenario button. Demo mode uses a saved 38 °C day with the clock at 12:00, and reminders arrive in about 1 minute.
+Tap a scenario button. The **Simulated** mode (the default, for the demo) uses a saved 38 °C day with the clock at 12:00, and reminders arrive in about 1 minute. Switch to **Live** to use your real time and, if you allow it, the forecast for your location.
 
 ![Demo on a phone](docs/capturas/02-safe-window-reminder.png)
 
@@ -53,7 +53,7 @@ the basic official rules instead of an error.
 | Strands tools (one per file) | `agent/tools/` |
 | Verifier hook (`AfterToolCallEvent` + `AfterModelCallEvent`, retry → safe template) | `agent/hooks/verifier.py` |
 | AgentCore Runtime entrypoint (structured logs: latency, tokens, verifier blocks) | `agent/app.py` |
-| Forecast: Open-Meteo, or fixtures in demo mode | `agent/forecast.py`, `fixtures/` |
+| Forecast: Open-Meteo, or fixtures in simulated (demo) mode | `agent/forecast.py`, `fixtures/` |
 
 ## Deploy to your AWS account
 Infrastructure is AWS CDK (Python) in `infra/`, two stacks: **AlTiempoAccess** (least-privilege
@@ -93,7 +93,7 @@ Al Tiempo gives general food-safety guidance from public health sources. It is n
 In an emergency, call your local emergency number.
 
 ## Third-party data and terms
-- Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); used through the free, non-commercial API (no ads, no subscriptions). The demo mode uses saved forecasts.
+- Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); used through the free, non-commercial API (no ads, no subscriptions). The simulated (demo) mode uses saved forecasts.
 - Fonts: Fraunces, Atkinson Hyperlegible and IBM Plex Mono (subset, renamed "AlTiempo Mono"), all SIL Open Font License 1.1, self-hosted in `web/fonts/` with their licenses. Icons are original.
 - Food-safety rules are paraphrased and cited; `rules/food_rules.yaml` keeps one short verbatim sentence per rule only so anyone can verify it on the official page. No third-party logos are used.
 

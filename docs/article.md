@@ -37,8 +37,8 @@ The rules exist. The WHO says not to leave cooked food at room temperature for m
 - **Video (< 3 min):** [TODO: YouTube link]
 
 1. Open the demo on your phone and choose **English** or **Español**.
-2. Tap **Safe window**. The demo uses a saved 38 °C day and a clock fixed at 12:00. The answer is *"According to U.S. FDA, eat it before 13:00 or throw it away. I can remind you at 12:45"*.
-3. Tap **Reminder**. The demo clock is accelerated, so the reminder arrives in about **1 minute** instead of 45.
+2. Tap **Safe window**. The page starts in **Simulated** mode: a saved 38 °C day and a clock fixed at 12:00, so everyone sees the same result. The answer is *"According to U.S. FDA, eat it before 13:00 or throw it away. Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45"*.
+3. Tap **Reminder**. In Simulated mode the clock is accelerated, so the reminder arrives in about **1 minute** instead of 45.
 4. Try **Shelter (120 people)**, **Power outage** and **Danger signs**. Tap **🔊 Listen** to hear any answer.
 5. Switch to **Live** mode to use your real location (rounded to about 1 km) and the real hourly forecast.
 
@@ -115,7 +115,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Tool | What it returns |
 |---|---|
 | `compute_safe_window` | Eat-by time, reminder time, status (`eat_before_deadline` / `discard_now`), rules and sources applied |
-| `get_forecast` | Hourly temperature (weather data by [Open-Meteo.com](https://open-meteo.com/), CC BY 4.0; a saved 38 °C day in demo mode) |
+| `get_forecast` | Hourly temperature (weather data by [Open-Meteo.com](https://open-meteo.com/), CC BY 4.0; a saved 38 °C day in simulated mode) |
 | `plan_meals` | When to cook each meal so it is eaten inside the window |
 | `track_outage` | Fridge and freezer verdict since the power went out, as a code-built summary |
 | `plan_shelter_batches` | Staggered batches, portions and discard time per batch |
