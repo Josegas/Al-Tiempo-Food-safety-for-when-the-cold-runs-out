@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Al Tiempo — food safety when the cold runs out</title>
+  <meta name="description" content="Until what time is cooked food safe without a fridge? Official rules + today's heat.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Al Tiempo</h1>
+      <p class="tagline" data-i18n="tagline"></p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-lang="es" class="active">ES</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <div class="seg" role="group" aria-label="Mode">
+        <button type="button" data-mode="demo" class="active" data-i18n="modeDemo"></button>
+        <button type="button" data-mode="live" data-i18n="modeLive"></button>
+      </div>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" role="status"></div>
+
+  <main>
+    <section class="scenarios" aria-labelledby="try-title">
+      <h2 id="try-title" data-i18n="tryTitle"></h2>
+      <div id="scenario-buttons" class="chips"></div>
+    </section>
+
+    <section id="chat" class="chat" aria-live="polite"></section>
+
+    <form id="form" class="composer" autocomplete="off">
+      <label for="prompt" class="sr-only" data-i18n="placeholder"></label>
+      <textarea id="prompt" rows="2" maxlength="1000" required></textarea>
+      <button id="send" type="submit" data-i18n="send"></button>
+    </form>
+  </main>
+
+  <footer>
+    <p data-i18n="disclaimer"></p>
+    <p><a href="https://github.com/Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out" target="_blank" rel="noopener">GitHub</a> · <span data-i18n="sources"></span></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
