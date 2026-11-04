@@ -2,7 +2,7 @@
 
 | Metric | Value | How measured |
 |---|---|---|
-| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **108 / 108 passing** | `make test`, GitHub Actions summary |
+| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **130 / 130 passing** | `make test`, GitHub Actions summary |
 | Food rules verified on the official source (verbatim text stored) | **11 / 11** | `python scripts/check_rules.py --strict` |
 | Invented times/limits caught by the verifier (adversarial unit tests) | **8 / 8** | `tests/test_verifier.py` |
 | End-to-end evals, Nova 2 Lite (18 scenarios × 2 runs, en/es) | **36 / 36 (100%)** | `python evals/run_evals.py --repeat 2` |
@@ -12,6 +12,7 @@
 | Cost per turn (Bedrock) | **$0.00227** | tokens × AWS Price List API price |
 | Verifier in eval runs | 2 retries (run 150818) → **0 retries, 0 templates** (run 192607, after code-built summaries) | same |
 | Latest eval run (20261103-192607) | **36 / 36**, median 2,052 ms, 5,625 in / 128 out tokens, **$0.00221/turn** | same |
+| Eval run after fixing spoken times + fridge door (20261103-204253) | **36 / 36**, 0 verifier retries, median 1,740 ms, **$0.00227/turn** | same (runs 203816: 34/36 and 204022: 35/36 found the bugs) |
 | Reminders delivered on the live system | **9 / 9**, 4–45 s after the scheduled minute | `make smoke` + DynamoDB `delay_s` (2026-11-04) |
 | Live agent time per turn (median, 15 turns) | **1,942 ms** | AgentCore logs, `conversation_turn` events |
 | Live end to end, first message of a new session | **≈ 6.4 s** median (6 scenarios) | HTTPS from Culiacán to CloudFront |

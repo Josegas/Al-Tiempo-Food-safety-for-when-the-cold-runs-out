@@ -108,11 +108,11 @@ def collect_allowed(tool_result: Any) -> tuple[set[str], set[int]]:
 
 SAFE_TEMPLATE = {
     "en": (
-        "I could not double-check my answer, so here is only what the official rules say. "
+        "To avoid giving you a wrong time, here is only what the official rules say. "
         "{window}If you are unsure, it is safer to throw the food away."
     ),
     "es": (
-        "No pude verificar mi respuesta, así que solo te doy lo que dicen las reglas oficiales. "
+        "Para no darte una hora equivocada, te respondo solo con lo que dicen las reglas oficiales. "
         "{window}Si tienes duda, es más seguro tirar la comida."
     ),
 }
@@ -202,7 +202,7 @@ class VerifierHook(HookProvider):
         if self.last_window:
             src = (self.last_window.get("deciding_source") or self.last_window["sources"][-1])[
                 "source_name"
-            ]
+            ].split(" - ")[0]  # short publisher name: "U.S. FDA", "WHO"
             hhmm = self.last_window["eat_by_hhmm"]
             expired = self.last_window.get("status") == "discard_now"
             if lang == "en":

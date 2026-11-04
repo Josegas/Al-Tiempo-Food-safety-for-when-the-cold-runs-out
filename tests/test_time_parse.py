@@ -68,3 +68,32 @@ def test_last_user_text_skips_tool_results():
         {"role": "user", "content": [{"toolResult": {}}]},
     ]
     assert last_user_text(msgs) == "cociné a las 12:00"
+
+
+NOON_DAY = datetime(2026, 11, 4, 22, 0)
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        # Real message from the user's test (live demo, 2026-11-04): it was read as 03:00.
+        ("fue un bistek con carne y frijoles guisados en manteca cocine tipo a las 3 y media de la tarde", "15:30"),
+        ("a las 3:30 de la tarde", "15:30"),
+        ("a las tres y cuarto de la tarde", "15:15"),
+        ("a las 2 menos cuarto de la tarde", "13:45"),
+        ("a las 4 y 20 de la tarde", "16:20"),
+        ("cociné a las 8 y media de la mañana", "08:30"),
+        ("a las 9 de la noche", "21:00"),
+        ("en la tarde, a las 5 y media", "17:30"),
+        ("lo hice al mediodía", "12:00"),
+        ("I cooked it at noon", "12:00"),
+        ("at seven in the evening", "19:00"),
+    ],
+)  # fmt: skip
+def test_spoken_clock_times(text, expected):
+    ut = extract_user_time(text, NOON_DAY)
+    assert ut.clock is not None and ut.clock.strftime("%H:%M") == expected
+
+
+def test_a_las_dos_horas_is_not_a_clock_time():
+    assert extract_user_time("lo dejé a las dos horas", NOON_DAY).clock is None
