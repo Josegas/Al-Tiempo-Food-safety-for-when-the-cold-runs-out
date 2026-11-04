@@ -127,7 +127,12 @@ class AccessStack(Stack):
         iam.User(self, "DevUser", user_name="al-tiempo-dev", groups=[group])
 
         # ---------------- GitHub Actions: OIDC, no stored keys ----------------
-        github_repo = self.node.try_get_context("githubRepo")
+        # GitHub sends an *immutable* subject (owner and repo IDs), not just "repo:owner/name":
+        # gh api repos/OWNER/REPO/actions/oidc/customization/sub -> sub_claim_prefix.
+        # It survives renames and blocks a re-created repo with the same name from deploying.
+        sub_prefix = self.node.try_get_context("githubOidcSubPrefix") or (
+            f"repo:{self.node.try_get_context('githubRepo')}"
+        )
         provider = iam.OpenIdConnectProvider.from_open_id_connect_provider_arn(
             self,
             "GitHubOidc",
@@ -144,7 +149,7 @@ class AccessStack(Stack):
                 conditions={
                     "StringEquals": {
                         "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-                        "token.actions.githubusercontent.com:sub": f"repo:{github_repo}:ref:refs/heads/main",
+                        "token.actions.githubusercontent.com:sub": f"{sub_prefix}:ref:refs/heads/main",
                     }
                 },
             ),
