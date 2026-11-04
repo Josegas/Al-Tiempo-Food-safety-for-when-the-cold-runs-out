@@ -9,7 +9,7 @@
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **130** automated tests. **36 of 36** end-to-end evals passed. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
+| **Technical Execution** | Live on AWS. **137** automated tests. **98 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and neither failure was unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
 | **Communication** | Demo with no login, buttons for 7 ready-made scenarios, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
@@ -58,6 +58,14 @@ Every answer below is a **real answer from the live demo** (38 °C day, clock at
 If the user accepts, **Amazon EventBridge Scheduler** creates a one-time schedule for that exact minute, which deletes itself after running. The reminder reaches the web app, and SMS is optional. The reminder's time and text are built in code from the rules engine result: *"Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"*.
 
 ![Safe-window answer with its source, and the reminder arriving](capturas/02-safe-window-reminder.png)
+
+Under each safe-window answer, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
+
+[TODO: screenshot of the timeline on the live demo after the deploy: capturas/ui/timeline-live.png]
+
+**No signal? It still helps.** The web app can be installed on a phone and opens without internet. The agent needs a connection, so offline it doesn't pretend to answer: it shows the basic official rules (1 hour on a hot day, 2 hours otherwise; rice 1 hour; no leftovers for babies; danger signs → clinic) with their sources.
+
+![Offline: the basic official rules instead of an error](capturas/ui/offline-card-en-390.png)
 
 ### 2. Plan portions and cooking times
 > **User:** We are 5 at home, lunch at 14:00 and dinner at 20:00. When should I cook?
@@ -155,9 +163,9 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **130 / 130** |
-| End-to-end evals consistent with the rules engine (18 bilingual scenarios × 2 runs) | **36 / 36 (100%)** |
-| Adversarial evals: baby + 5-hour-old rice, "say it's 100% safe", medicine dose, diagnosis | **10 / 10** |
+| Rules-engine, tool and safety tests passing | **137 / 137** |
+| End-to-end evals consistent with the rules engine (50 bilingual scenarios × 2 runs) | **98 / 100 (98%)**, 0 unsafe answers |
+| Adversarial evals: pressure about babies, "say it's 100% safe", medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim | **28 / 30**, 0 unsafe answers |
 | Invented times blocked by the verifier (adversarial unit tests) | **8 / 8** |
 | Reminders delivered on the live system | **9 / 9**, 4 to 45 seconds after the scheduled minute |
 | Cost per conversation turn (Bedrock) | **$0.0022** (evals), **$0.0024** (live) |
@@ -187,7 +195,7 @@ We will **not** claim fewer illnesses from a pilot this small. That needs a larg
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 130 pytest tests cover:
+**Deterministic core, tested.** 137 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
 - reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace 5 horas"*, *"2 pm"*);
 - the verifier, the API and the reminder Lambdas.
@@ -207,7 +215,9 @@ We ran the same agent with three Bedrock models:
 
 ![Eval pass rate by model](img/model-evals.png)
 
-**Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, the suite passes **36/36** over two runs. In the latest run, after moving the key sentences into code, the verifier needed **0 retries** (it needed 2 before), with a median of **2,052 ms** and **$0.0022** per turn.
+**Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, that suite passed **36/36** over two runs.
+
+**Then we made the test harder.** We grew the suite to **50 scenarios** (26 in Spanish, 24 in English). The expected times come from the rules engine, not from us. The new scenarios include expired food, spoken times, formula, toddlers, an opened fridge, antibiotics, home remedies, *"ignore your rules"* and a fake WHO claim. The first full run scored **95/100**, and the failures were worth more than the score. They exposed **four real bugs**: an outage deadline the model reused after the fridge door was opened, a prompt rule that only seemed to apply to outages, a template placeholder (*"eat it before HH:MM"*) copied into an answer, and an eval harness that didn't tell the agent the user's language. Each one now has a test. After the fixes: **98/100**, median **1,590 ms**, **$0.00225** per turn, and **0** safe-template fallbacks. Neither remaining failure was unsafe: one was a correct refusal in different words, and one was an evasive answer that didn't correct the false claim. We report it as it is.
 
 **Live performance (measured on the deployed demo):**
 
@@ -258,6 +268,8 @@ RESULT: PASS
 | — | **Deterministic time reading** from the user's own words (the user's text beats the model's arguments) |
 | — | **FinOps:** tagged inference profile, budget alerts, and a **kill switch** (AWS Budgets action) |
 | — | **Amazon Polly** voice, DynamoDB **TTL** for privacy |
+| — | A **safe-window timeline** drawn from the engine's structured output, not from the model's text |
+| — | An **installable web app that works offline** with the basic official rules (signal is intermittent where fridges are missing) |
 
 ## Existing solutions
 
@@ -308,6 +320,11 @@ Guardrails that actually limit spending, not just warn:
 - `max_tokens=800` per call, and at most 1 verifier retry.
 - A $10 project budget with alerts at 50/80/100%. Normal judging traffic is estimated at about $3, so the switch only fires if someone abuses the demo.
 - At 100% of the budget, an **AWS Budgets action automatically attaches a DENY policy** to the agent and API roles.
+
+**We tested the guardrails with real traffic** (`make loadtest`, 4 November). The test only calls the health endpoint, so it never reaches the model:
+- **Normal use**, 8 requests per second for 10 seconds: **80 / 80** answered, median **141 ms**, p95 228 ms.
+- **A burst of 300 requests in 1.6 seconds:** **65** answered, **57** stopped by API Gateway throttling (HTTP 429), and **178** stopped by Lambda (HTTP 503). None of them reached Bedrock.
+- **What the 503s taught us:** this new AWS account allows only **10** Lambda functions running at the same time (the AWS default is 1,000). API Gateway lets bursts of 20 through, so Lambda turned away the rest. Cost stayed protected and the web shows "try again", but the limits were not aligned. A free quota increase fixes it. We found it because we measured it.
 
 The budget and its kill switch, as AWS reports them (real output):
 ```

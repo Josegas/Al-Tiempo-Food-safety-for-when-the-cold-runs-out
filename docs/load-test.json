@@ -1,0 +1,28 @@
+{
+ "url_path": "/api/health",
+ "limit": "10 req/s, burst 20",
+ "results": [
+  {
+   "phase": "normal",
+   "requests": 80,
+   "seconds": 10.0,
+   "status": {
+    "200": 80
+   },
+   "p50_ms_200": 141,
+   "p95_ms_200": 228
+  },
+  {
+   "phase": "burst",
+   "requests": 300,
+   "seconds": 1.6,
+   "status": {
+    "200": 65,
+    "429": 57,
+    "503": 178
+   },
+   "p50_ms_200": 156,
+   "p95_ms_200": 1240
+  }
+ ]
+}

@@ -27,7 +27,8 @@ make install          # venv + dependencies
 cp .env.example .env  # DEMO_MODE=true uses a saved 38 °C forecast
 make check            # lint + rules policy + tests
 make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
-make web              # preview the web at http://localhost:8000 (API calls go to the live demo)
+make web              # preview the web at http://localhost:8088 (API calls go to the live demo)
+make loadtest         # burst test of the live API throttle (health endpoint only, no model calls)
 ```
 
 ## What it does
@@ -37,6 +38,10 @@ make web              # preview the web at http://localhost:8000 (API calls go t
 4. **Strict mode for babies and young children.**
 5. **Shelters & community kitchens** — staggered cooking batches with discard times.
 6. **Danger-sign escalation** — fixed WHO dehydration questions → "go to a clinic / call 911". No diagnosis, no doses.
+
+Every safe-window answer also shows a **timeline** (cooked → now → reminder → limit) drawn only from
+the rules engine's numbers. The web is **installable and opens without signal**: offline, it shows
+the basic official rules instead of an error.
 
 ## How it works
 ![Architecture](docs/img/architecture.png)
@@ -69,9 +74,12 @@ make smoke           # end-to-end check of the live demo
 - **Security:** gitleaks secret scan, pip-audit dependency scan, bandit-style static rules, Dependabot.
 - **Policy as code:** a release (`v*` tag) is blocked while any food rule is not verified on its official source.
 - **Safety regression tests:** every real unsafe answer we found becomes a test (see `docs/diario.md`).
-- **Evals drive decisions:** 18 bilingual scenarios (incl. adversarial ones) picked the model —
-  Nova Lite 8/18, Nova Pro 15/18, **Nova 2 Lite 18/18** — and now pass 36/36 at $0.00227 per turn
-  (`docs/metrics.md`, `docs/costs.md`). Every number we publish is in `docs/sources.md`.
+- **Evals drive decisions:** 18 bilingual scenarios picked the model (Nova Lite 8/18, Nova Pro
+  15/18, **Nova 2 Lite 18/18**). The suite now has **50 scenarios** (incl. 15 adversarial) and passes
+  **98/100** over two runs at $0.00225 per turn, with 0 unsafe answers (`docs/metrics.md`,
+  `docs/costs.md`). Every number we publish is in `docs/sources.md`.
+- **Load-tested guardrails:** `make loadtest` shows normal traffic answered and bursts stopped
+  before they reach the model (`docs/costs.md`).
 
 ## Rule sources (all verified on 2026-11-03)
 Every rule in `rules/food_rules.yaml` stores the **verbatim sentence** from its official page
