@@ -84,6 +84,24 @@ const I18N = {
       plan_shelter_batches: "Tandas del albergue", schedule_reminder: "Recordatorio",
       check_danger_signs: "Señales de alarma", get_forecast: "Pronóstico",
     },
+    tl: {
+      title: "La ventana segura", cooked: "Cocinado", now: "Ahora", remind: "Aviso", limit: "Límite",
+      left: (m) => `Quedan ${fmtLeft(m, "es")} para comerlo.`, expired: "Ya pasó el límite: deséchalo.",
+      by: (src) => src ? `Decide: ${src}` : "Decide: nuestra regla más estricta para bebés y niños",
+      aria: (d) => `Línea de tiempo. ${d.cooked_known ? `Cocinado a las ${d.cooked_at_hhmm}. Límite: ${d.eat_by_hhmm}. ` : ""}Ahora son las ${d.now_hhmm}.`,
+    },
+    offline: {
+      banner: "Sin conexión. Las respuestas necesitan internet; mientras tanto, usa la regla básica.",
+      title: "Sin conexión: regla básica",
+      rules: [
+        "Con calor (más de 32 °C), no dejes comida cocida fuera más de 1 hora. Sin calor, máximo 2 horas.",
+        "Arroz cocido: máximo 1 hora fuera.",
+        "Bebés y niños pequeños: prepárales al momento y no guardes sobras.",
+        "Diarrea con mucho sueño, sin poder beber, ojos hundidos o sangre: ve a la clínica o llama a emergencias.",
+      ],
+      doubt: "Si tienes duda, tírala.",
+      src: "Fuentes: U.S. FDA, OMS y NHS. La regla para niños es más estricta a propósito.",
+    },
     rulesUsed: "Reglas aplicadas",
     verified: "Revisada por el verificador",
     replaced: "El verificador la cambió por la respuesta segura",
@@ -136,6 +154,24 @@ const I18N = {
       compute_safe_window: "Safe window", track_outage: "Power outage", plan_meals: "Meal plan",
       plan_shelter_batches: "Shelter batches", schedule_reminder: "Reminder",
       check_danger_signs: "Danger signs", get_forecast: "Forecast",
+    },
+    tl: {
+      title: "The safe window", cooked: "Cooked", now: "Now", remind: "Reminder", limit: "Limit",
+      left: (m) => `${fmtLeft(m, "en")} left to eat it.`, expired: "The limit has passed: throw it away.",
+      by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
+      aria: (d) => `Timeline. ${d.cooked_known ? `Cooked at ${d.cooked_at_hhmm}. Limit: ${d.eat_by_hhmm}. ` : ""}Now it is ${d.now_hhmm}.`,
+    },
+    offline: {
+      banner: "You are offline. Answers need internet; meanwhile, use the basic rule.",
+      title: "Offline: the basic rule",
+      rules: [
+        "On a hot day (over 32 °C / 90 °F), don't keep cooked food out more than 1 hour. Otherwise, 2 hours at most.",
+        "Cooked rice: 1 hour out at most.",
+        "Babies and young children: prepare food fresh and keep no leftovers.",
+        "Diarrhea with heavy sleepiness, not drinking, sunken eyes or blood: go to a clinic or call emergency services.",
+      ],
+      doubt: "If in doubt, throw it out.",
+      src: "Sources: U.S. FDA, WHO and NHS. The rule for children is stricter on purpose.",
     },
     rulesUsed: "Rules applied",
     verified: "Checked by the verifier",
@@ -203,6 +239,7 @@ function render() {
   document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
   document.body.dataset.view = state.mode;
   renderModebar();
+  renderNetbar();
   renderScenarios();
   renderSteps();
   if (!$("#chat").querySelector(".msg")) renderWelcome();
@@ -349,11 +386,13 @@ function typingMessage() {
   return addNode(m);
 }
 
-function botMessage(answer, metrics) {
+function botMessage(answer, metrics, decision) {
   const m = el("article", "msg msg-bot");
   const body = el("div", "ans");
   renderAnswer(body, answer);
   m.appendChild(body);
+  const tl = safeWindowTimeline(decision);
+  if (tl) m.appendChild(tl);
   m.appendChild(decisionTrail(metrics));
   const meta = el("div", "meta");
   const btn = el("button", "listen");
@@ -364,6 +403,85 @@ function botMessage(answer, metrics) {
   if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
   m.appendChild(meta);
   return addNode(m);
+}
+
+// ---------------------------------------------------------------- safe-window timeline
+// Drawn only from `decision` (the rules engine's numbers, passed through by the API), never from
+// the model's text. Old backends don't send it: then nothing is drawn.
+const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
+function toMin(hhmm) { const m = HHMM.exec(hhmm || ""); return m ? Number(m[1]) * 60 + Number(m[2]) : null; }
+function fmtLeft(min, lang) {
+  const h = Math.floor(min / 60), m = min % 60;
+  if (!h) return `${m} min`;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}
+
+function safeWindowTimeline(d) {
+  if (!d || d.kind !== "safe_window") return null;
+  const T = t("tl");
+  const eat = toMin(d.eat_by_hhmm), now = toMin(d.now_hhmm);
+  if (eat == null || now == null) return null;
+  const expired = d.status === "discard_now";
+  const fig = el("figure", expired ? "tl tl-expired" : "tl");
+  fig.setAttribute("aria-label", T.aria(d));
+  fig.appendChild(el("figcaption", "tl-title", T.title));
+
+  // Positions on a line from "cooked" (0) to "limit" (1). Times can cross midnight.
+  let start = d.cooked_known ? toMin(d.cooked_at_hhmm) : null;
+  const span = start == null ? null : ((eat - start + 1440) % 1440) || 1440;
+  const pos = (hhmm) => {
+    const x = toMin(hhmm);
+    if (x == null || span == null) return null;
+    const off = (x - start + 1440) % 1440;
+    return off > span ? null : off / span;
+  };
+  const track = el("div", "tl-track");
+  track.setAttribute("aria-hidden", "true");
+  const fill = el("div", "tl-fill");
+  const pNow = expired ? 1 : pos(d.now_hhmm);
+  if (pNow != null) fill.style.width = `${(pNow * 100).toFixed(1)}%`;
+  track.appendChild(fill);
+  const pRem = expired ? null : pos(d.reminder_at_hhmm);
+  if (pRem != null && pRem > (pNow ?? 0)) {
+    const r = el("span", "tl-tick tl-tick-rem");
+    r.style.left = `${(pRem * 100).toFixed(1)}%`;
+    track.appendChild(r);
+  }
+  if (pNow != null && !expired) {
+    const n = el("span", "tl-tick tl-tick-now");
+    n.style.left = `${(pNow * 100).toFixed(1)}%`;
+    track.appendChild(n);
+  }
+  if (span != null) fig.appendChild(track);
+
+  // The same facts as text (what screen readers and small screens rely on).
+  const list = el("dl", "tl-points");
+  const point = (cls, label, value) => {
+    if (!value) return;
+    const w = el("div", `tl-pt ${cls}`);
+    w.append(el("dt", "", label), el("dd", "", value));
+    list.appendChild(w);
+  };
+  // Chronological order. Unknown cooking time: the engine assumed "long ago", so its limit is not
+  // a real clock time for this dish and is not shown.
+  if (d.cooked_known) point("pt-cooked", T.cooked, d.cooked_at_hhmm);
+  if (expired) {
+    if (d.cooked_known) point("pt-limit pt-past", T.limit, d.eat_by_hhmm);
+    point(d.cooked_known ? "pt-now pt-end" : "pt-now", T.now, d.now_hhmm);
+  } else {
+    point("pt-now", T.now, d.now_hhmm);
+    point("pt-rem", T.remind, d.reminder_at_hhmm);
+    point("pt-limit pt-end", T.limit, d.eat_by_hhmm);
+  }
+  fig.appendChild(list);
+
+  const status = el("p", "tl-status");
+  status.append(icon(expired ? "alert" : "window"));
+  const left = expired ? null : (Number.isInteger(d.minutes_left) ? d.minutes_left : (eat - now + 1440) % 1440);
+  status.appendChild(el("span", "", expired ? T.expired : T.left(left)));
+  fig.appendChild(status);
+  fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
+  return fig;
 }
 
 // Shows which rules tools ran and what the verifier did, using only the structured `metrics`
@@ -400,6 +518,31 @@ function errorMessage(text, retryPrompt) {
   }
   return addNode(m);
 }
+
+// No signal: the agent can't answer, so show the official basics (cached with the page by sw.js).
+function offlineMessage() {
+  const O = t("offline");
+  const m = el("div", "msg msg-offline");
+  m.setAttribute("role", "alert");
+  const head = el("p", "err-title");
+  head.append(icon("alert"), el("span", "", O.title));
+  const list = el("ul", "ans-list");
+  O.rules.forEach((r) => list.appendChild(el("li", "", r)));
+  m.append(head, list, el("p", "offline-doubt", O.doubt), el("p", "tl-src", O.src));
+  return addNode(m);
+}
+
+function isOffline(e) {
+  return navigator.onLine === false || e instanceof TypeError; // fetch() rejects with TypeError without network
+}
+
+function renderNetbar() {
+  const bar = $("#netbar");
+  bar.hidden = navigator.onLine !== false;
+  bar.textContent = bar.hidden ? "" : t("offline").banner;
+}
+window.addEventListener("online", renderNetbar);
+window.addEventListener("offline", renderNetbar);
 
 function reminderMessage(r) {
   const m = el("div", "msg msg-reminder");
@@ -441,11 +584,12 @@ async function send(prompt, { echo = true } = {}) {
     if (data.error || !data.answer) {
       errorMessage(data.answer || t("error"), data.error === "daily_cap" ? null : prompt);
     } else {
-      botMessage(data.answer, data.metrics);
+      botMessage(data.answer, data.metrics, data.decision);
     }
   } catch (e) {
     typing.remove();
-    errorMessage(t("error"), prompt);
+    if (isOffline(e)) offlineMessage();
+    else errorMessage(t("error"), prompt);
   } finally {
     state.busy = false;
     setBusy(false);
@@ -554,6 +698,12 @@ function syncHeader() {
 window.addEventListener("resize", syncHeader);
 
 render();
+renderNetbar();
 syncHeader();
 warmUp();
 setInterval(pollReminders, 15000);
+
+// Installable + opens offline (https or localhost only; browsers require it).
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
