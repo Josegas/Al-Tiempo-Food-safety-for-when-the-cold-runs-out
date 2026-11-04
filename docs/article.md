@@ -121,11 +121,11 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Amazon Bedrock (Nova 2 Lite) | The language model, called through a tagged *application inference profile* so its cost is visible per project |
 | Amazon Bedrock AgentCore Runtime | Runs the Strands agent: a serverless session per user, ARM64, IAM-only access |
 | Amazon EventBridge Scheduler | Reminders at an exact future minute, even after the user closes the app |
-| AWS Lambda + Amazon API Gateway | API with throttling (3 requests/s) and a daily cap of 500 conversations; delivers reminders |
+| AWS Lambda + Amazon API Gateway | API with throttling (10 requests/s, bursts of 20) and a daily cap of 500 messages; delivers reminders |
 | Amazon DynamoDB | Delivered reminders and the daily counter. Personal data expires after **7 days (TTL)** |
 | Amazon Polly | Reads answers aloud for people who read little |
 | Amazon S3 + CloudFront | The public demo website |
-| Amazon CloudWatch + AWS Budgets | Logs without personal data, a dashboard, 3 alarms, and a $5 budget with an automatic kill switch |
+| Amazon CloudWatch + AWS Budgets | Logs without personal data, a dashboard, 3 alarms, and a $10 budget with an automatic kill switch |
 | Amazon SNS | Alarm emails; SMS reminders (optional) |
 
 ## Social Impact
@@ -196,7 +196,8 @@ We ran the same agent with three Bedrock models:
 |---|---|
 | Agent time per turn (median, 15 live turns) | **1.9 s** |
 | End to end, follow-up turns | **2.1–3.0 s** |
-| End to end, first message of a new session (a fresh AgentCore session starts) | **≈ 6.4 s** median |
+| End to end, first message of a new session, before the warm-up below | **≈ 6.4 s** median |
+| End to end, first message with the warm-up | [TODO: measure after deploy] |
 
 **DevOps:**
 - **CI:** GitHub Actions runs lint, tests with coverage, a secret scan (gitleaks), a dependency scan (pip-audit), and `cdk synth` on every pull request.
@@ -279,9 +280,9 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 | Estimate for the whole judging period (≈1,000 turns until 27 November) | **≈ $3–5** in total |
 
 Guardrails that actually limit spending, not just warn:
-- API throttling (3 requests/s) and a daily cap of 500 conversations.
+- API throttling (10 requests/s, bursts of 20), a daily cap of 500 chat messages, and a separate cap of 1,000 session warm-ups.
 - `max_tokens=800` per call, and at most 1 verifier retry.
-- A $5 project budget with alerts at 50/80/100%.
+- A $10 project budget with alerts at 50/80/100%. Normal judging traffic is estimated at about $3, so the switch only fires if someone abuses the demo.
 - At 100% of the budget, an **AWS Budgets action automatically attaches a DENY policy** to the agent and API roles.
 
 The budget and its kill switch, as AWS reports them (real output):
