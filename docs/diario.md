@@ -141,3 +141,10 @@
 ## 2026-11-04 01:20 — "Demo" → "Simulado"
 - Qué pasó: el botón decía "Demo / En vivo". Para un usuario real, "Demo" suena a "versión falsa" y le resta confianza a toda la app.
 - Qué decidí: nombrar el modo por lo que hace: **Simulado / Real** (*Simulated / Live*). Solo cambian textos de la web; el agente, el backend y las reglas no cambian. En README y artículo se mantiene "demo" solo donde se habla con los jueces.
+
+## 2026-11-04 01:45 — las capturas encontraron un bug del recordatorio
+- Qué intenté: rehacer las capturas del artículo en la demo en vivo con "Simulado / Real".
+- Qué pasó: al responder "Sí, prográmalo", el recordatorio llegó bien (12:45), pero la respuesta salió reemplazada por la plantilla segura ("El verificador la cambió…").
+- Cómo lo supe: la captura, y luego reproducido en local: violaciones `13:00` y luego `120 min`.
+- Por qué: el verificador solo confía en los resultados de herramientas del turno actual. En el turno del recordatorio, el modelo repetía la frase del turno anterior ("antes de las 13:00… de 2 horas a 1"), que no venía en el resultado del recordatorio. La frase del porqué (2 horas) lo empeoró.
+- Qué decidí: no aflojar el verificador. El resultado del recordatorio ahora incluye los datos del motor en los que se basa (`based_on`: hora límite y reglas). Resultado: 4 de 4 conversaciones de dos turnos sin bloqueos ni reintentos (antes: bloqueada). Test de regresión nuevo (141).

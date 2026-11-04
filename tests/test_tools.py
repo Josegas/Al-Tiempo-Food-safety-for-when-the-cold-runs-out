@@ -221,3 +221,20 @@ def test_outage_user_words_beat_missing_model_args():
     c = ctx("The power went out at 10:30. I kept the fridge closed. Freezer is half full.")
     r = j(track_outage(tool_context=c))
     assert r["fridge_status"] == "ok" and "until 14:30" in r["summary"]["en"]
+
+
+def test_reminder_turn_carries_the_engine_facts_it_is_based_on():
+    """Live screenshot bug: in the "yes, schedule it" turn the model repeated "eat it before 13:00
+    ... from 2 hours to 1" and the verifier blocked it, because only this turn's tool results count.
+    The reminder result now carries the window it is based on, so those facts stay verifiable."""
+    from agent.hooks.verifier import VerifierHook, collect_allowed
+
+    c = ctx("I cooked beans at 12:00 and I have no fridge")
+    compute_safe_window(food_type="cooked_food", tool_context=c)
+    raw = schedule_reminder(at="12:45", message="x", tool_context=c)
+    assert j(raw)["based_on"]["limit_hhmm"] == "13:00"
+    times, minutes = collect_allowed(raw)
+    assert {"12:45", "13:00"} <= times and {60, 120} <= minutes
+    v = VerifierHook()  # the reminder result must not be mistaken for a safe window
+    v.on_tool_result(type("E", (), {"result": {"content": [{"text": raw}]}})())
+    assert v.last_window is None

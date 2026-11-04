@@ -125,6 +125,7 @@ def compute_safe_window(
             "reminder_at_hhmm": result["reminder_at"][11:16],
             "status": result["status"],
             "source_name": result["deciding_source"]["source_name"],
+            "rule_ids": result["rule_ids"],
         },
     )
     return out(result)
