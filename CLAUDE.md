@@ -22,7 +22,7 @@
 ## 1. El hackathon (reglas que NO podemos romper)
 
 **Hackathon:** Strands SDK: Workshop to Ship (AWS Builder Center).
-**Reto:** construir y publicar un agente de IA de **impacto social** con el **Strands Agents SDK**, con mejoras **medibles** para poblaciones desatendidas (áreas: educación, salud o resiliencia climática). Nuestro proyecto: **salud + resiliencia climática**.
+**Reto:** construir y publicar un agente de IA de **impacto social** con el **Strands Agents SDK**, con mejoras **medibles** para poblaciones desatendidas (áreas: educación, salud o resiliencia climática). Las reglas piden UNA sola área de enfoque: declaramos Health (salud) como área principal (la mejora medible es evitar comida insegura y enfermedades). El clima (calor, apagones, desastres) es el factor de riesgo y el contexto de uso, no una segunda área. En el artículo y en el formulario se declara solo Health.
 
 ### Fechas (hora de Culiacán, UTC-7)
 - **Cierre seguro: miércoles 4 de noviembre de 2026, 23:59** (el encabezado dice GMT-8 y las reglas dicen PDT; usamos la más temprana).
@@ -220,6 +220,7 @@ al-tiempo/
 - Commits pequeños y descriptivos. Repo público desde el primer commit, siempre desplegable en `main`.
 - Manejo de errores: si falla el pronóstico, usar el peor caso (límite de 1 h) y decírselo al usuario.
 - Privacidad: datos mínimos; sin nombres; el teléfono solo si se piden recordatorios por SMS; TTL de 7 días en DynamoDB.
+- Las reglas exigen que el proyecto no infrinja derechos de terceros: revisar los términos de uso de cada API externa (por ejemplo, Open-Meteo puede pedir atribución) y cumplirlos en el README y en la web. No copiar textos largos de guías oficiales; parafrasear la regla y citar la fuente.
 
 ---
 
@@ -315,7 +316,7 @@ Tono: concreto y verificable; sin superlativos sin respaldo; honesto sobre lo qu
 | 2:15–2:45 | Un número medido e impacto. |
 | 2:45–3:00 | Qué sigue y dónde probarlo. |
 
-Subtítulos en inglés. Sin música con copyright.
+Subtítulos en inglés. Sin música con copyright y sin logos ni marcas de terceros (OMS, USDA, FoodKeeper, etc.): las fuentes se citan en texto, no con sus logos. Las reglas lo prohíben salvo permiso.
 
 ---
 
