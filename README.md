@@ -12,7 +12,10 @@ is safe to eat today**, based on official food-safety rules and the hourly heat 
 > blocks any answer whose times don't match the engine.
 
 ## Try it in 1 minute
-_Live demo link: coming soon (AWS deployment in progress)._
+**Live demo (no login, works on phones): https://d2mnz1h4b0sg0y.cloudfront.net**
+Tap a scenario button. Demo mode uses a saved 38 °C day with the clock at 12:00, and reminders arrive in about 1 minute.
+
+![Demo on a phone](docs/capturas/02-safe-window-reminder.png)
 
 Locally (Python 3.11+, AWS credentials with Bedrock access):
 ```bash
@@ -33,6 +36,8 @@ make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
 6. **Danger-sign escalation** — fixed WHO dehydration questions → "go to a clinic / call 911". No diagnosis, no doses.
 
 ## How it works
+![Architecture](docs/img/architecture.png)
+
 | Piece | Where |
 |---|---|
 | Rules as data (each with official source) | `rules/food_rules.yaml`, `rules/danger_signs.yaml` |
