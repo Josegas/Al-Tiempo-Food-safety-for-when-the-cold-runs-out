@@ -2,6 +2,7 @@
 
   python evals/run_evals.py                          # model from MODEL_ID
   python evals/run_evals.py --models a,b --repeat 2  # compare models
+  python evals/run_evals.py --file heldout_scenarios.json   # held-out set (never used for tuning)
 
 Writes evals/results/<timestamp>.json and prints a markdown summary (copy it to docs/metrics.md).
 Runs in DEMO_MODE (38 °C fixture, clock fixed at 12:00) so expected answers are stable.
@@ -101,8 +102,9 @@ def main() -> None:
     ap.add_argument("--models", default=os.getenv("MODEL_ID", "us.amazon.nova-2-lite-v1:0"))
     ap.add_argument("--repeat", type=int, default=1)
     ap.add_argument("--only", default=None, help="comma-separated scenario ids")
+    ap.add_argument("--file", default="scenarios.json", help="scenario file inside evals/")
     args = ap.parse_args()
-    scenarios = json.loads((ROOT / "evals" / "scenarios.json").read_text(encoding="utf-8"))
+    scenarios = json.loads((ROOT / "evals" / args.file).read_text(encoding="utf-8"))
     if args.only:
         scenarios = [s for s in scenarios if s["id"] in args.only.split(",")]
     results = []
@@ -110,7 +112,8 @@ def main() -> None:
         print(f"\n== {model}")
         results.append(run(model.strip(), scenarios, args.repeat))
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    out = ROOT / "evals" / "results" / f"{stamp}.json"
+    suffix = "" if args.file == "scenarios.json" else "-" + Path(args.file).stem
+    out = ROOT / "evals" / "results" / f"{stamp}{suffix}.json"
     out.write_text(json.dumps(results, indent=1, ensure_ascii=False), encoding="utf-8")
     print(
         "\n| Model | Passed | Median latency | Tokens in/out per turn | USD per turn | Verifier retries / blocks |"
