@@ -214,6 +214,18 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 .quiz-panel { margin: 6px 0 0; font-size: .85rem; color: var(--muted); }
 .quiz-panel strong { color: var(--forest); }
 
+/* "Look inside": forecast -> engine -> verifier, closed by default. */
+.inside { margin-top: 8px; font-size: .86rem; }
+.inside > summary { display: inline-flex; align-items: center; min-height: 36px; cursor: pointer; font-weight: 700; color: var(--forest); }
+.inside > summary::-webkit-details-marker { display: none; }
+.inside > summary::before { content: "▸"; margin-right: 6px; }
+.inside[open] > summary::before { content: "▾"; }
+.inside-steps { margin: 4px 0 0; padding: 10px 12px 10px 32px; display: grid; gap: 10px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--paper); }
+.inside-steps li::marker { color: var(--emerald-dark); font-weight: 700; }
+.inside-k { margin: 0; font-weight: 700; color: var(--ink); }
+.inside-v { margin: 2px 0 0; color: var(--muted); line-height: 1.5; }
+.inside-chip { font-family: var(--f-mono); font-size: .8rem; padding: 1px 6px; border-radius: 6px; background: var(--ivory); border: 1px solid var(--line); color: var(--ink); }
+
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
 .listen { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 40px; padding: 0 14px 0 10px; border: 1px solid var(--line-strong); background: var(--paper); border-radius: 999px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--forest); }
 .listen:hover { border-color: var(--emerald); }
@@ -313,7 +325,7 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 @media print {
   @page { margin: 14mm; }
   body { background: #fff; color: #000; }
-  .skip, .topbar, .modebar, .footer, .intro, .how, .panel-head, .composer, .welcome, .netbar, .meta, .quiz, .msg-typing { display: none !important; }
+  .skip, .topbar, .modebar, .footer, .intro, .how, .panel-head, .composer, .welcome, .netbar, .meta, .quiz, .inside, .msg-typing { display: none !important; }
   .layout, .panel, .chat { display: block !important; position: static !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; background: #fff !important; }
   body.printing .msg:not(.print-target) { display: none !important; }
   .msg { animation: none; break-inside: avoid; }

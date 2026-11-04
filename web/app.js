@@ -115,6 +115,20 @@ const I18N = {
       panel: (pct, n) => `Comprensión: ${pct} % correcto (n = ${n})`,
       note: "Anónimo: solo se cuenta si acertaste, sin datos personales.",
     },
+    inside: {
+      summary: "Ver por dentro", forecast: "Pronóstico usado", engine: "Motor de reglas", verifier: "Verificador",
+      fcDemo: "Simulado: un día guardado de 38 °C, igual para todos.",
+      fcLive: (t) => `Pronóstico real por hora (Open-Meteo): máximo ${t} °C en esas horas.`,
+      fcNone: "Sin pronóstico para esas horas: se asume más de 32 °C (el caso más seguro).",
+      fcLiveAny: "Modo real: pronóstico por hora de Open-Meteo si compartiste tu ubicación; si no, se asume calor.",
+      fcNotUsed: "Esta respuesta no necesitó el pronóstico.",
+      tools: "Herramientas", rule: "Regla que decide", noEngine: "En esta respuesta no se calculó ninguna hora.",
+      unknown: "Hora de cocción desconocida: el motor asume el peor caso.",
+      vOk: "Aprobó la respuesta a la primera: no encontró horas ni límites que el motor no diera.",
+      vRetry: (n) => `Pidió ${n === 1 ? "una corrección" : `${n} correcciones`} al modelo y después aprobó.`,
+      vBlock: "Bloqueó la respuesta del modelo y usó la respuesta segura armada con el motor.",
+      model: (i, o, ms) => `Modelo: ${i} tokens de entrada, ${o} de salida · ${ms} ms`,
+    },
     offline: {
       banner: "Sin conexión. Las respuestas necesitan internet; mientras tanto, usa la regla básica.",
       title: "Sin conexión: regla básica",
@@ -210,6 +224,20 @@ const I18N = {
       ok: "Correct!", no: (c) => `The right time is ${c}.`,
       panel: (pct, n) => `Comprehension: ${pct}% correct (n = ${n})`,
       note: "Anonymous: we only count whether you got it right, no personal data.",
+    },
+    inside: {
+      summary: "Look inside", forecast: "Forecast used", engine: "Rules engine", verifier: "Verifier",
+      fcDemo: "Simulated: a saved 38 °C day, the same for everyone.",
+      fcLive: (t) => `Real hourly forecast (Open-Meteo): up to ${t} °C in those hours.`,
+      fcNone: "No forecast for those hours: assumed above 32 °C (the safest case).",
+      fcLiveAny: "Live mode: Open-Meteo hourly forecast if you shared your location; otherwise heat is assumed.",
+      fcNotUsed: "This answer did not need the forecast.",
+      tools: "Tools", rule: "Deciding rule", noEngine: "No time was calculated in this answer.",
+      unknown: "Cooking time unknown: the engine assumes the worst case.",
+      vOk: "Approved the answer on the first try: no time or limit the engine didn't produce.",
+      vRetry: (n) => `Asked the model for ${n === 1 ? "one correction" : `${n} corrections`}, then approved.`,
+      vBlock: "Blocked the model's answer and used the safe answer built from the engine.",
+      model: (i, o, ms) => `Model: ${i} input tokens, ${o} output · ${ms} ms`,
     },
     offline: {
       banner: "You are offline. Answers need internet; meanwhile, use the basic rule.",
@@ -455,6 +483,8 @@ function botMessage(answer, metrics, decision) {
   if (decision && decision.kind === "shelter_plan" && tl) meta.appendChild(printButton(m));
   if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
   m.appendChild(meta);
+  const inside = insideView(metrics, decision);
+  if (inside) m.appendChild(inside);
   return addNode(m);
 }
 
@@ -538,6 +568,65 @@ function safeWindowTimeline(d) {
   if (why) fig.appendChild(el("p", "tl-why", why));
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
+}
+
+// ---------------------------------------------------------------- "Look inside" (closed by default)
+// forecast used -> rules engine output -> verifier decision, for each answer. Uses only what the
+// backend already returns (`metrics`, `decision`); nothing is inferred from the model's text.
+const FORECAST_TOOLS = new Set(["compute_safe_window", "plan_meals", "plan_shelter_batches", "get_forecast"]);
+
+function insideView(metrics, d) {
+  if (!metrics || !Array.isArray(metrics.tools_used)) return null;
+  const I = t("inside");
+  const det = el("details", "inside");
+  det.appendChild(el("summary", "", I.summary));
+  const steps = el("ol", "inside-steps");
+  const step = (title, ...lines) => {
+    const li = el("li");
+    li.appendChild(el("p", "inside-k", title));
+    lines.filter(Boolean).forEach((x) => li.appendChild(typeof x === "string" ? el("p", "inside-v", x) : x));
+    steps.appendChild(li);
+  };
+
+  // 1. Forecast
+  const usedForecast = metrics.tools_used.some((x) => FORECAST_TOOLS.has(x));
+  let fc = I.fcNotUsed;
+  if (metrics.demo && (usedForecast || d)) fc = I.fcDemo;
+  else if (d && d.kind === "safe_window") fc = Number.isFinite(d.max_temp_c) ? I.fcLive(Math.round(d.max_temp_c * 10) / 10) : I.fcNone;
+  else if (usedForecast || d) fc = I.fcLiveAny;
+  step(I.forecast, fc);
+
+  // 2. Rules engine: tools that ran, deciding rule + source, times exactly as the engine sent them
+  const names = [...new Set(metrics.tools_used)].map((x) => t("tools")[x] || x).join(", ");
+  const lines = [names ? `${I.tools}: ${names}` : null];
+  if (d && (d.kind === "safe_window" || d.kind === "shelter_plan")) {
+    const rule = el("p", "inside-v");
+    rule.append(`${I.rule}: `);
+    const ids = d.kind === "safe_window" ? [d.rule_id] : (d.rule_ids || []);
+    ids.filter(Boolean).forEach((id) => { rule.append(el("code", "inside-chip", id), " "); });
+    if (d.source && d.source.name) rule.append(`(${d.source.name})`);
+    lines.push(rule);
+    if (d.kind === "safe_window") {
+      const T = t("tl");
+      lines.push(d.cooked_known
+        ? `${T.cooked} ${d.cooked_at_hhmm} · ${T.limit} ${d.eat_by_hhmm} (${d.limit_minutes} min)${d.reminder_at_hhmm && d.status !== "discard_now" ? ` · ${T.remind} ${d.reminder_at_hhmm}` : ""}`
+        : I.unknown);
+    } else {
+      const S = t("sh");
+      (d.batches || []).forEach((b, i) => lines.push(`${S.batch(i + 1, b.portions)}: ${S.cook} ${b.start_cooking_hhmm} · ${S.serve} ${b.ready_hhmm} · ${S.discard} ${b.discard_hhmm}`));
+    }
+  } else {
+    lines.push(I.noEngine);
+  }
+  step(I.engine, ...lines);
+
+  // 3. Verifier, from the backend's counters for this turn
+  const blocked = Number(metrics.verifier_blocked) || 0, retried = Number(metrics.verifier_retried) || 0;
+  const model = Number.isInteger(metrics.input_tokens) && Number.isInteger(metrics.output_tokens) && Number.isInteger(metrics.latency_ms)
+    ? I.model(metrics.input_tokens, metrics.output_tokens, metrics.latency_ms) : null;
+  step(I.verifier, blocked ? I.vBlock : retried ? I.vRetry(retried) : I.vOk, model);
+  det.appendChild(steps);
+  return det;
 }
 
 // ---------------------------------------------------------------- comprehension check
