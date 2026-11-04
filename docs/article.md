@@ -4,6 +4,8 @@
 
 **In one minute:** Al Tiempo ("at room temperature" in Mexican Spanish) is a bilingual (English/Spanish) agent built with the **Strands Agents SDK** and running on **Amazon Bedrock AgentCore Runtime**. You tell it what you cooked and when. It answers with a clock time, for example *"eat the beans before 13:00 or throw them away"*, based on official food-safety rules (WHO, U.S. FDA, CDC, NHS) and today's hourly heat forecast. It can also schedule a reminder for that exact minute. The language model never calculates a time: a tested rules engine does, and a verifier hook blocks any answer whose times don't match it.
 
+**Focus area: Health** (preventing foodborne illness). Heat, power outages and disasters are the risk factors and the context of use, not a second focus area.
+
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
@@ -105,7 +107,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Tool | What it returns |
 |---|---|
 | `compute_safe_window` | Eat-by time, reminder time, status (`eat_before_deadline` / `discard_now`), rules and sources applied |
-| `get_forecast` | Hourly temperature (Open-Meteo; a saved 38 °C day in demo mode) |
+| `get_forecast` | Hourly temperature (weather data by [Open-Meteo.com](https://open-meteo.com/), CC BY 4.0; a saved 38 °C day in demo mode) |
 | `plan_meals` | When to cook each meal so it is eaten inside the window |
 | `track_outage` | Fridge and freezer verdict since the power went out, as a code-built summary |
 | `plan_shelter_batches` | Staggered batches, portions and discard time per batch |
@@ -196,8 +198,11 @@ We ran the same agent with three Bedrock models:
 |---|---|
 | Agent time per turn (median, 15 live turns) | **1.9 s** |
 | End to end, follow-up turns | **2.1–3.0 s** |
-| End to end, first message of a new session, before the warm-up below | **≈ 6.4 s** median |
-| End to end, first message with the warm-up | [TODO: measure after deploy] |
+| First message, before the warm-up (real browser, 6 scenarios) | **6.2 s** median |
+| First message with the warm-up, clicking 5 s after the page opens | **2.0 s** median (−68%) |
+| First message if clicked instantly (the warm-up is still running) | 5.8 s median, no worse than before |
+
+**Warm-up.** Most of the first-message wait was AgentCore starting a fresh session for each visitor, not the model. When the page opens, the web now calls `/api/warm`, which starts the session and builds the agent **without calling the model (0 tokens)**, under its own daily cap. Measured in a real browser on the live demo: the first answer went from **6.2 s to 2.0 s** (median of 6 scenarios).
 
 **DevOps:**
 - **CI:** GitHub Actions runs lint, tests with coverage, a secret scan (gitleaks), a dependency scan (pip-audit), and `cdk synth` on every pull request.
