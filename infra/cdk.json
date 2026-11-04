@@ -1,0 +1,12 @@
+{
+  "app": "python3 app.py",
+  "watch": {"include": ["**"], "exclude": ["cdk.out", "**/__pycache__"]},
+  "context": {
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "githubRepo": "Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out",
+    "monthlyBudgetUsd": 5,
+    "dailyChatCap": 500,
+    "smsEnabled": false
+  }
+}
