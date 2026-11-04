@@ -1,60 +1,169 @@
 "use strict";
 // Al Tiempo web client: plain JS, no build step. Talks to /api/* on the same domain (CloudFront).
+// Agent text is never inserted as HTML: everything goes through textContent / DOM nodes.
+// The browser never calculates or extracts food-safety times: it only shows what the backend sent.
+
+const SCENARIOS = [
+  // [icon, tone, es title, es description, es prompt, en title, en description, en prompt]
+  ["window", "primary",
+    "Ventana segura", "Cocinaste y no tienes refri: te decimos hasta qué hora se puede comer.",
+    "Cociné frijoles a las 12:00 y no tengo refri. ¿Hasta qué hora se pueden comer?",
+    "Safe window", "You cooked and have no fridge: find out until what time it can be eaten.",
+    "I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?"],
+  ["baby", "",
+    "Bebé + arroz", "Reglas más estrictas para bebés y niños pequeños.",
+    "¿Le doy a mi bebé el arroz que cociné hace 5 horas? Estuvo fuera del refri.",
+    "Baby + rice", "Stricter rules for babies and young children.",
+    "Can I give my baby the rice I cooked 5 hours ago? It was out of the fridge."],
+  ["outage", "",
+    "Apagón", "Se fue la luz: cuánto aguantan el refri y el congelador.",
+    "Se fue la luz a las 06:00, no he abierto el refri y el congelador está lleno. ¿Qué hago?",
+    "Power outage", "The power went out: how long the fridge and freezer keep food.",
+    "The power went out at 06:00. I haven't opened the fridge and the freezer is full. What do I do?"],
+  ["shelter", "",
+    "Albergue (120 personas)", "Tandas de cocina para que nada se sirva fuera de tiempo.",
+    "Coordino un albergue con 120 personas. La comida es de 13:00 a 15:00, arroz y frijoles, sin forma de mantenerla caliente.",
+    "Shelter (120 people)", "Cooking batches so nothing is served past its time.",
+    "I run a shelter with 120 people. Lunch is 13:00 to 15:00, rice and beans, no way to keep food hot."],
+  ["plan", "",
+    "Planear comidas", "A qué hora cocinar según tus horarios de comida.",
+    "Somos 5 en casa, comemos a las 14:00 y cenamos a las 20:00. ¿A qué hora cocino?",
+    "Plan meals", "When to cook, based on when you eat.",
+    "We are 5 at home, lunch at 14:00 and dinner at 20:00. When should I cook?"],
+  ["bell", "",
+    "Recordatorio", "Un aviso antes de que se acabe el tiempo.",
+    "Cociné pollo a las 12:00. Prográmame un recordatorio para comerlo a tiempo.",
+    "Reminder", "A heads-up before the time runs out.",
+    "I cooked chicken at 12:00. Schedule a reminder so we eat it in time."],
+  ["danger", "danger",
+    "Señales de alarma", "Diarrea o vómito: cuándo ir a la clínica. Sin diagnósticos ni dosis.",
+    "Mi hija de 2 años tiene diarrea, está muy dormida y casi no quiere beber. Estamos en México.",
+    "Danger signs", "Diarrhea or vomiting: when to go to a clinic. No diagnosis, no doses.",
+    "My 2-year-old daughter has diarrhea, she is very sleepy and barely drinks. We are in Mexico."],
+];
 
 const I18N = {
   es: {
-    tagline: "¿Hasta qué hora se puede comer? Reglas oficiales + el calor de hoy.",
+    skip: "Ir a escribir tu pregunta",
+    brandSub: "Inocuidad cuando falta el frío",
+    langGroup: "Idioma", modeGroup: "Modo",
     modeDemo: "Demo", modeLive: "En vivo",
-    bannerDemo: "Modo demo: día simulado de 38 °C y reloj fijo a las 12:00, para que los resultados sean iguales para todos. Los recordatorios llegan en ~1 minuto.",
-    bannerLive: "Modo en vivo: usa tu hora real y, si lo permites, tu ubicación para el pronóstico de calor (datos del clima: Open-Meteo.com).",
-    tryTitle: "Pruébalo en 1 minuto",
-    placeholder: "Escribe qué cocinaste y a qué hora…",
-    send: "Enviar", thinking: "Revisando las reglas oficiales…", listen: "🔊 Escuchar",
-    disclaimer: "Al Tiempo da orientación general de inocuidad basada en fuentes oficiales (OMS, FDA, CDC, NHS). No es consejo médico. En una emergencia, llama a tu número local de emergencias.",
-    sources: "Fuentes y métricas en el repositorio",
-    reminder: "⏰ Recordatorio",
-    error: "No pude responder. Si tienes duda, tira la comida.",
-    scenarios: [
-      ["Ventana segura", "Cociné frijoles a las 12:00 y no tengo refri. ¿Hasta qué hora se pueden comer?"],
-      ["Bebé + arroz", "¿Le doy a mi bebé el arroz que cociné hace 5 horas? Estuvo fuera del refri."],
-      ["Apagón", "Se fue la luz a las 06:00, no he abierto el refri y el congelador está lleno. ¿Qué hago?"],
-      ["Albergue (120 personas)", "Coordino un albergue con 120 personas. La comida es de 13:00 a 15:00, arroz y frijoles, sin forma de mantenerla caliente."],
-      ["Planear comidas", "Somos 5 en casa, comemos a las 14:00 y cenamos a las 20:00. ¿A qué hora cocino?"],
-      ["Señales de alarma", "Mi hija de 2 años tiene diarrea, está muy dormida y casi no quiere beber. Estamos en México."],
-      ["Recordatorio", "Cociné pollo a las 12:00. Prográmame un recordatorio para comerlo a tiempo."],
+    demoLabel: "Modo demo",
+    demoPills: ["Día simulado de 38 °C", "Reloj fijo 12:00", "Recordatorios en ~1 min"],
+    demoNote: "Resultados iguales para todos. No son tus condiciones reales.",
+    liveLabel: "En vivo",
+    livePills: ["Tu hora real"],
+    geo: {
+      idle: "Ubicación: no solicitada",
+      asking: "Pidiendo tu ubicación…",
+      granted: "Ubicación compartida (~1 km)",
+      denied: "Sin ubicación: se usa el límite más estricto (1 h)",
+      unsupported: "Sin ubicación: se usa el límite más estricto (1 h)",
+    },
+    liveNote: "Con tu permiso usamos tu ubicación redondeada (~1 km) para el pronóstico de calor. Datos del clima: Open-Meteo.com.",
+    heroTitle: "Comida segura, incluso cuando no hay refrigerador.",
+    heroText: "Dinos qué cocinaste y a qué hora. Al Tiempo aplica reglas oficiales de inocuidad y el calor del día, y te da una hora clara: cómelo antes de… o deséchalo.",
+    scenTitle: "Elige una situación",
+    howTitle: "Cómo decide Al Tiempo",
+    steps: [
+      ["Tú describes la situación", "Con tus palabras: qué cocinaste, a qué hora y para quién."],
+      ["El motor aplica reglas oficiales", "Código probado con reglas de la OMS, la FDA, los CDC y el NHS calcula la hora límite. La IA no calcula."],
+      ["El verificador revisa la respuesta", "Si la respuesta trae una hora que el motor no dio, se bloquea y se usa una respuesta segura."],
+      ["El agente te lo explica", "En español o inglés, y también en voz."],
     ],
+    panelTitle: "Conversación",
+    badgeDemo: "Simulado: 38 °C, 12:00", badgeLive: "Tu hora real",
+    welcomeTitle: "Cuéntame qué cocinaste y a qué hora.",
+    welcomeText: "Por ejemplo: «Cociné frijoles a las 12:00 y no tengo refri». También puedes elegir una situación.",
+    placeholder: "¿Qué cocinaste y a qué hora?",
+    send: "Enviar",
+    thinking: "Revisando las reglas oficiales…",
+    listen: "Escuchar", listening: "Reproduciendo…", voiceFail: "No se pudo reproducir el audio",
+    tools: {
+      compute_safe_window: "Ventana segura", track_outage: "Apagón", plan_meals: "Plan de comidas",
+      plan_shelter_batches: "Tandas del albergue", schedule_reminder: "Recordatorio",
+      check_danger_signs: "Señales de alarma", get_forecast: "Pronóstico",
+    },
+    rulesUsed: "Reglas aplicadas",
+    verified: "Revisada por el verificador",
+    replaced: "El verificador la cambió por la respuesta segura",
+    reminder: "Recordatorio",
+    reminderAt: "para las",
+    errorTitle: "No llegó la respuesta",
+    error: "No pude responder. Si tienes duda, tira la comida.",
+    retry: "Intentar de nuevo",
+    disclaimer: "Al Tiempo da orientación general de inocuidad basada en fuentes oficiales (OMS, FDA, CDC, NHS). No es consejo médico. En una emergencia, llama a tu número local de emergencias.",
+    linkCode: "Código en GitHub",
+    sources: "Fuentes y métricas",
   },
   en: {
-    tagline: "Until what time is it safe to eat? Official rules + today's heat.",
+    skip: "Skip to typing your question",
+    brandSub: "Food safety when the cold runs out",
+    langGroup: "Language", modeGroup: "Mode",
     modeDemo: "Demo", modeLive: "Live",
-    bannerDemo: "Demo mode: simulated 38 °C day and the clock fixed at 12:00, so everyone gets the same results. Reminders arrive in ~1 minute.",
-    bannerLive: "Live mode: uses your real time and, if you allow it, your location for the heat forecast (weather data by Open-Meteo.com).",
-    tryTitle: "Try it in 1 minute",
-    placeholder: "Type what you cooked and when…",
-    send: "Send", thinking: "Checking the official rules…", listen: "🔊 Listen",
-    disclaimer: "Al Tiempo gives general food-safety guidance from official sources (WHO, FDA, CDC, NHS). It is not medical advice. In an emergency, call your local emergency number.",
-    sources: "Sources and metrics in the repository",
-    reminder: "⏰ Reminder",
-    error: "I could not answer. If in doubt, throw the food away.",
-    scenarios: [
-      ["Safe window", "I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?"],
-      ["Baby + rice", "Can I give my baby the rice I cooked 5 hours ago? It was out of the fridge."],
-      ["Power outage", "The power went out at 06:00. I haven't opened the fridge and the freezer is full. What do I do?"],
-      ["Shelter (120 people)", "I run a shelter with 120 people. Lunch is 13:00 to 15:00, rice and beans, no way to keep food hot."],
-      ["Plan meals", "We are 5 at home, lunch at 14:00 and dinner at 20:00. When should I cook?"],
-      ["Danger signs", "My 2-year-old daughter has diarrhea, she is very sleepy and barely drinks. We are in Mexico."],
-      ["Reminder", "I cooked chicken at 12:00. Schedule a reminder so we eat it in time."],
+    demoLabel: "Demo mode",
+    demoPills: ["Simulated 38 °C day", "Clock fixed at 12:00", "Reminders in ~1 min"],
+    demoNote: "Same results for everyone. These are not your real conditions.",
+    liveLabel: "Live",
+    livePills: ["Your real time"],
+    geo: {
+      idle: "Location: not requested",
+      asking: "Asking for your location…",
+      granted: "Location shared (~1 km)",
+      denied: "No location: the strictest limit (1 h) is used",
+      unsupported: "No location: the strictest limit (1 h) is used",
+    },
+    liveNote: "With your permission we use your rounded location (~1 km) for the heat forecast. Weather data by Open-Meteo.com.",
+    heroTitle: "Food safety, even when the cold runs out.",
+    heroText: "Tell it what you cooked and when. Al Tiempo applies official food-safety rules and today's heat, and gives you a clear time: eat it before… or throw it away.",
+    scenTitle: "Pick a situation",
+    howTitle: "How Al Tiempo decides",
+    steps: [
+      ["You describe the situation", "In your own words: what you cooked, when, and for whom."],
+      ["The engine applies official rules", "Tested code with WHO, FDA, CDC and NHS rules works out the deadline. The AI does not calculate."],
+      ["The verifier checks the answer", "If the answer has a time the engine didn't produce, it is blocked and a safe answer is used."],
+      ["The agent explains it to you", "In English or Spanish, and out loud too."],
     ],
+    panelTitle: "Conversation",
+    badgeDemo: "Simulated: 38 °C, 12:00", badgeLive: "Your real time",
+    welcomeTitle: "Tell me what you cooked and when.",
+    welcomeText: "For example: “I cooked beans at 12:00 and I have no fridge.” Or pick a situation.",
+    placeholder: "What did you cook, and when?",
+    send: "Send",
+    thinking: "Checking the official rules…",
+    listen: "Listen", listening: "Playing…", voiceFail: "Audio could not be played",
+    tools: {
+      compute_safe_window: "Safe window", track_outage: "Power outage", plan_meals: "Meal plan",
+      plan_shelter_batches: "Shelter batches", schedule_reminder: "Reminder",
+      check_danger_signs: "Danger signs", get_forecast: "Forecast",
+    },
+    rulesUsed: "Rules applied",
+    verified: "Checked by the verifier",
+    replaced: "The verifier replaced it with the safe answer",
+    reminder: "Reminder",
+    reminderAt: "for",
+    errorTitle: "The answer didn't arrive",
+    error: "I could not answer. If in doubt, throw the food away.",
+    retry: "Try again",
+    disclaimer: "Al Tiempo gives general food-safety guidance from official sources (WHO, FDA, CDC, NHS). It is not medical advice. In an emergency, call your local emergency number.",
+    linkCode: "Code on GitHub",
+    sources: "Sources and metrics",
   },
 };
+
+const RULE_TOOLS = new Set(["compute_safe_window", "track_outage", "plan_meals", "plan_shelter_batches",
+  "schedule_reminder", "check_danger_signs"]);
 
 const state = {
   lang: (navigator.language || "es").toLowerCase().startsWith("es") ? "es" : "en",
   mode: "demo",
   sessionId: newSessionId(),
   coords: null,
+  geo: "idle",
   seenReminders: new Set(),
   busy: false,
+  warm: null,
+  lastPrompt: "",
 };
 
 function newSessionId() {
@@ -64,80 +173,259 @@ function newSessionId() {
 
 const $ = (sel) => document.querySelector(sel);
 const t = (key) => I18N[state.lang][key];
+const SVGNS = "http://www.w3.org/2000/svg";
 
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function icon(name, cls = "ic") {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("class", cls);
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  const use = document.createElementNS(SVGNS, "use");
+  use.setAttribute("href", `#i-${name}`);
+  svg.appendChild(use);
+  return svg;
+}
+
+// ---------------------------------------------------------------- rendering of static UI
 function render() {
   document.documentElement.lang = state.lang;
-  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-aria]").forEach((n) => { n.setAttribute("aria-label", t(n.dataset.i18nAria)); });
   $("#prompt").placeholder = t("placeholder");
-  document.querySelectorAll("[data-lang]").forEach((b) => b.classList.toggle("active", b.dataset.lang === state.lang));
-  document.querySelectorAll("[data-mode]").forEach((b) => b.classList.toggle("active", b.dataset.mode === state.mode));
-  const banner = $("#banner");
-  banner.textContent = state.mode === "demo" ? t("bannerDemo") : t("bannerLive");
-  banner.classList.toggle("live", state.mode === "live");
-  const box = $("#scenario-buttons");
-  box.innerHTML = "";
-  for (const [label, prompt] of t("scenarios")) {
-    const b = document.createElement("button");
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
+  document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
+  document.body.dataset.view = state.mode;
+  renderModebar();
+  renderScenarios();
+  renderSteps();
+  if (!$("#chat").querySelector(".msg")) renderWelcome();
+  if ($(".topbar")) requestAnimationFrame(syncHeader);
+}
+
+function renderModebar() {
+  const bar = $("#modebar");
+  bar.replaceChildren();
+  const inner = el("div", "modebar-inner");
+  const demo = state.mode === "demo";
+  const label = el("span", "mode-label");
+  label.append(icon(demo ? "sun" : "pin"), el("span", "", demo ? t("demoLabel") : t("liveLabel")));
+  const pills = el("ul", "pills");
+  const items = demo ? t("demoPills") : [...t("livePills"), t("geo")[state.geo]];
+  items.forEach((p) => pills.appendChild(el("li", "pill", p)));
+  inner.append(label, pills, el("p", "mode-note", demo ? t("demoNote") : t("liveNote")));
+  bar.appendChild(inner);
+  const badge = $("#panel-mode");
+  badge.replaceChildren(icon(demo ? "sun" : "pin"), el("span", "", demo ? t("badgeDemo") : t("badgeLive")));
+}
+
+function renderScenarios() {
+  const box = $("#scenario-cards");
+  box.replaceChildren();
+  const es = state.lang === "es";
+  SCENARIOS.forEach((s, i) => {
+    const [ic, tone] = s;
+    const title = es ? s[2] : s[5];
+    const desc = es ? s[3] : s[6];
+    const prompt = es ? s[4] : s[7];
+    const b = el("button", `card${tone ? ` card-${tone}` : ""}`);
     b.type = "button";
-    b.textContent = label;
-    b.title = prompt;
-    b.addEventListener("click", () => send(prompt));
+    b.dataset.scenario = String(i);
+    const tid = `scen-${i}-t`;
+    const did = `scen-${i}-d`;
+    b.setAttribute("aria-labelledby", tid);
+    b.setAttribute("aria-describedby", did);
+    const ib = el("span", "card-icon");
+    ib.appendChild(icon(ic));
+    const tx = el("span", "card-text");
+    const ti = el("span", "card-title", title); ti.id = tid;
+    const de = el("span", "card-desc", desc); de.id = did;
+    tx.append(ti, de);
+    b.append(ib, tx);
+    b.addEventListener("click", () => { send(prompt); focusConversation(); });
     box.appendChild(b);
+  });
+}
+
+function renderSteps() {
+  const ol = $("#how-steps");
+  ol.replaceChildren();
+  t("steps").forEach(([title, text], i) => {
+    const li = el("li", `step step-${i + 1}`);
+    li.append(el("span", "step-title", title), el("span", "step-text", text));
+    ol.appendChild(li);
+  });
+}
+
+function renderWelcome() {
+  const chat = $("#chat");
+  chat.replaceChildren();
+  const w = el("div", "welcome");
+  const mark = $(".mark").cloneNode(true);
+  mark.setAttribute("class", "mark welcome-mark");
+  w.append(mark, el("p", "welcome-title", t("welcomeTitle")), el("p", "welcome-text", t("welcomeText")));
+  chat.appendChild(w);
+}
+
+function focusConversation() {
+  // On phones the conversation is below the cards: bring it into view after choosing a situation.
+  if (window.matchMedia("(max-width: 1023px)").matches) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $("#panel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 }
 
-// Shows **bold** from the model as <strong> without innerHTML (no HTML injection possible).
-function appendRich(el, text) {
+// ---------------------------------------------------------------- safe rich text (no innerHTML)
+// Shows **bold** as <strong>.
+function appendInline(parent, text) {
   String(text).split(/\*\*(.+?)\*\*/g).forEach((part, i) => {
     if (i % 2) {
-      const b = document.createElement("strong");
-      b.textContent = part;
-      el.appendChild(b);
+      parent.appendChild(el("strong", "", part));
     } else if (part) {
-      el.appendChild(document.createTextNode(part));
+      parent.appendChild(document.createTextNode(part));
     }
   });
 }
 
-function addMessage(kind, text, extra) {
-  const div = document.createElement("div");
-  div.className = `msg ${kind}`;
-  appendRich(div, text);
-  if (extra) div.appendChild(extra);
-  $("#chat").appendChild(div);
-  div.scrollIntoView({ behavior: "smooth", block: "end" });
-  return div;
+// Paragraphs, "- " / "1. " lists and "#" headings, built with DOM nodes only.
+function renderAnswer(container, text) {
+  const blocks = String(text).replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
+  for (const block of blocks) {
+    let list = null;
+    let para = null;
+    for (const raw of block.split("\n")) {
+      const line = raw.trimEnd();
+      if (!line.trim()) continue;
+      const h = line.match(/^\s*#{1,4}\s+(.*)$/);
+      const ul = line.match(/^\s*[-*•]\s+(.*)$/);
+      const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
+      if (h) {
+        list = null; para = null;
+        const hh = el("p", "ans-h"); appendInline(hh, h[1]); container.appendChild(hh);
+      } else if (ul || ol) {
+        para = null;
+        const kind = ul ? "ul" : "ol";
+        if (!list || list.tagName.toLowerCase() !== kind) { list = el(kind, "ans-list"); container.appendChild(list); }
+        const li = el("li"); appendInline(li, (ul || ol)[1]); list.appendChild(li);
+      } else {
+        list = null;
+        if (!para) { para = el("p", "ans-p"); container.appendChild(para); } else { para.appendChild(document.createElement("br")); }
+        appendInline(para, line.trim());
+      }
+    }
+  }
 }
 
-function botMeta(answer, metrics) {
-  const meta = document.createElement("div");
-  meta.className = "meta";
-  const btn = document.createElement("button");
+// ---------------------------------------------------------------- chat messages
+function addNode(node) {
+  const chat = $("#chat");
+  chat.querySelector(".welcome")?.remove();
+  chat.appendChild(node);
+  chat.scrollTop = chat.scrollHeight;
+  if (window.matchMedia("(min-width: 1024px)").matches === false) {
+    node.scrollIntoView({ behavior: "auto", block: "nearest" });
+  }
+  return node;
+}
+
+function userMessage(text) {
+  const m = el("div", "msg msg-user");
+  m.appendChild(el("p", "ans-p", text));
+  return addNode(m);
+}
+
+function typingMessage() {
+  const m = el("div", "msg msg-bot msg-typing");
+  m.setAttribute("aria-label", t("thinking"));
+  const dots = el("span", "dots");
+  dots.append(el("i"), el("i"), el("i"));
+  m.append(dots, el("span", "typing-text", t("thinking")));
+  return addNode(m);
+}
+
+function botMessage(answer, metrics) {
+  const m = el("article", "msg msg-bot");
+  const body = el("div", "ans");
+  renderAnswer(body, answer);
+  m.appendChild(body);
+  m.appendChild(decisionTrail(metrics));
+  const meta = el("div", "meta");
+  const btn = el("button", "listen");
   btn.type = "button";
-  btn.textContent = t("listen");
+  btn.append(icon("speaker"), el("span", "", t("listen")));
   btn.addEventListener("click", () => speak(answer, btn));
   meta.appendChild(btn);
-  if (metrics && metrics.api_ms) {
-    const span = document.createElement("span");
-    span.textContent = `${(metrics.api_ms / 1000).toFixed(1)} s · ${(metrics.tools_used || []).join(", ") || "—"}`;
-    meta.appendChild(span);
-  }
-  return meta;
+  if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
+  m.appendChild(meta);
+  return addNode(m);
 }
 
+// Shows which rules tools ran and what the verifier did, using only the structured `metrics`
+// the backend returned (tools_used, verifier_blocked). Nothing is inferred from the text.
+function decisionTrail(metrics) {
+  const wrap = el("div", "trail");
+  if (!metrics) return wrap;
+  const used = (metrics.tools_used || []).filter((x) => RULE_TOOLS.has(x));
+  if (!used.length && !metrics.verifier_blocked) return wrap;
+  if (used.length) {
+    const names = [...new Set(used)].map((x) => t("tools")[x] || x).join(", ");
+    const r = el("span", "trail-item");
+    r.append(el("span", "trail-k", `${t("rulesUsed")}:`), el("span", "trail-v", ` ${names}`));
+    wrap.appendChild(r);
+  }
+  const v = el("span", metrics.verifier_blocked ? "seal seal-swap" : "seal");
+  v.append(icon(metrics.verifier_blocked ? "swap" : "shield"), el("span", "", metrics.verifier_blocked ? t("replaced") : t("verified")));
+  wrap.appendChild(v);
+  return wrap;
+}
+
+function errorMessage(text, retryPrompt) {
+  const m = el("div", "msg msg-error");
+  m.setAttribute("role", "alert");
+  const head = el("p", "err-title");
+  head.append(icon("alert"), el("span", "", t("errorTitle")));
+  m.append(head, el("p", "ans-p", text || t("error")));
+  if (retryPrompt) {
+    const b = el("button", "retry");
+    b.type = "button";
+    b.append(icon("retry"), el("span", "", t("retry")));
+    b.addEventListener("click", () => { m.remove(); send(retryPrompt, { echo: false }); });
+    m.appendChild(b);
+  }
+  return addNode(m);
+}
+
+function reminderMessage(r) {
+  const m = el("div", "msg msg-reminder");
+  const head = el("p", "rem-head");
+  head.append(icon("bell"), el("span", "", t("reminder")), el("span", "rem-time", `${t("reminderAt")} ${r.at_local}`));
+  const body = el("p", "ans-p");
+  appendInline(body, r.message);
+  m.append(head, body);
+  return addNode(m);
+}
+
+// ---------------------------------------------------------------- API
 async function api(path, options) {
   const res = await fetch(path, { headers: { "content-type": "application/json" }, ...options });
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, data };
 }
 
-async function send(prompt) {
+async function send(prompt, { echo = true } = {}) {
   prompt = (prompt || "").trim();
   if (!prompt || state.busy) return;
   state.busy = true;
-  $("#send").disabled = true;
-  addMessage("user", prompt);
-  const typing = addMessage("bot typing", t("thinking"));
+  state.lastPrompt = prompt;
+  setBusy(true);
+  if (echo) userMessage(prompt);
+  const typing = typingMessage();
   if (/recordatorio|reminder/i.test(prompt) && "Notification" in window && Notification.permission === "default") {
     Notification.requestPermission().catch(() => {});
   }
@@ -150,24 +438,43 @@ async function send(prompt) {
     await state.warm; // if the session is still starting, wait for it instead of starting a 2nd one
     const { data } = await api("/api/chat", { method: "POST", body: JSON.stringify(body) });
     typing.remove();
-    const answer = data.answer || t("error");
-    const msg = addMessage(data.error ? "bot error" : "bot", answer, botMeta(answer, data.metrics));
-    if (data.error) msg.title = data.error;
+    if (data.error || !data.answer) {
+      errorMessage(data.answer || t("error"), data.error === "daily_cap" ? null : prompt);
+    } else {
+      botMessage(data.answer, data.metrics);
+    }
   } catch (e) {
     typing.remove();
-    addMessage("bot error", t("error"));
+    errorMessage(t("error"), prompt);
   } finally {
     state.busy = false;
-    $("#send").disabled = false;
+    setBusy(false);
   }
+}
+
+function setBusy(busy) {
+  $("#send").disabled = busy;
+  document.querySelectorAll(".card").forEach((c) => { c.disabled = busy; });
+  $("#panel").setAttribute("aria-busy", String(busy));
 }
 
 async function speak(text, btn) {
   btn.disabled = true;
+  const label = btn.querySelector("span");
+  label.textContent = t("listening");
   try {
     const { ok, data } = await api("/api/voice", { method: "POST", body: JSON.stringify({ text: text.replace(/\*\*/g, ""), language: state.lang }) });
-    if (ok && data.audio_base64) await new Audio(`data:audio/mpeg;base64,${data.audio_base64}`).play();
-  } finally { btn.disabled = false; }
+    if (ok && data.audio_base64) {
+      await new Audio(`data:audio/mpeg;base64,${data.audio_base64}`).play();
+    } else {
+      btn.title = t("voiceFail");
+    }
+  } catch (e) {
+    btn.title = t("voiceFail");
+  } finally {
+    btn.disabled = false;
+    label.textContent = t("listen");
+  }
 }
 
 async function pollReminders() {
@@ -177,8 +484,8 @@ async function pollReminders() {
     for (const r of data.reminders || []) {
       if (state.seenReminders.has(r.reminder_id)) continue;
       state.seenReminders.add(r.reminder_id);
+      reminderMessage(r);
       const text = `${t("reminder")} (${r.at_local}): ${r.message}`;
-      addMessage("reminder", text);
       if ("Notification" in window && Notification.permission === "granted") new Notification("Al Tiempo", { body: text });
     }
   } catch (e) { /* offline: try again later */ }
@@ -193,23 +500,60 @@ function warmUp() {
   }).catch(() => {});
 }
 
+function resetConversation() {
+  state.sessionId = newSessionId();
+  state.seenReminders = new Set();
+  renderWelcome();
+}
+
 function setMode(mode) {
+  if (mode === state.mode) return;
   state.mode = mode;
-  state.sessionId = newSessionId(); // new conversation when switching mode
-  if (mode === "live" && !state.coords && navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (p) => { state.coords = { lat: +p.coords.latitude.toFixed(2), lon: +p.coords.longitude.toFixed(2) }; },
-      () => { state.coords = null; }, { timeout: 8000, maximumAge: 3600000 });
+  resetConversation(); // new conversation when switching mode: never mix simulated and real results
+  if (mode === "live" && !state.coords) {
+    if (navigator.geolocation) {
+      state.geo = "asking";
+      navigator.geolocation.getCurrentPosition(
+        (p) => { state.coords = { lat: +p.coords.latitude.toFixed(2), lon: +p.coords.longitude.toFixed(2) }; state.geo = "granted"; renderModebar(); },
+        () => { state.coords = null; state.geo = "denied"; renderModebar(); },
+        { timeout: 8000, maximumAge: 3600000 });
+    } else {
+      state.geo = "unsupported";
+    }
   }
   render();
   warmUp();
 }
 
-document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => { state.lang = b.dataset.lang; state.sessionId = newSessionId(); render(); warmUp(); }));
+function setLang(lang) {
+  if (lang === state.lang) return;
+  state.lang = lang;
+  resetConversation();
+  render();
+  warmUp();
+}
+
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
-$("#form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("#prompt").value; $("#prompt").value = ""; send(v); });
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("#prompt").value; $("#prompt").value = ""; autosize(); send(v); });
 $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#form").requestSubmit(); } });
 
+function autosize() {
+  const ta = $("#prompt");
+  ta.style.height = "auto";
+  ta.style.height = `${Math.min(ta.scrollHeight, 140)}px`;
+}
+$("#prompt").addEventListener("input", autosize);
+
+// The header height changes with the language and mode texts; the sticky conversation panel uses it.
+function syncHeader() {
+  const bar = $(".topbar");
+  const sticky = getComputedStyle(bar).position === "sticky";
+  document.documentElement.style.setProperty("--sticky-top", `${sticky ? bar.offsetHeight + 16 : 12}px`);
+}
+window.addEventListener("resize", syncHeader);
+
 render();
+syncHeader();
 warmUp();
 setInterval(pollReminders, 15000);
