@@ -1,4 +1,4 @@
-.PHONY: install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
+.PHONY: figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
 
 CHAT_LANG ?= es
 ADMIN_PROFILE ?= default
@@ -59,3 +59,6 @@ smoke:  ## end-to-end check of the deployed demo
 
 activate-cost-tag:  ## admin: make the "project" tag usable in budgets/Cost Explorer (can take 24 h)
 	aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=project,Status=Active --profile $(ADMIN_PROFILE)
+
+figures:  ## article images from code + eval results (needs Pillow)
+	python3 scripts/make_figures.py
