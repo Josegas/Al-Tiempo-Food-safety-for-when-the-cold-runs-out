@@ -27,6 +27,7 @@ make install          # venv + dependencies
 cp .env.example .env  # DEMO_MODE=true uses a saved 38 °C forecast
 make check            # lint + rules policy + tests
 make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
+make web              # preview the web at http://localhost:8000 (API calls go to the live demo)
 ```
 
 ## What it does
@@ -85,6 +86,7 @@ In an emergency, call your local emergency number.
 
 ## Third-party data and terms
 - Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); used through the free, non-commercial API (no ads, no subscriptions). The demo mode uses saved forecasts.
+- Fonts: Fraunces, Atkinson Hyperlegible and IBM Plex Mono (subset, renamed "AlTiempo Mono"), all SIL Open Font License 1.1, self-hosted in `web/fonts/` with their licenses. Icons are original.
 - Food-safety rules are paraphrased and cited; `rules/food_rules.yaml` keeps one short verbatim sentence per rule only so anyone can verify it on the official page. No third-party logos are used.
 
 ## License

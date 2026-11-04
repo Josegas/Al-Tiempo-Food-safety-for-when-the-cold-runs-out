@@ -1,4 +1,4 @@
-.PHONY: figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
+.PHONY: web figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
 
 CHAT_LANG ?= es
 ADMIN_PROFILE ?= default
@@ -62,3 +62,6 @@ activate-cost-tag:  ## admin: make the "project" tag usable in budgets/Cost Expl
 
 figures:  ## article images from code + eval results (needs Pillow)
 	python3 scripts/make_figures.py
+
+web:  ## local preview of web/ at http://localhost:8000 (API calls go to the deployed demo)
+	.venv/bin/python scripts/dev_server.py
