@@ -29,3 +29,14 @@ Budgets only **alert**; they don't stop spending. What actually limits cost:
 5. Budget `al-tiempo-monthly` ($10, resources tagged `project=al-tiempo`): email at 50/80/100% + forecast. Raised from $5 on 2026-11-04: normal traffic is ≈ $3, too close to $5; at $5 an abusive client hitting the daily cap (≈ $1.20/day) would switch the demo off in ~4 days. The budget never slows the agent down; only the kill switch affects users.
 6. **Kill switch:** at 100% of the budget, AWS Budgets attaches a DENY policy (Bedrock, AgentCore, Polly) to the runtime and API roles. Detach `al-tiempo-kill-switch` to resume.
 7. Application inference profile so Bedrock spend for this project is visible separately in Cost Explorer.
+
+## Load test (2026-11-04, `make loadtest`, raw output in `docs/load-test.json`)
+Only `GET /api/health` (Lambda answers `{"ok": true}`): no model call, no tokens, not counted in the daily cap.
+| Phase | Requests | Result |
+|---|---|---|
+| Normal: 8 req/s for 10 s | 80 | **80 × 200**, p50 141 ms, p95 228 ms |
+| Burst: 300 at once, 60 threads, 1.6 s | 300 | 65 × 200, **57 × 429** (API Gateway throttle), **178 × 503** (Lambda) |
+
+The 503s come from the account's Lambda concurrency quota: **10** (new-account value; AWS default 1,000;
+quota `L-B99A9384`, checked with `aws service-quotas get-service-quota`). API Gateway allows bursts of
+20, so Lambda rejects the rest. No request reached Bedrock. Fix (free): request the quota increase.

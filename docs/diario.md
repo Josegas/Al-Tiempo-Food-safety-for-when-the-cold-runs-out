@@ -98,3 +98,36 @@
 - Cómo lo verifiqué: servidor local (`make web`) contra la API real; Playwright a 375/390/768/1024/1440 px: 63 capturas (estado inicial, 7 escenarios, error simulado, recordatorio real) sin scroll horizontal ni errores de consola; axe-core: 0 violaciones WCAG 2.1 AA en es/en, móvil y escritorio; pruebas funcionales: modo En vivo con ubicación concedida (manda lat/lon redondeados) y negada, voz (200 + audio), cambio de idioma (reinicia y calienta sesión nueva), teclado (anillo de foco visible).
 - Errores que encontré y corregí en el camino: el nombre se cortaba a 375 px; el placeholder se partía; la franja Demo ocupaba mucho espacio fijo en móvil (ahora el encabezado no es fijo en móvil y el panel lleva una etiqueta del modo); `data-mode` en `<body>` hacía que el body recibiera `aria-pressed` (lo detectó axe).
 - Pendiente: la línea de tiempo "cocinado → cómelo antes de → deséchalo" necesita que `/api/chat` devuelva la salida del motor (campo opcional nuevo); no se tocó el backend sin autorización. Evals 35/36: 1 falla del modelo ajena al rediseño (`en-100-safe` pidió la hora en vez de usar la herramienta).
+
+## 2026-11-03 23:30
+- Qué intenté: dibujar en la web la "ventana segura" (cocinado → ahora → aviso → límite) en cada respuesta del motor.
+- Qué pasó: la web solo tenía el texto del modelo; sacar horas de ese texto contradice el principio "el modelo no calcula".
+- Cómo lo supe: revisando qué devolvía `/api/chat` (solo `answer` y `metrics`).
+- Qué decidí: campo opcional `decision` en la respuesta, copiado tal cual del resultado de `compute_safe_window` (agent/decision.py) y pasado por la Lambda sin cambios. Sin cambios en reglas, motor, verificador ni IAM. La web dibuja solo con esos números; si el backend no lo manda, no dibuja nada. 4 tests nuevos; axe sin errores (tuve que oscurecer el rojo del texto: 4.45 → `--red-ink`).
+
+## 2026-11-04 00:05 — prueba de carga
+- Qué intenté: demostrar con números que el throttling de API Gateway (10 req/s, ráfaga 20) protege el presupuesto. `make loadtest` solo llama `/api/health` (sin modelo, sin tokens, sin gastar el tope diario).
+- Qué pasó: tráfico normal (8 req/s × 10 s) → 80/80 OK, p50 141 ms. Ráfaga de 300 peticiones en 1.6 s → 65 OK, 57 × 429 (throttling, lo esperado) y **178 × 503** (inesperado).
+- Cómo lo supe: `aws lambda get-account-settings` → la cuenta permite solo **10 Lambdas a la vez** (cuenta nueva; el valor normal de AWS es 1,000, cuota `L-B99A9384`). API Gateway deja pasar ráfagas de 20 y Lambda rechaza el resto con 503.
+- Qué decidí: no cambiar infraestructura en el freeze. El costo sigue protegido (ninguna petición llegó a Bedrock) y la web ya muestra "intenta de nuevo". Pedir el aumento de cuota (gratis) en Service Quotas. Queda documentado como hallazgo real.
+
+## 2026-11-04 00:20 — evals de 18 a 50 escenarios
+- Qué intenté: llegar a 50 escenarios (la guía pide 40–60). Las horas esperadas salieron del motor en modo demo, no de mi cabeza.
+- Qué pasó: primera corrida de los 32 nuevos: 29/32. Corrida completa: 95/100.
+- Errores reales encontrados:
+  1. Refri con la puerta abierta: el modelo dijo "seguro hasta las 15:00 si el termómetro…". El motor devolvía esa hora aunque la regla ya no aplicaba, y el verificador la aceptaba. Ahora el motor no da hora cuando la regla no aplica (test nuevo).
+  2. La regla 12 del prompt empezaba con "En apagones…", y el modelo no siempre repetía el resumen de la ventana segura ("Déscalo ahora"). Ahora aplica siempre y pide copiarlo palabra por palabra.
+  3. Sin herramienta, el modelo copió el molde del prompt: "cómelo antes de las **HH:MM**". El verificador ahora trata los moldes (`HH:MM`, `<regla>`) como una hora inventada: reintenta y, si sigue, usa la plantilla segura (2 tests nuevos). Las evals fallan cualquier respuesta con un molde.
+  4. Arnés de evals: no ponía el idioma en el estado del agente, así que el resumen salía en inglés para un usuario en español. Ahora `build_agent` lo pone (igual que producción).
+  5. Texto del motor en apagón: "hasta **el** mañana a las 10:30" → "hasta mañana a las 10:30" (test nuevo).
+- Lo que fue error mío en los escenarios (no del agente): "descártalo" no estaba en la lista de palabras válidas; "if it's salmonella" era un falso positivo; un escenario esperaba "2 horas" sin hora de cocción, cuando el verificador (con razón) no permite dar un límite sin herramienta.
+
+## 2026-11-04 00:30 — funciona sin internet (PWA)
+- Qué intenté: que la página abra sin señal (el usuario tiene luz y datos intermitentes).
+- Qué hice: `manifest.json` + íconos (del logo propio) + `sw.js`. El service worker usa red primero (con internet siempre se ve el último deploy) y caché solo como respaldo; nunca guarda `/api/*`. Sin señal: aviso arriba y, al preguntar, una tarjeta con la regla básica (1 h con calor, 2 h sin calor, arroz 1 h, bebés sin sobras, señales de alarma → clínica) con sus fuentes.
+- Cómo lo comprobé: Playwright en modo offline: la página recarga desde caché con sus fuentes, aparece la tarjeta, axe 0 errores, Chrome la marca instalable sin errores.
+
+## 2026-11-04 00:12 — revisar las evals sin hacer trampa
+- Qué pasó: después de los arreglos, la corrida 20261104-000424 dio 97/100. Leí las 3 respuestas que fallaron: las 3 eran seguras (ninguna confirmó "la OMS dice 8 horas" ni dijo "100% seguro").
+- Por qué fallaron: mis revisiones de texto. "no puedo decirte que **es 100% seguro comer**" contiene la frase prohibida dentro de una negación; "deséchalo ahora" y "¿hace cuántas horas?" no estaban en la lista de respuestas aceptables.
+- Qué decidí: ajustar solo esos 2 escenarios a su intención (no confirmar lo falso), escribirlo en su campo `note` y hacer una corrida nueva completa en vez de recalificar la anterior. Reporto las dos corridas.

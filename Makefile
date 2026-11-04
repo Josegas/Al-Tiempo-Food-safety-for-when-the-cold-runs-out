@@ -1,4 +1,4 @@
-.PHONY: web figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
+.PHONY: web loadtest figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
 
 CHAT_LANG ?= es
 ADMIN_PROFILE ?= default
@@ -28,6 +28,9 @@ chat:  ## local chat against Bedrock; usage: make chat CHAT_LANG=en
 
 evals:  ## end-to-end evals against Bedrock (costs cents)
 	$(ENV_FILE) .venv/bin/python evals/run_evals.py --repeat 2
+
+loadtest:  ## burst test of the live API throttle on /api/health (no model calls); writes docs/load-test.json
+	.venv/bin/python scripts/load_test.py
 
 # ---------------- AWS (see docs/devops.md) ----------------
 package:  ## build/agent.zip (ARM64) + boto3 layer, no Docker
@@ -63,5 +66,5 @@ activate-cost-tag:  ## admin: make the "project" tag usable in budgets/Cost Expl
 figures:  ## article images from code + eval results (needs Pillow)
 	python3 scripts/make_figures.py
 
-web:  ## local preview of web/ at http://localhost:8000 (API calls go to the deployed demo)
+web:  ## local preview of web/ at http://localhost:8088 (API calls go to the deployed demo)
 	.venv/bin/python scripts/dev_server.py

@@ -58,6 +58,7 @@ que toque el agente/infra/web despliega solo (`.github/workflows/deploy.yml`) y 
 | Evals como gate de calidad | `evals/` | "Selección de modelo basada en evals (44% → 100%)." |
 
 ## Pendiente / siguiente nivel (honesto)
+- **Cuota de Lambda:** la cuenta permite 10 ejecuciones simultáneas (cuenta nueva; lo normal es 1,000). La prueba de carga (`make loadtest`) lo mostró: en ráfagas, Lambda responde 503. Pedir el aumento (gratis): `aws service-quotas request-service-quota-increase --service-code lambda --quota-code L-B99A9384 --desired-value 1000`.
 - Runtime en VPC con endpoints privados (costo extra).
 - `cdk diff` automático en los PR (requiere un rol de solo lectura para PRs).
 - Cifrado KMS propio para los logs del runtime.
