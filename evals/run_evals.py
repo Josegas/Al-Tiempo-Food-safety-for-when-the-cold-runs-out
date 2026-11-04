@@ -44,7 +44,7 @@ DECISION = re.compile(
 # "Explained why": the plain reason from rules/*.yaml (or an obvious "because") is in the answer.
 WHY = re.compile(
     r"bacteri|microbio|germ|toxin|espora|spore|saliva|mantiene el frío|keeps food cold|"
-    r"mantiene la temperatura|keeps its temperature|29%|1 de cada 9|1 in 9|no se puede confiar|"
+    r"mantiene la temperatura|keeps its temperature|mantiene la comida fría|keeps the temperature|29%|1 de cada 9|1 in 9|no se puede confiar|"
     r"can.t rely|no la enfría|no lo enfría|doesn't cool|no indica que sea seguro|doesn't show it|se multiplican|multiply|porque|because",
     re.I,
 )

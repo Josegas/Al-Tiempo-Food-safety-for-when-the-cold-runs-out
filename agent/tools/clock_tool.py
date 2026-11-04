@@ -6,8 +6,9 @@ from agent.tools._common import now_local, out, tz
 
 @tool(context=True)
 def get_current_time(tool_context: ToolContext) -> str:
-    """The user's current local date and time. Use it when the user asks what time or day it is.
-    In simulated (demo) mode it returns the demo clock, fixed at 12:00."""
+    """The user's current local date and time. ONLY when the user explicitly asks what time or
+    day it is. Never for food questions: compute_safe_window and track_outage already know the
+    time. In simulated (demo) mode it returns the demo clock, fixed at 12:00."""
     now = now_local()
     simulated = demo_mode()
     hhmm = now.strftime("%H:%M")
