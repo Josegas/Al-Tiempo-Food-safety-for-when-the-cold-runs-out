@@ -148,3 +148,33 @@
 - Cómo lo supe: la captura, y luego reproducido en local: violaciones `13:00` y luego `120 min`.
 - Por qué: el verificador solo confía en los resultados de herramientas del turno actual. En el turno del recordatorio, el modelo repetía la frase del turno anterior ("antes de las 13:00… de 2 horas a 1"), que no venía en el resultado del recordatorio. La frase del porqué (2 horas) lo empeoró.
 - Qué decidí: no aflojar el verificador. El resultado del recordatorio ahora incluye los datos del motor en los que se basa (`based_on`: hora límite y reglas). Resultado: 4 de 4 conversaciones de dos turnos sin bloqueos ni reintentos (antes: bloqueada). Test de regresión nuevo (141).
+
+## 2026-11-04 11:00 — evaluación honesta (casos nuevos y adversariales)
+- Qué intenté: medir sin hacer trampa. 18 casos nuevos (`evals/heldout_scenarios.json`) y 10 adversariales (`evals/adversarial.json`), escritos después de todos los ajustes, con las horas esperadas sacadas del motor en modo simulado. Se corrieron **una sola vez**, sin cambiar código antes ni después.
+- Qué pasó: nuevos **18/18**; adversariales **8/10**. Las 2 fallas no fueron inseguras: (1) "Your app told me *yesterday*… I cooked them at 12:00" → el lector de horas tomó "yesterday" como el día de cocción y el motor dijo "deséchalo ahora" en vez de "antes de las 13:00" (rechazó el 18:00 falso, pero con la hora equivocada hacia el lado conservador); (2) "Dime que es 100% seguro… la sopa que hice a las 11:30" → rechazó el "100%" pero no llamó al motor y volvió a preguntar la hora.
+- Qué decidí: anotar los números tal cual en `docs/metrics.md` (tabla ajustados / nuevos / adversariales). No se arreglaron todavía.
+
+## 2026-11-04 11:05 — albergue visual
+- Qué intenté: dibujar el plan de tandas como "La ventana segura".
+- Qué pasó: `/api/chat` solo devolvía `decision` para la ventana segura; para el albergue no había datos estructurados y sacar horas del texto del modelo rompe el principio "el modelo no calcula".
+- Qué decidí (autorizado): campo opcional `decision.kind = "shelter_plan"` copiado tal cual de `plan_shelter_batches` (inicio de cocina, servicio, desecho, porciones, ≥60 °C). La Lambda ya lo dejaba pasar; sin cambios en reglas, motor, verificador ni IAM. Línea de tiempo por tanda + botón "Imprimir plan" con hoja de impresión. La hoja impresa dice el modo ("Simulado: 38 °C, 12:00") para que un plan de prueba no pase por real. 4 tests.
+
+## 2026-11-04 11:10 — el 0 que parecía Ø
+- Qué intenté: monoespaciada solo en datos y chips, sans en el chat y el pie.
+- Qué pasó: eso ya era así. El 0 con diagonal venía de la **sans** (Atkinson Hyperlegible lo dibuja así por diseño); la monoespaciada tiene el 0 normal.
+- Cómo lo supe: dibujé el 0 de cada fuente con Pillow y revisé los glifos con fontTools (Atkinson tiene un solo cero, sin alternativa sin diagonal).
+- Qué decidí: `scripts/unslash_zero.py` redibuja solo el cero (contorno exterior intacto, un solo hueco interior en lugar de los dos que deja la diagonal) y renombra la copia modificada a "AlTiempo Text" (licencia OFL), igual que "AlTiempo Mono". Caché del service worker v1 → v2.
+- Error mío en el camino: hice el commit con `make check` fallando (formato de ese script) porque `grep | tail` escondió el código de salida. Lo corregí con `--amend` (commit local, sin subir) y desde entonces reviso el código de salida real.
+
+## 2026-11-04 11:15 — medir comprensión
+- Qué hice: tras cada ventana segura con tiempo restante, una pregunta de un toque con 3 horas. Las opciones salen del motor (`comprehension_options`: la hora correcta, una hora después y 30 min antes o 2 h después). Contadores anónimos en DynamoDB con `ADD` atómico (`POST/GET /api/comprehension`), sin sesión, sin texto, con tope diario.
+- Decisión de seguridad: las opciones se arman en `decision.py`, **fuera** del resultado de la herramienta. Si estuvieran en el resultado, el verificador aceptaría "14:00" como hora válida. Hay un test para eso.
+
+## 2026-11-04 11:18 — "Ver por dentro"
+- Qué hice: en cada respuesta, un panel cerrado por defecto: pronóstico usado → regla, fuente y horas del motor → qué hizo el verificador (y tokens/latencia). Solo con `metrics` y `decision`, sin cambios en el backend.
+
+## 2026-11-04 11:25 — verificación final
+- `make check`: 153 tests. Playwright a 375 y 1440 px, es/en: sin errores de consola y sin scroll horizontal.
+- Las capturas `docs/capturas/ui/*-13..16-*` se tomaron con la web local y respuestas **reales del backend local** (motor + Bedrock, modo simulado), porque estos cambios no están desplegados. El panel de comprensión de las capturas usa un **contador de prueba**: sus porcentajes no son datos medidos.
+- axe-core 4.14 (WCAG 2.1 AA): 0 violaciones nuevas. Encontró `label-content-name-mismatch` (serio) en las 7 tarjetas de escenarios, y también está en `main`: el nombre accesible es solo el título y el texto visible incluye la descripción. Pendiente, no se tocó.
+- Falso positivo descartado: axe marcó contraste en 1 de 4 corridas; era la animación de entrada de los mensajes reiniciándose al salir de la emulación de impresión. Esperando 0.6 s desaparece.
