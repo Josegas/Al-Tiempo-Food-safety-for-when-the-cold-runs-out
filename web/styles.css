@@ -201,6 +201,12 @@ body[data-view="live"] .mode-badge { background: var(--emerald-tint); color: var
 .pt-cook dd { color: var(--amber-ink); }
 
 /* Comprehension check: one tap, options come from the rules engine. */
+.hygiene { margin-top: 10px; padding: 6px 10px; border-left: 3px solid var(--line-strong); font-size: .84rem; color: var(--muted); }
+.hygiene p { margin: 2px 0; }
+.hygiene-kicker { font-size: .74rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--forest); }
+.hygiene-tip { color: var(--ink); }
+.hygiene-k { font-weight: 700; }
+.hygiene-src a { color: inherit; }
 .quiz { margin-top: 12px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-card); background: var(--paper); }
 .quiz-q { margin: 0 0 8px; font-weight: 700; font-size: .92rem; color: var(--forest); }
 .quiz-kicker { display: block; margin-bottom: 2px; font-weight: 400; font-size: .78rem; color: var(--muted); }

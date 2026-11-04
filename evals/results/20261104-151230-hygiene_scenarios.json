@@ -1,0 +1,89 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1750,
+  "avg_input_tokens": 7354,
+  "avg_output_tokens": 168,
+  "cost_per_turn_usd": 0.00289,
+  "verifier_retries": 1,
+  "verifier_blocks": 0,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según la regla de la FDA, tu ensalada de lechuga y jitomate para el comedor debe comerse antes de las **13:00** en la comida del mediodía y antes de las **15:00** en la comida de la tarde. \n\nCocina solo para la porción que se comerá en cada comida; no dejes sobras a temperatura ambiente. \n\nLa regla se basa en que la temperatura pronosticada llegará a 38 °C.",
+    "answers": [
+     "Según la regla de la FDA, tu ensalada de lechuga y jitomate para el comedor debe comerse antes de las **13:00** en la comida del mediodía y antes de las **15:00** en la comida de la tarde. \n\nCocina solo para la porción que se comerá en cada comida; no dejes sobras a temperatura ambiente. \n\nLa regla se basa en que la temperatura pronosticada llegará a 38 °C."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 3255,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 10961,
+    "output_tokens": 306,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [
+       "12:00",
+       "14:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de alimentos crudos en la misma tabla. Ante la duda, lo más seguro es no comerlo, porque el contacto entre el pollo crudo y el tomate puede transmitir bacterias peligrosas.\n\nSi ya lo comiste, vigila por síntomas como vómito, diarrea o dolor abdominal. Si aparecen, ve a la clínica lo antes posible.",
+    "answers": [
+     "Mis reglas no cubren la preparación de alimentos crudos en la misma tabla. Ante la duda, lo más seguro es no comerlo, porque el contacto entre el pollo crudo y el tomate puede transmitir bacterias peligrosas.\n\nSi ya lo comiste, vigila por síntomas como vómito, diarrea o dolor abdominal. Si aparecen, ve a la clínica lo antes posible."
+    ],
+    "tools": [],
+    "latency_ms": 1100,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3424,
+    "output_tokens": 80,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1750,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 7679,
+    "output_tokens": 119,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

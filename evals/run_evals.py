@@ -99,6 +99,12 @@ def run(model: str, scenarios: list[dict], repeat: int) -> dict:
             fails = [f"error {error}"] if error else check(s, answer, tools)
             if not error and s.get("no_repeat") and len(answers) > 1 and answers[-1] == answers[-2]:
                 fails.append("same answer twice in a row")
+            if not error and "expect_hygiene_tip" in s:  # chosen in code (agent/hygiene.py)
+                from agent.hygiene import pick_tip
+
+                got = (pick_tip((s.get("turns") or [s["prompt"]])[-1], s["lang"]) or {}).get("id")
+                if got != s["expect_hygiene_tip"]:
+                    fails.append(f"hygiene tip {got} (expected {s['expect_hygiene_tip']})")
             if not error and s.get("expect_tool_last_turn") is not None:
                 last_turn = agent.messages[_last_user_index(agent.messages) :]
                 if s["expect_tool_last_turn"] not in tools_called(last_turn):

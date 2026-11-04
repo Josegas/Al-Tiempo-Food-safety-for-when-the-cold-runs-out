@@ -21,6 +21,7 @@ from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
 from agent.agent import build_agent, clean_answer
 from agent.decision import safe_window_decision, shelter_plan_decision
+from agent.hygiene import pick_tip
 from agent.request_context import RequestSettings, set_current
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -139,6 +140,9 @@ def invoke(payload: dict, context=None) -> dict:
     decision = safe_window_decision(turn) or shelter_plan_decision(turn)
     if decision:  # optional: lets the web draw the timeline (safe window / shelter batches) from the engine's numbers
         response["decision"] = decision
+    tip = pick_tip(prompt, language)  # chosen in code from the user's words; shown after the answer
+    if tip:
+        response["hygiene_tip"] = tip
     return response
 
 

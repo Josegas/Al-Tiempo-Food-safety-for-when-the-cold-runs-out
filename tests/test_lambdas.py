@@ -194,3 +194,15 @@ def test_comprehension_has_a_daily_cap_and_empty_stats(api):
     )
     r = api.handler(event("GET /api/comprehension"), None)
     assert json.loads(r["body"]) == {"answered": 0, "correct": 0}
+
+
+def test_chat_passes_the_hygiene_tip_through(api):
+    tip = {"id": "WASH_PRODUCE", "tip": "Lava las frutas.", "why": "x", "source_name": "WHO", "source_url": "https://who.int"}  # fmt: skip
+
+    def invoke(**kw):
+        body = {"answer": "ok", "metrics": {}, "hygiene_tip": tip}
+        return {"response": io.BytesIO(json.dumps(body).encode())}
+
+    api.AGENTCORE = SimpleNamespace(invoke_agent_runtime=invoke)
+    r = api.handler(event("POST /api/chat", {"prompt": "ensalada", "session_id": SESSION}), None)
+    assert json.loads(r["body"])["hygiene_tip"] == tip

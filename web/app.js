@@ -109,6 +109,7 @@ const I18N = {
       print: "Imprimir plan", people: (n) => `${n} personas`,
       aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
     },
+    hygiene: { kicker: "Consejo de higiene", why: "Por qué:", src: "Fuente:" },
     quiz: {
       kicker: "Comprobación anónima · opcional",
       q: "¿Se entendió? Toca la hora límite que te dimos arriba:",
@@ -220,6 +221,7 @@ const I18N = {
       print: "Print plan", people: (n) => `${n} people`,
       aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
     },
+    hygiene: { kicker: "Hygiene tip", why: "Why:", src: "Source:" },
     quiz: {
       kicker: "Anonymous check · optional",
       q: "Was it clear? Tap the deadline we gave you above:",
@@ -466,7 +468,7 @@ function typingMessage() {
   return addNode(m);
 }
 
-function botMessage(answer, metrics, decision) {
+function botMessage(answer, metrics, decision, hygiene) {
   const m = el("article", "msg msg-bot");
   const body = el("div", "ans");
   renderAnswer(body, answer);
@@ -474,6 +476,8 @@ function botMessage(answer, metrics, decision) {
   const tl = safeWindowTimeline(decision) || shelterTimeline(decision);
   if (tl) m.appendChild(tl);
   m.appendChild(decisionTrail(metrics));
+  const tip = hygieneNote(hygiene);
+  if (tip) m.appendChild(tip);
   const quiz = quizBlock(decision);
   if (quiz) m.appendChild(quiz);
   const meta = el("div", "meta");
@@ -488,6 +492,30 @@ function botMessage(answer, metrics, decision) {
   const inside = insideView(metrics, decision);
   if (inside) m.appendChild(inside);
   return addNode(m);
+}
+
+// ---------------------------------------------------------------- hygiene tip
+// Chosen by the backend's code from the user's words (rules/hygiene_tips.yaml), never by the model.
+// A small note after the decision: it must not compete with the safe window.
+function hygieneNote(h) {
+  if (!h || typeof h.tip !== "string" || !h.tip) return null;
+  const H = t("hygiene");
+  const box = el("aside", "hygiene");
+  box.setAttribute("aria-label", H.kicker);
+  box.append(el("p", "hygiene-kicker", H.kicker), el("p", "hygiene-tip", h.tip));
+  if (h.why) {
+    const why = el("p", "hygiene-why");
+    why.append(el("span", "hygiene-k", `${H.why} `), document.createTextNode(h.why));
+    box.appendChild(why);
+  }
+  if (h.source_name && /^https:\/\//.test(h.source_url || "")) {
+    const src = el("p", "hygiene-src");
+    const a = el("a", "", h.source_name.split(" - ")[0]);
+    a.href = h.source_url; a.target = "_blank"; a.rel = "noopener";
+    src.append(el("span", "hygiene-k", `${H.src} `), a);
+    box.appendChild(src);
+  }
+  return box;
 }
 
 // ---------------------------------------------------------------- safe-window timeline
@@ -858,7 +886,7 @@ async function send(prompt, { echo = true } = {}) {
     if (data.error || !data.answer) {
       errorMessage(data.answer || t("error"), data.error === "daily_cap" ? null : prompt);
     } else {
-      botMessage(data.answer, data.metrics, data.decision);
+      botMessage(data.answer, data.metrics, data.decision, data.hygiene_tip);
     }
   } catch (e) {
     typing.remove();
