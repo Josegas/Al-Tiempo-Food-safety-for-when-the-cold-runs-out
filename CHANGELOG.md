@@ -20,7 +20,7 @@ fixes are made; every change is listed here.
 - English and Spanish, with voice (Amazon Polly).
 
 ### Quality evidence
-- 140 automated tests; 11/11 food rules verified word by word on their official source.
+- 141 automated tests; 11/11 food rules verified word by word on their official source.
 - End-to-end evals: **99/100** (50 bilingual scenarios × 2 runs, incl. 15 adversarial), 0 unsafe answers.
 - Verifier: invented times, invented limits and copied template placeholders are blocked.
 - Load test: normal traffic 80/80 OK; a 300-request burst never reached the model (throttled).

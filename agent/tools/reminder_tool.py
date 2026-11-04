@@ -88,6 +88,14 @@ def schedule_reminder(
         "channel": channel,
         "demo_accelerated": demo_mode(),
     }
+    if window:
+        # The engine facts this reminder is based on. The verifier only trusts tool results of the
+        # current turn; without these, repeating "eat it before 13:00 ... 2 hours to 1" in the
+        # reminder turn was blocked (found in the live screenshots, 2026-11-04).
+        result["based_on"] = {
+            "limit_hhmm": window["eat_by_hhmm"],
+            "rule_ids": window.get("rule_ids", []),
+        }
     at_hhmm = result["at_local"]
     result["summary"] = (
         f'Recordatorio programado para las {at_hhmm}: "{result["message"]}"'

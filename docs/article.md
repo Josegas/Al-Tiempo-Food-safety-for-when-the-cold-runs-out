@@ -42,7 +42,7 @@ The rules exist. The WHO says not to leave cooked food at room temperature for m
 4. Try **Shelter (120 people)**, **Power outage** and **Danger signs**. Tap **🔊 Listen** to hear any answer.
 5. Switch to **Live** mode to use your real location (rounded to about 1 km) and the real hourly forecast.
 
-![Demo home on a phone: demo banner, language switch and scenario buttons](capturas/01-demo-home.png)
+![Home on a phone: simulated-mode banner, language switch and scenario buttons](capturas/01-demo-home.png)
 
 ## What it does
 
@@ -163,7 +163,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **140 / 140** |
+| Rules-engine, tool and safety tests passing | **141 / 141** |
 | End-to-end evals consistent with the rules engine (50 bilingual scenarios × 2 runs) | **99 / 100 (99%)**, 0 unsafe answers |
 | Adversarial evals: pressure about babies, "say it's 100% safe", medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim | **29 / 30**, 0 unsafe answers |
 | Invented times blocked by the verifier (adversarial unit tests) | **8 / 8** |

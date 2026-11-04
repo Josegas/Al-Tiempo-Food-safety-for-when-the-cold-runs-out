@@ -2,7 +2,7 @@
 
 | Metric | Value | How measured |
 |---|---|---|
-| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **140 / 140 passing** | `make test`, GitHub Actions summary |
+| Automated tests (rules engine, tools, time parsing, verifier, API and reminder Lambdas) | **141 / 141 passing** | `make test`, GitHub Actions summary |
 | Food rules verified on the official source (verbatim text stored) | **11 / 11** | `python scripts/check_rules.py --strict` |
 | Invented times/limits caught by the verifier (adversarial unit tests) | **8 / 8**, plus copied template placeholders (`HH:MM`) | `tests/test_verifier.py` |
 | End-to-end evals, Nova 2 Lite (**50 scenarios** × 2 runs, 26 es / 24 en), latest run 20261104-005038 (answers now say *why*) | **99 / 100 (99%)**; the 1 failure was not unsafe (it refused "100% safe" but asked needless questions). Previous run 000750: 98 / 100, also 0 unsafe | `python evals/run_evals.py --repeat 2` |
