@@ -246,3 +246,17 @@ def test_status_eat_before_deadline():
     w = re_.compute_safe_window("cooked_food", T0, "general", flat(25), now=T0)
     assert w.status == "eat_before_deadline"
     assert w.minutes_left == 120
+
+
+def test_outage_summary_after_fridge_limit_says_discard():
+    """Real bug (live demo): the model said "you have until 10:00" when it was already 12:00."""
+    r = re_.track_outage(datetime(2026, 11, 4, 6), datetime(2026, 11, 4, 12), False, "full")
+    assert "ended at 10:00" in r["summary"]["en"] and "Throw away" in r["summary"]["en"]
+    assert "terminó a las 10:00" in r["summary"]["es"]
+    assert "until Friday 06:00" in r["summary"]["en"]  # 48 h later, with the day
+    assert "viernes a las 06:00" in r["summary"]["es"]
+
+
+def test_outage_summary_before_limit_door_closed():
+    r = re_.track_outage(datetime(2026, 11, 4, 6), datetime(2026, 11, 4, 9), False, "half")
+    assert "until 10:00" in r["summary"]["en"] and "until tomorrow 06:00" in r["summary"]["en"]

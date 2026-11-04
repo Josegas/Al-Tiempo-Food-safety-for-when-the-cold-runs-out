@@ -64,4 +64,15 @@ def compute_safe_window(
     result["time_source"] = time_source
     result["now_hhmm"] = now.strftime("%H:%M")
     result["forecast_source"] = source
+    # Remembered for schedule_reminder: the reminder's time and text come from here, not the model.
+    tool_context.agent.state.set(
+        "last_window",
+        {
+            "food_type": food_type,
+            "eat_by_hhmm": result["eat_by_hhmm"],
+            "reminder_at_hhmm": result["reminder_at"][11:16],
+            "status": result["status"],
+            "source_name": result["deciding_source"]["source_name"],
+        },
+    )
     return out(result)

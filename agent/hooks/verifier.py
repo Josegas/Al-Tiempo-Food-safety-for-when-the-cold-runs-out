@@ -200,7 +200,9 @@ class VerifierHook(HookProvider):
         lang = self.language if self.language in SAFE_TEMPLATE else "en"
         window = ""
         if self.last_window:
-            src = self.last_window["sources"][-1]["source_name"]
+            src = (self.last_window.get("deciding_source") or self.last_window["sources"][-1])[
+                "source_name"
+            ]
             hhmm = self.last_window["eat_by_hhmm"]
             expired = self.last_window.get("status") == "discard_now"
             if lang == "en":
