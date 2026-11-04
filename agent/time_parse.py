@@ -2,6 +2,7 @@
 
 "cociné frijoles a las 12:00"      -> clock 12:00
 "a las 2 de la tarde" / "at 2 pm"  -> clock 14:00
+"a las 3 y media de la tarde"      -> clock 15:30
 "hace 5 horas" / "5 hours ago"     -> 300 minutes ago
 "hace media hora" / "an hour ago"  -> 30 / 60 minutes ago
 """
@@ -24,14 +25,40 @@ AGO_EN = re.compile(r"\b" + _NUM + r"\s*(hours?|hrs?|h|minutes?|mins?)\s+ago\b",
 HALF_HOUR = re.compile(r"\b(hace\s+media\s+hora|half\s+an\s+hour\s+ago)\b", re.I)
 JUST_NOW = re.compile(r"\b(ahorita|reci[eé]n|acabo\s+de|just\s+now|just\s+(cooked|made))\b", re.I)
 
-# 12:00, 2:30 pm, 14h30
-CLOCK = re.compile(r"\b(\d{1,2})[:h](\d{2})\s*([ap]\.?\s?m\.?)?", re.I)
-# "a las 12", "a la 1 de la tarde", "at 2 pm", "at 7"
+_HOUR_WORDS = {
+    "una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5, "seis": 6, "siete": 7, "ocho": 8,
+    "nueve": 9, "diez": 10, "once": 11, "doce": 12, "one": 1, "two": 2, "three": 3, "four": 4,
+    "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+}  # fmt: skip
+_SUFFIX = (
+    r"([ap]\.?\s?m\.?|(?:de|en)\s+la\s+(?:mañana|tarde|noche)"
+    r"|in\s+the\s+(?:morning|afternoon|evening))?"
+)
+# 12:00, 2:30 pm, 14h30, 3:30 de la tarde
+CLOCK = re.compile(r"\b(\d{1,2})[:h](\d{2})\s*" + _SUFFIX, re.I)
+# "a las 12", "a la 1 de la tarde", "a las 3 y media de la tarde", "a las tres y cuarto",
+# "a las 2 menos cuarto", "a las 4 y 20", "at 2 pm", "at 7"
 CLOCK_WORDS = re.compile(
-    r"\b(?:a\s+las?|at)\s+(\d{1,2})(?!\s*(?:horas?|hours?|min))\s*"
-    r"([ap]\.?\s?m\.?|de\s+la\s+(?:mañana|tarde|noche)|in\s+the\s+(?:morning|afternoon|evening))?",
+    r"\b(?:a\s+las?|at)\s+(\d{1,2}|" + "|".join(_HOUR_WORDS) + r")\b"
+    r"(?:\s+(y\s+media|y\s+cuarto|menos\s+cuarto|y\s+\d{1,2})(?:\s*min(?:utos)?\b)?)?"
+    r"(?!\s*(?:horas?|hours?|min))\s*" + _SUFFIX,
     re.I,
 )
+NOON = re.compile(r"\b(al\s+mediod[ií]a|at\s+noon)\b", re.I)
+
+
+def _fraction(hh: int, frac: str | None) -> tuple[int, int]:
+    """'y media' -> :30, 'y cuarto' -> :15, 'menos cuarto' -> one hour earlier :45, 'y 20' -> :20."""
+    if not frac:
+        return hh, 0
+    f = " ".join(frac.lower().split())
+    if f == "y media":
+        return hh, 30
+    if f == "y cuarto":
+        return hh, 15
+    if f == "menos cuarto":
+        return (hh - 1) % 24 or 12, 45
+    return hh, int(f.split()[-1])
 
 
 @dataclass
@@ -95,7 +122,12 @@ def extract_user_time(text: str, now: datetime) -> UserTime:
     else:
         m = CLOCK_WORDS.search(text)
         if m:
-            hh, mm, suffix = int(m.group(1)), 0, m.group(2)
+            tok = m.group(1).lower()
+            hour = _HOUR_WORDS[tok] if tok in _HOUR_WORDS else int(tok)
+            hh, mm = _fraction(hour, m.group(2))
+            suffix = m.group(3)
+        elif NOON.search(text):
+            hh, mm, suffix = 12, 0, "pm"
     if hh is not None and hh < 24 and mm < 60:
         return _resolve_clock(hh, mm, suffix, now)
 

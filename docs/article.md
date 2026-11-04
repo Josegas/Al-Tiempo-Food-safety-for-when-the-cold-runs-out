@@ -9,7 +9,7 @@
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **108** automated tests. **36 of 36** end-to-end evals passed. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
+| **Technical Execution** | Live on AWS. **130** automated tests. **36 of 36** end-to-end evals passed. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
 | **Communication** | Demo with no login, buttons for 7 ready-made scenarios, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
@@ -155,7 +155,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **108 / 108** |
+| Rules-engine, tool and safety tests passing | **130 / 130** |
 | End-to-end evals consistent with the rules engine (18 bilingual scenarios × 2 runs) | **36 / 36 (100%)** |
 | Adversarial evals: baby + 5-hour-old rice, "say it's 100% safe", medicine dose, diagnosis | **10 / 10** |
 | Invented times blocked by the verifier (adversarial unit tests) | **8 / 8** |
@@ -170,7 +170,7 @@ We have not tested Al Tiempo with families in the field yet. That is the most im
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 108 pytest tests cover:
+**Deterministic core, tested.** 130 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
 - reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace 5 horas"*, *"2 pm"*);
 - the verifier, the API and the reminder Lambdas.
@@ -270,6 +270,8 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 **Two more real bugs, found on the live system:**
 - **Reminder text:** the first live reminders were written by the model, and one of the first three arrived as *"Eat the beans now, discard after"*, with no time. Reminder time and text are now built in code from the engine result.
 - **Outage mode:** the model once told a user at 12:00 *"you have until 10:00"* for the fridge. The engine had the correct verdict; the model misread it. The engine now returns a plain-language summary in both languages, and the model only relays it. We applied the same idea to the safe-window answer. In the next full eval run, verifier retries dropped from **2 to 0** and the suite still passed **36/36**.
+
+**A user test after launch:** a tester wrote *"cooked it around half past three in the afternoon"* in Spanish (*"a las 3 y media de la tarde"*). Our time reader understood **03:00**. The verifier noticed that the model's 15:30 didn't match and fell back to the safe template, so nobody was told to eat unsafe food, but the answer was clumsy. The reader now understands "y media", "y cuarto", "menos cuarto", "al mediodía" and hours written as words. We added 12 regression tests with the tester's exact sentence. In the same round, the model sometimes ignored *"I kept the fridge closed"*, so door and freezer state are now read from the user's words too. The full eval suite is back to **36/36** with **0** verifier retries.
 
 **Other challenges:**
 - **Sources that block automated readers:** USDA FSIS returned HTTP 403, so we cite the FDA pages that publish the same rules and that we could check word by word.

@@ -3,6 +3,8 @@
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from agent.tools import (
     check_danger_signs,
     compute_safe_window,
@@ -194,3 +196,27 @@ def test_safe_window_summary_is_built_in_code():
     b = j(compute_safe_window(food_type="cooked_rice", audience="infant",
                               tool_context=ctx("rice I cooked 5 hours ago", language="es")))  # fmt: skip
     assert b["summary"].endswith("ya pasó el límite: deséchalo ahora.")
+
+
+@pytest.mark.parametrize(
+    "text,door,freezer",
+    [
+        ("The power went out at 10:30. I kept the fridge closed. Freezer is half full.", False, "half"),
+        ("The power went out at 06:00. I haven't opened the fridge and the freezer is full.", False, "full"),
+        ("Se fue la luz a las 06:00, no he abierto el refri y el congelador está lleno.", False, "full"),
+        ("se fue la luz, el refri sigue cerrado, el congelador a medias", False, "half"),
+        ("se fue la luz y abrí el refri dos veces", True, None),
+        ("the power went out at 7", None, None),
+    ],
+)  # fmt: skip
+def test_outage_reads_door_and_freezer_from_user_text(text, door, freezer):
+    from agent.tools.outage_tool import door_and_freezer_from_text
+
+    assert door_and_freezer_from_text(text) == (door, freezer)
+
+
+def test_outage_user_words_beat_missing_model_args():
+    """Eval failure: user said "I kept the fridge closed", model passed nothing -> no 14:30."""
+    c = ctx("The power went out at 10:30. I kept the fridge closed. Freezer is half full.")
+    r = j(track_outage(tool_context=c))
+    assert r["fridge_status"] == "ok" and "until 14:30" in r["summary"]["en"]
