@@ -164,6 +164,23 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 
 We have not tested Al Tiempo with families in the field yet. That is the most important next step (see Limitations).
 
+**Informal usability test:** [TODO: results of the informal test with people, n = …, or delete this line]
+
+### How we would measure impact in a pilot
+
+System metrics show that the guidance is **correct**. A pilot has to show that it is **useful** and that it **changes what people do**. Our plan for a 4-week pilot with one community kitchen and 20–30 households without a fridge, together with local community health workers:
+
+| Question | Indicator | How we would measure it |
+|---|---|---|
+| Do people understand the answer? | % who can repeat the eat-by time and the action ("eat before 13:00 or throw it away") in their own words | Short check right after the first use |
+| Does it change behavior? | % of cooked meals eaten inside the safe window, before vs. during the pilot | A daily one-question check-in about the main meal |
+| Do reminders work in real life? | % of reminders delivered on time, and % followed by the action (eat or discard) | Delivery logs (already measured: `delay_s`) + the check-in |
+| Does it help shelters and kitchens? | Portions discarded per batch, and portions served outside the window | The coordinator's batch sheet, before vs. during |
+| Is it safe? | Answers that contradict the official rules | The verifier log + review of a random 10% sample |
+| Is it affordable? | Cost per household per month | Cost Explorer with the project tag (already in place) |
+
+We will **not** claim fewer illnesses from a pilot this small. That needs a larger study with health-service data. What the pilot can honestly show is understanding, behavior change and food waste.
+
 ## Technical Execution
 
 **It runs on AWS today**, and all of it is infrastructure as code (AWS CDK in Python), split into two stacks:
