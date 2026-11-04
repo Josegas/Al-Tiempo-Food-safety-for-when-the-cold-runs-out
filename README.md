@@ -7,6 +7,8 @@ An AI agent built with the **Strands Agents SDK** on **AWS** that tells families
 refrigeration — and shelters / community kitchens after disasters — **until what time cooked food
 is safe to eat today**, based on official food-safety rules and the hourly heat forecast.
 
+**Focus area: Health** (preventing foodborne illness). Heat, power outages and disasters are the risk factors and the context of use.
+
 > **Design principle:** the model talks and explains; official rules decide; when in doubt, the safest option.
 > The LLM never computes times or limits: a deterministic, tested rules engine does, and a verifier hook
 > blocks any answer whose times don't match the engine.
@@ -80,6 +82,10 @@ CI blocks a release if any rule is unverified (`python scripts/check_rules.py --
 ## Disclaimer
 Al Tiempo gives general food-safety guidance from public health sources. It is not medical advice.
 In an emergency, call your local emergency number.
+
+## Third-party data and terms
+- Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); used through the free, non-commercial API (no ads, no subscriptions). The demo mode uses saved forecasts.
+- Food-safety rules are paraphrased and cited; `rules/food_rules.yaml` keeps one short verbatim sentence per rule only so anyone can verify it on the official page. No third-party logos are used.
 
 ## License
 [MIT](LICENSE)
