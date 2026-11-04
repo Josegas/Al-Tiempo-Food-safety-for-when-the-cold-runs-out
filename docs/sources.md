@@ -23,6 +23,24 @@ Notes:
   that hour as the limit to eat it. The engine labels it as adapted.
 - POLICY_CHILD_STRICT is **our** policy (stricter than official rules) and is labeled as such.
 
+## A2. Reasons ("why"), objections and hygiene tips (checked 2026-11-04)
+Each rule's one-sentence reason (`why` in `rules/food_rules.yaml`), the objection replies (`rules/objections.yaml`) and the hygiene tips (`rules/hygiene_tips.yaml`) are backed by these verbatim sentences. The WHO PDF text was extracted with `pdftotext` from the official file.
+
+| Used for | Source | Verbatim |
+|---|---|---|
+| Why of the 2-hour rule; "covered", "lime or chili" | [WHO — Five keys to safer food](https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf) | "Microorganisms can multiply very quickly if food is stored at room temperature." |
+| Why of hot holding (> 60 °C) | same | "By holding at temperatures below 5°C or above 60°C, the growth of microorganisms is slowed down or stopped." |
+| Why of the FDA 2 h / 1 h rules | [FDA — Handling Food Safely While Eating Outdoors](https://www.fda.gov/food/buy-store-serve-safe-food/handling-food-safely-while-eating-outdoors) (current as of 03/05/2024) | "As food heats up in summer temperatures, bacteria multiply rapidly." · "This is when bacteria in food can multiply rapidly, and lead to foodborne illness." |
+| Why of the rice rule; "I'll boil it again"; "I already ate it" (vomiting, diarrhoea) | [NHS — Starchy foods and carbohydrates](https://www.nhs.uk/live-well/eat-well/food-types/starchy-foods-and-carbohydrates/) (reviewed 15 March 2023) | "The bacteria multiply and produce toxins that make you be sick (vomit) and have diarrhoea. Reheating food will not get rid of these toxins." |
+| "It smelled / looked fine" | [FDA — Food and Water Safety During Power Outages and Floods](https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods) | "You can’t rely on appearance or odor." (the page does not mention taste) |
+| Why of the formula rules | [CDC — Infant Formula Preparation and Storage](https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/preparation-and-storage.html) (May 14, 2026) | "Prepared infant formula can spoil if it is left out at room temperature." · "The combination of infant formula and your baby's saliva can cause bacteria to grow." |
+| Why of the strict mode for children; "we always did it" | [WHO — Food safety fact sheet](https://www.who.int/news-room/fact-sheets/detail/food-safety) (4 June 2026) | see section B (29% of the burden; almost 1 in 9 people) |
+| Hygiene: separate raw food | WHO — Five keys (above) | "Use separate equipment and utensils such as knives and cutting boards for handling raw foods" · "Raw food, especially meat, poultry and seafood, and their juices, can contain dangerous microorganisms which may be transferred onto other foods during food preparation and storage." |
+| Hygiene: wash hands | same | "Wash your hands before handling food and often during food preparation" · "Wash your hands after going to the toilet" · "These microorganisms are carried on hands, wiping cloths and utensils, especially cutting boards and the slightest contact can transfer them to food and cause foodborne diseases." |
+| Hygiene: fruits, vegetables, water | same | "Wash fruits and vegetables, especially if eaten raw" · "Use safe water or treat it to make it safe" · "Raw materials, including water and ice, may be contaminated with dangerous microorganisms and chemicals." · "simple measures such as washing and peeling may reduce the risk." |
+
+Project policy, not an official source: "don't give spoiled food to animals" (`ANIMALS` in `rules/objections.yaml`) and "if you use a disinfectant, follow the instructions on its label".
+
 ## B. Numbers for the article (latest available)
 
 | Claim | Number | Source | Status |
