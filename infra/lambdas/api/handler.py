@@ -129,6 +129,8 @@ def chat(body: dict) -> dict:
         out["decision"] = result["decision"]
     if isinstance(result.get("hygiene_tip"), dict):  # optional hygiene tip chosen by code
         out["hygiene_tip"] = result["hygiene_tip"]
+    if isinstance(result.get("leftover_tip"), dict):  # optional compost note chosen by code
+        out["leftover_tip"] = result["leftover_tip"]
     return _resp(200, out)
 
 

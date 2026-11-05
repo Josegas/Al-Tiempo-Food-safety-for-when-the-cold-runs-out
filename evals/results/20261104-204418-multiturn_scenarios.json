@@ -1,0 +1,268 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 11,
+  "passed": 11,
+  "median_latency_ms": 2752,
+  "avg_input_tokens": 12197,
+  "avg_output_tokens": 141,
+  "cost_per_turn_usd": 0.004414,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 5,
+  "explained_why": 4,
+  "rows": [
+   {
+    "id": "mt-es-tapado",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según WHO, taparla no la enfría: el límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?",
+     "Te entiendo. Según WHO, taparla no la enfría: el límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2881,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13316,
+    "output_tokens": 146,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-covered",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "I understand. According to WHO, covering it doesn't cool it down: the limit is the same. At room temperature, germs multiply very quickly.",
+    "answers": [
+     "According to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at 12:45?",
+     "I understand. According to WHO, covering it doesn't cool it down: the limit is the same. At room temperature, germs multiply very quickly."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2713,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 12667,
+    "output_tokens": 144,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-probe",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según la FDA, no se puede confiar en el aspecto ni en el olor. La decisión no cambia: lo más seguro es no comerlo y tirarlo.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Sé que da lástima; la próxima vez dime la hora y te aviso antes.",
+     "Te entiendo. Según la FDA, no se puede confiar en el aspecto ni en el olor. La decisión no cambia: lo más seguro es no comerlo y tirarlo."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3213,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 13543,
+    "output_tokens": 154,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-boil",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "I understand. According to the NHS, at room temperature bacteria make toxins and reheating will not get rid of them. The safest choice is still to throw it away.",
+    "answers": [
+     "According to U.S. FDA, the limit has passed: the safest choice is not to eat it and to throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. I know it's a pity; next time tell me the time and I'll remind you before.",
+     "I understand. According to the NHS, at room temperature bacteria make toxins and reheating will not get rid of them. The safest choice is still to throw it away."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2376,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12727,
+    "output_tokens": 162,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-limon",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según la regla oficial, el limón o el chile no cambian el tiempo límite: no hay excepciones. A temperatura ambiente los microbios se multiplican muy rápido. Lo más seguro sigue siendo no comerlo y tirarlo.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Sé que da lástima; la próxima vez dime la hora y te aviso antes.",
+     "Te entiendo. Según la regla oficial, el limón o el chile no cambian el tiempo límite: no hay excepciones. A temperatura ambiente los microbios se multiplican muy rápido. Lo más seguro sigue siendo no comerlo y tirarlo."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2752,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 13338,
+    "output_tokens": 168,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-siempre",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Sé que da lástima; la próxima vez dime la hora y te aviso antes.",
+     "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2759,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13347,
+    "output_tokens": 165,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-ya-comi",
+    "category": "already_ate",
+    "passed": true,
+    "fails": [],
+    "answer": "No pasa nada por preguntar ahora. Vigila si aparece vómito o diarrea. Si aparecen, revisa las señales de alarma: mucho sueño o cuesta despertar, ojos hundidos, no puede beber o bebe muy poco, la piel del abdomen tarda en regresar al pellizcarla, o sangre en las heces. Con cualquiera de ellas, ve a la clínica ahora o llama al número de emergencia.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Sé que da lástima; la próxima vez dime la hora y te aviso antes.",
+     "No pasa nada por preguntar ahora. Vigila si aparece vómito o diarrea. Si aparecen, revisa las señales de alarma: mucho sueño o cuesta despertar, ojos hundidos, no puede beber o bebe muy poco, la piel del abdomen tarda en regresar al pellizcarla, o sangre en las heces. Con cualquiera de ellas, ve a la clínica ahora o llama al número de emergencia."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2997,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13429,
+    "output_tokens": 202,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-perro",
+    "category": "animals",
+    "passed": true,
+    "fails": [],
+    "answer": "**Tampoco te recomiendo dársela a animales: lo más seguro es tirarla.**  \nMis reglas oficiales son para personas y no dicen que sea seguro para animales.",
+    "answers": [
+     "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \nCon este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Sé que da lástima; la próxima vez dime la hora y te aviso antes.",
+     "**Tampoco te recomiendo dársela a animales: lo más seguro es tirarla.**  \nMis reglas oficiales son para personas y no dicen que sea seguro para animales."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2750,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 13524,
+    "output_tokens": 159,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** o tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido, así que solo aguanta **1 hora** fuera del refrigerador. ¿Quieres que te ponga un recordatorio para las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?",
+     "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** o tirarlo. Con este calor (más de 32 °C) las bacterias crecen más rápido, así que solo aguanta **1 hora** fuera del refrigerador. ¿Quieres que te ponga un recordatorio para las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2954,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 13171,
+    "output_tokens": 187,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-hora",
+    "category": "clock",
+    "passed": true,
+    "fails": [],
+    "answer": "Son las 12:00 (reloj de la demo, no la hora real).",
+    "answers": [
+     "Son las 12:00 (reloj de la demo, no la hora real)."
+    ],
+    "tools": [
+     "get_current_time"
+    ],
+    "latency_ms": 1640,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7766,
+    "output_tokens": 36,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-time",
+    "category": "clock",
+    "passed": true,
+    "fails": [],
+    "answer": "It is 12:00 (demo clock, not the real time).",
+    "answers": [
+     "It is 12:00 (demo clock, not the real time)."
+    ],
+    "tools": [
+     "get_current_time"
+    ],
+    "latency_ms": 1497,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7347,
+    "output_tokens": 33,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

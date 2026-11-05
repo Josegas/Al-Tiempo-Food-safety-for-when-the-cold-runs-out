@@ -81,10 +81,11 @@ def test_summary_explains_why_from_engine_data():
 
     r = _engine_result()
     es = window_summary(r, "es")
+    # the answer carries the SHORT reason; the long one (forecast numbers) stays in window_reason
     assert (
-        "Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega "
-        "a 38 °C), el límite baja de 2 horas a 1." in es
+        "Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2." in es
     )
+    assert "el pronóstico llega a 38 °C" in window_reason(r, "es")
     mild = {"deciding_source": {"rule_id": "FDA_2H"}, "max_temp_c": 28.5, "hot_threshold_c": 32.0}
     assert "máximo 28.5 °C" in window_reason(mild, "es") and "2 hours" in window_reason(mild, "en")
     no_forecast = {**mild, "deciding_source": {"rule_id": "FDA_HOT_1H"}, "max_temp_c": None}

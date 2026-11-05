@@ -1,0 +1,79 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1735,
+  "avg_input_tokens": 5381,
+  "avg_output_tokens": 85,
+  "cost_per_turn_usd": 0.00201,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servir la comida. ¿Cuántos comensales son? ¿A qué horas planeas servir la ensalada?",
+    "answers": [
+     "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servir la comida. ¿Cuántos comensales son? ¿A qué horas planeas servir la ensalada?"
+    ],
+    "tools": [],
+    "latency_ms": 1735,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3831,
+    "output_tokens": 60,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de alimentos crudos en la misma tabla que otros alimentos. Ante la duda, lo más seguro es no usar la misma tabla para cortar pollo crudo y tomate, ya que podría haber contaminación cruzada. Te recomiendo usar tablas diferentes o lavar bien la tabla entre usos. Si ya cortaste ambos en la misma tabla, lo más seguro es descartar el tomate para evitar riesgos de contaminación.",
+    "answers": [
+     "Mis reglas no cubren la preparación de alimentos crudos en la misma tabla que otros alimentos. Ante la duda, lo más seguro es no usar la misma tabla para cortar pollo crudo y tomate, ya que podría haber contaminación cruzada. Te recomiendo usar tablas diferentes o lavar bien la tabla entre usos. Si ya cortaste ambos en la misma tabla, lo más seguro es descartar el tomate para evitar riesgos de contaminación."
+    ],
+    "tools": [],
+    "latency_ms": 1319,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3825,
+    "output_tokens": 90,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1837,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8487,
+    "output_tokens": 106,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

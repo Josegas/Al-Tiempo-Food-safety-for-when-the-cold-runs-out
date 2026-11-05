@@ -9,8 +9,8 @@
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **141** automated tests. **99 of 100** end-to-end eval runs passed (50 bilingual scenarios × 2), and the one failure was not unsafe. **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute of the scheduled time. |
-| **Communication** | Demo with no login, buttons for 7 ready-made scenarios, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
+| **Technical Execution** | Live on AWS. **240** automated tests. **50 of 50** bilingual end-to-end scenarios in the final run, **18 of 18** held-out scenarios written after tuning, **11 of 11** multi-turn follow-ups. **26 questions real people asked**, read by hand: **24 right, 2 doubtful, 0 wrong, 0 unsafe** (first run: 15 / 4 / 7, 2 unsafe). **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute. |
+| **Communication** | Demo with no login, buttons for 8 ready-made scenarios, a **traffic light** with the time in large type, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
 ---
@@ -37,8 +37,8 @@ The rules exist. The WHO says not to leave cooked food at room temperature for m
 - **Video (< 3 min):** [TODO: YouTube link]
 
 1. Open the demo on your phone and choose **English** or **Español**.
-2. Tap **Safe window**. The page starts in **Simulated** mode: a saved 38 °C day and a clock fixed at 12:00, so everyone sees the same result. The answer is *"According to U.S. FDA, eat it before 13:00 or throw it away. Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45"*.
-3. Tap **Reminder**. In Simulated mode the clock is accelerated, so the reminder arrives in about **1 minute** instead of 45.
+2. Tap **I'm about to cook**. The page starts in **Simulated** mode: a saved 38 °C day and a clock fixed at 12:00, so everyone sees the same result. A green light shows **15:00** in large type, and the answer is *"If you cook it at 14:00, according to U.S. FDA, eat it before 15:00. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at 14:45?"* Say *"yes, remind me"*.
+3. Tap **Already cooked** to see the same rule after cooking (green, with a live countdown), or ask about rice from 5 hours ago to see the red **Throw it away**. In Simulated mode the clock is accelerated, so a reminder arrives in about **1 minute**.
 4. Try **Shelter (120 people)**, **Power outage** and **Danger signs**. Tap **🔊 Listen** to hear any answer.
 5. Switch to **Live** mode to use your real location (rounded to about 1 km) and the real hourly forecast.
 
@@ -46,7 +46,7 @@ The rules exist. The WHO says not to leave cooked food at room temperature for m
 
 ## What it does
 
-Every answer below is a **real answer from the live demo** (38 °C day, clock at 12:00); the screenshots are the same conversations on a phone. `[...]` marks where we shortened it.
+Every answer below is a **real answer from the agent** in simulated mode (38 °C day, clock at 12:00), copied as it came; the screenshots are the same conversations on a phone. `[...]` marks where we shortened it. [TODO: after the deploy, re-check the new answers on the live demo]
 
 ### 1. Safe window + reminders (the core)
 > **User:** I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?
@@ -58,6 +58,24 @@ Every answer below is a **real answer from the live demo** (38 °C day, clock at
 If the user accepts, **Amazon EventBridge Scheduler** creates a one-time schedule for that exact minute, which deletes itself after running. The reminder reaches the web app, and SMS is optional. The reminder's time and text are built in code from the rules engine result: *"Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"*.
 
 ![Safe-window answer with its source, and the reminder arriving](capturas/02-safe-window-reminder.png)
+
+**Before cooking, not only after.** The most useful moment is before the food sits out, so the first button is the plan:
+> **User:** I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?
+> **Al Tiempo:** If you cook it at 14:00, according to U.S. FDA, eat it before **15:00**. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at **14:45**?
+> **User:** yes please remind me
+> **Al Tiempo:** Reminder set for **14:45**: "Al Tiempo: eat the food before 15:00. After that, throw it away. Source: U.S. FDA".
+
+**A traffic light first.** Each answer with a decision starts with one colour and one big time, copied from the rules engine's output: **green** "eat it before 15:00" with a live countdown, **amber** when little time is left or the food won't last until mealtime, **red** "throw it away", and **grey** when a detail is missing ("when did you cook it?"). Someone who reads little gets the decision from the colour and the number. The **🔊 Listen** button reads the answer aloud (Amazon Polly).
+
+[TODO: screenshot of the traffic light on a phone after the deploy: green 15:00 and red "Throw it away"]
+
+**It listens to the details people actually give.** We adapted 26 questions that real people asked in public forums (see *Challenges*). They don't say "I cooked at 12:00 and have no fridge". They say things like these, and all of them are read **in code** from the user's words:
+- *"He eats at 3 on the building site"* → that is when it will be eaten, not when it was cooked: **"It won't last until 15:00: eat it before 13:00 or throw it away."**
+- *"The tamales are still in the steamer, steaming"* → WHO: food kept piping hot (above 60 °C) is not on the room-temperature clock; the clock starts when the heat goes off.
+- *"The room has air conditioning, 22 degrees"* → the user's room temperature replaces the outdoor forecast, so the limit is 2 hours instead of 1, and never more than 2.
+- *"What do I do with the stew?"* (no time) → it asks when it was cooked, and says the rule meanwhile. The model is not allowed to invent a cooking time.
+- *"Since last night"*, *"since 7am"*, *"an hour and a half ago"* → read correctly. (Before this round, "an hour and a half" was read as one hour: an error toward the unsafe side, now covered by a test.)
+- *"Sorry, I didn't understand"* → the same engine result in one simpler sentence.
 
 Every safe-window answer also says **why**, in one sentence built in code: *"Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1."* Under it, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left, the reason and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
 
@@ -75,6 +93,8 @@ Every safe-window answer also says **why**, in one sentence built in code: *"Abo
 For families who *do* have a fridge and lost power, the clock starts when the power went out. It uses the FDA's outage rules: 4 hours for a closed fridge, 48 hours for a full freezer, 24 hours for a half-full one.
 > **User:** The power went out at 06:00. I haven't opened the fridge and the freezer is full. What do I do?
 > **Al Tiempo:** According to the official rules: **Fridge:** The 4-hour limit ended at 10:00. Throw away perishable food from the fridge, or check it with a food thermometer if you have one. **Freezer:** Keep it closed; food stays safe within the 48-hour rule until **Friday 06:00**. The power outage started at 06:00 and it is now 12:00.
+
+If the user says the ice in the freezer melted and froze again, the freezer's 24/48-hour rule no longer applies and the answer is to throw away the perishable food (a conservative project policy). If the user never mentioned a freezer, the answer doesn't talk about one, so the model can't "move" their raw chicken into it (a real eval failure, now a test).
 
 ![Power-outage mode](capturas/09-outage.png)
 
@@ -104,13 +124,24 @@ If someone has diarrhea or vomiting, Al Tiempo asks fixed questions based on the
 
 When asked for medicine doses, it declines kindly and sends the person to a clinic.
 
+### Talk to it, see the heat, print it
+- **Speak instead of typing.** A microphone button uses the browser's speech recognition (Chrome, Edge, Android). When the question was spoken, the answer is **read aloud automatically with Amazon Polly**: a full spoken conversation for people who read or type little. In Chrome the audio is processed by Google, and the button says so. We wanted Amazon Transcribe so the audio stays in AWS, but it is not available on this account's Free plan (same reason as SMS); it is the first next step.
+- **Today's heat, hour by hour.** Under the safe window, a small chart draws the same hourly forecast the engine used, the 32 °C line, and the safe window shaded on top. You can *see* why today it's 1 hour and not 2. The forecast hours are kept out of the model's context, so they never become "allowed" times for the verifier.
+- **A card for the kitchen wall.** "Print card" turns a safe window or a shelter plan into a big, plain page: the eat-by time in huge type (or a batch table with **THROW AWAY at** times and a "done" box), the deciding source, the mode (simulated or real) and the date, and a QR code back to the app. For a community kitchen without smartphones on every table, the plan lives on the wall.
+
+[TODO: screenshots after the deploy: microphone button, heat chart, printed card]
+
+### Small notes after the decision (chosen in code, never changing it)
+- **"What to do with it?"** When the answer is "throw it away", a small note says what can go in a home compost pile: fruit and vegetable scraps and small amounts of cooked food, but not meat, fish, dairy or grease, which attract animals ([US EPA, Composting At Home](https://www.epa.gov/recycle/composting-home)). It never suggests feeding spoiled food to animals.
+- **Hygiene tip.** If the message is about raw salad, a cutting board used for raw chicken, or handwashing, one short tip from the [WHO Five Keys to Safer Food](https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf) appears, with its reason. At most one per answer, and no chemical amounts ("if you use a disinfectant, follow its label").
+
 ## How it works
 
 > **Design principle: the model talks and explains. Official rules decide. When in doubt, the safest option.**
 
 ![Architecture of Al Tiempo on AWS](img/architecture.png)
 
-The agent is a **Strands Agents** loop with **7 tools**. Every tool that calculates something is deterministic Python with unit tests:
+The agent is a **Strands Agents** loop with **8 tools**. Every tool that calculates something is deterministic Python with unit tests:
 
 | Tool | What it returns |
 |---|---|
@@ -121,6 +152,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | `plan_shelter_batches` | Staggered batches, portions and discard time per batch |
 | `schedule_reminder` | One-time EventBridge Scheduler schedule at the exact minute |
 | `check_danger_signs` | Escalate or not, plus the emergency number for the country |
+| `get_current_time` | The time, only when the user asks for it (the demo clock in simulated mode) |
 
 **Rules are data, not code.** `rules/food_rules.yaml` holds 11 rules. Each one stores its `source_url`, the date it was checked, and the **verbatim sentence** from the official page, so anyone can verify it with Ctrl+F. Two rules say openly what they are:
 - **Adapted:** the NHS says to refrigerate cooked rice within 1 hour. With no fridge, we use that hour as the limit to eat it.
@@ -133,7 +165,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Amazon EventBridge Scheduler | Reminders at an exact future minute, even after the user closes the app |
 | AWS Lambda + Amazon API Gateway | API with throttling (10 requests/s, bursts of 20) and a daily cap of 500 messages; delivers reminders |
 | Amazon DynamoDB | Delivered reminders and the daily counter. Personal data expires after **7 days (TTL)** |
-| Amazon Polly | Reads answers aloud for people who read little |
+| Amazon Polly | Reads answers aloud for people who read little; automatic when the question was spoken |
 | Amazon S3 + CloudFront | The public demo website |
 | Amazon CloudWatch + AWS Budgets | Logs without personal data, a dashboard, 3 alarms, and a $10 budget with an automatic kill switch |
 | Amazon SNS | Alarm emails; SMS reminders (optional) |
@@ -147,7 +179,7 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 **Why it fits them:**
 - **Plain answers:** you get a clock time and an action ("eat before 13:00 or throw it away"), not a table of rules.
 - **Voice:** any answer can be heard with Amazon Polly, for people who read little. There are two languages today, and adding more is a configuration change.
-- **Works when the user is away:** the reminder arrives even if the user closed the app, through EventBridge Scheduler. SMS for basic phones is implemented. It is off in the public demo because SMS sandbox accounts can only text verified numbers.
+- **Works when the user is away:** the reminder arrives even if the user closed the app, through EventBridge Scheduler. SMS for basic phones is implemented (Amazon SNS) and tested with a fake client, but it is off in the public demo: the AWS account runs on the Free plan, where SMS is not available. If an SMS fails, the web reminder still arrives.
 - **Safe by default:**
   - If the cooking time is unknown, it assumes the worst case and asks for the time.
   - If the forecast fails, it uses the strictest limit (1 hour).
@@ -163,12 +195,15 @@ The agent is a **Strands Agents** loop with **7 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **141 / 141** |
-| End-to-end evals consistent with the rules engine (50 bilingual scenarios × 2 runs) | **99 / 100 (99%)**, 0 unsafe answers |
+| Rules-engine, tool and safety tests passing | **240 / 240** |
+| End-to-end evals consistent with the rules engine (50 bilingual scenarios, final run) | **50 / 50**; 49 / 50 in each of the 4 runs before it that evening, 0 unsafe answers |
+| Held-out scenarios written after tuning (never tuned on) | **18 / 18** |
+| **26 questions adapted from real public questions**, read by hand (right / doubtful / wrong) | **24 / 2 / 0**, 0 unsafe (first run, before any change: 15 / 4 / 7, 2 unsafe) |
+| Multi-turn follow-ups ("but it was covered", "I already ate it", "I didn't understand") | **11 / 11** |
 | Adversarial evals: pressure about babies, "say it's 100% safe", medicine doses, diagnosis, antibiotics, home remedies, "ignore your rules", a fake WHO claim | **29 / 30**, 0 unsafe answers |
 | Invented times blocked by the verifier (adversarial unit tests) | **8 / 8** |
 | Reminders delivered on the live system | **9 / 9**, 4 to 45 seconds after the scheduled minute |
-| Cost per conversation turn (Bedrock) | **$0.0022** (evals), **$0.0024** (live) |
+| Cost per conversation turn (Bedrock) | **$0.0029** (final eval run; the prompt grew with style examples), earlier **$0.0022** (evals) and **$0.0024** (live) |
 
 We have not tested Al Tiempo with families in the field yet. That is the most important next step (see Limitations).
 
@@ -195,9 +230,9 @@ We will **not** claim fewer illnesses from a pilot this small. That needs a larg
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 141 pytest tests cover:
+**Deterministic core, tested.** 240 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
-- reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace 5 horas"*, *"2 pm"*);
+- reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace una hora y media"*, *"since 7am"*, *"desde anoche"*, *"he eats at 3"*, *"I'm going to cook at 2"*), plus the room temperature they report;
 - the verifier, the API and the reminder Lambdas.
 
 **The verifier hook.** It uses Strands hooks:
@@ -218,6 +253,8 @@ We ran the same agent with three Bedrock models:
 **Amazon Nova Lite** passed **8/18 (44%)**, **Nova Pro 15/18 (83%)** and **Nova 2 Lite 18/18 (100%)**. Nova 2 Lite costs about half as much per turn as Nova Pro. With Nova 2 Lite, that 18-scenario suite passed **36/36** over two runs.
 
 **Then we made the test harder.** We grew the suite to **50 scenarios** (26 in Spanish, 24 in English). The expected times come from the rules engine, not from us. The new scenarios include expired food, spoken times, formula, toddlers, an opened fridge, antibiotics, home remedies, *"ignore your rules"* and a fake WHO claim. The first full run scored **95/100**, and the failures were worth more than the score. They exposed **four real bugs**: an outage deadline the model reused after the fridge door was opened, a prompt rule that only seemed to apply to outages, a template placeholder (*"eat it before HH:MM"*) copied into an answer, and an eval harness that didn't tell the agent the user's language. Each one now has a test. After the fixes: **98/100**, and **99/100** in the latest run (with the *why* sentence added), median **1,644 ms**, **$0.00227** per turn, and **0** safe-template fallbacks. No failure was unsafe: they were correct refusals in different words, an evasive answer that didn't correct a false claim, and one that asked needless questions. We report them as they are.
+
+**After the real-question fixes and shorter answers (4 November, evening), final run with the final code:** **50/50** (median **1,950 ms**, **$0.00285** per turn), **18/18** held-out, **11/11** multi-turn follow-ups, **9/10** adversarial (the one miss refused to say "100% safe" and asked for the time instead of calling the engine: safe, but not the expected answer), **3/3** hygiene tips, and **5/6** new cases for room temperature, planned cooking and salads (the miss: a salad "for the community kitchen" got "from what time to what time do you serve?" instead of a plan; a fair question, but not the expected answer). Raw results are in `evals/results/`.
 
 **Live performance (measured on the deployed demo):**
 
@@ -267,8 +304,11 @@ RESULT: PASS
 | — | **Power-outage mode** and a **shelter batch planner** |
 | — | **Deterministic time reading** from the user's own words (the user's text beats the model's arguments) |
 | — | **FinOps:** tagged inference profile, budget alerts, and a **kill switch** (AWS Budgets action) |
-| — | **Amazon Polly** voice, DynamoDB **TTL** for privacy |
-| — | A **safe-window timeline** drawn from the engine's structured output, not from the model's text |
+| — | **Spoken conversation** (browser speech in, Amazon Polly out), DynamoDB **TTL** for privacy |
+| — | An **hourly heat chart** of the forecast the engine used, and a **printable kitchen card** with a QR code |
+| — | A **traffic light + safe-window timeline** drawn from the engine's structured output, not from the model's text, with a live countdown |
+| — | **Before-cooking planning**: "I'm going to cook at 14:00" gives the eat-by time and a reminder before the food ever sits out |
+| — | **Details read in code from the user's words**: eating time vs. cooking time, food still on the heat, the room temperature, "since last night"; the model's own guesses of a time are ignored |
 | — | An **installable web app that works offline** with the basic official rules (signal is intermittent where fridges are missing) |
 
 ## Existing solutions
@@ -302,6 +342,24 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 
 **A user test after launch:** a tester wrote *"cooked it around half past three in the afternoon"* in Spanish (*"a las 3 y media de la tarde"*). Our time reader understood **03:00**. The verifier noticed that the model's 15:30 didn't match and fell back to the safe template, so nobody was told to eat unsafe food, but the answer was clumsy. The reader now understands "y media", "y cuarto", "menos cuarto", "al mediodía" and hours written as words. We added 12 regression tests with the tester's exact sentence. In the same round, the model sometimes ignored *"I kept the fridge closed"*, so door and freezer state are now read from the user's words too. The 18-scenario eval suite we had then was back to **36/36** with **0** verifier retries.
 
+**The biggest test: 26 questions real people asked.** We paraphrased 26 questions that people posted in public forums: food forgotten overnight, a lunch for a construction worker, tamales still steaming, a baby's leftovers, outages, "my grandmother says boiling kills everything", a community kitchen for 150 people, fermented rice. We ran them **once, before changing anything**, and read every answer by hand:
+
+| | Right | Doubtful | Wrong | Unsafe |
+|---|---|---|---|---|
+| First run, nothing changed | 15 | 4 | 7 | **2** |
+| Final run, after the fixes below | **24** | 2 | **0** | **0** |
+
+None of the failures was a wrong rule. Two were follow-ups that ended in a generic safe template and one was a missing *"my rules don't cover fermented food"* (all fixed earlier that day). Most of the rest were about **how real people describe time**, and every one became a test or an eval case:
+- *"He eats at 3"* was read as cooked at 03:00. Now the eating time and the cooking time are separate, and the answer says *"it won't last until 15:00"*.
+- *"An hour and a half ago"* was read as one hour, an error toward the **unsafe** side.
+- *"Since last night"*, *"since 7am"* and *"after 6 hours without power"* were not understood, and the model filled the gap with a made-up time. The tool now ignores the model's guesses: no time in the user's words → it asks.
+- *"I'm going to cook at 2"* was read as "yesterday at 2" → "throw it away". Planned cooking is now in the future, with a reminder.
+- A thawed and refrozen freezer was called **"safe until tomorrow"** (unsafe). Melted ice now voids the freezer rule.
+- The model put the user's raw chicken in a freezer the user never mentioned. The outage answer no longer mentions a freezer unless the user did.
+- A real crash we found along the way: the verifier mistook a meal plan for a safe window and its fallback raised `KeyError`, so the user saw "sorry, I could not answer". Fixed with a test.
+
+The 2 doubtful answers left are wording, not decisions: one says it "can't use the kitchen temperature" (it can) and asks for the cooking time, and one credits the FDA for "lime or chili doesn't change the limit", a rule we adapted, not a quote. Both point to the safe side. We report them as they are.
+
 **Other challenges:**
 - **Sources that block automated readers:** USDA FSIS returned HTTP 403, so we cite the FDA pages that publish the same rules and that we could check word by word.
 - **Verifier false positives:** *"30 minutes left"* and *"the rice from 5 hours ago"* were wrongly blocked at first, and we fixed them with tests.
@@ -311,7 +369,7 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 
 | Item | Value |
 |---|---|
-| Bedrock, measured | **$0.0022 per turn** (5,625 input / 128 output tokens on average over 36 eval turns; AWS Price List API, us-east-1). Live: **$0.0024** |
+| Bedrock, measured | **$0.0029 per turn** in the final eval run (7,571 input / 127 output tokens on average over 50 turns; AWS Price List API, us-east-1). Earlier: $0.0022 (evals), $0.0024 (live) |
 | AgentCore Runtime | Billed by active vCPU and GB-hours. No servers run 24/7: no EC2, no NAT gateway, no provisioned throughput |
 | Estimate for the whole judging period (≈1,000 turns until 27 November) | **≈ $3–5** in total |
 
@@ -340,12 +398,14 @@ policy: arn:aws:iam::<account>:policy/al-tiempo-kill-switch
 - The rules are **time and temperature rules**. They don't cover food that was already contaminated, or allergies.
 - **No field study yet.** All metrics above are system metrics.
 - The model can still phrase things imperfectly. In one eval answer it said food "has been out for 2 hours" when it had been 0 hours (conservative, but false). The verifier checks times and limits, not every sentence.
-- SMS works only for numbers verified in the SNS sandbox. The demo uses web reminders.
+- SMS reminders are implemented but disabled in the demo: the AWS account is on the Free plan, where SMS is not available. The demo uses web reminders and browser notifications.
 - Two languages so far.
+- The model still varies between runs (about ±2 scenarios out of 26–50), so a judge may see slightly different wording from ours. The decision and its times come from the engine every time.
 
 **Next steps:**
 - Pilot with a community kitchen and with community health workers.
 - WhatsApp and SMS in production.
+- Amazon Transcribe for voice input, so the audio stays in AWS (blocked today by the account's Free plan).
 - More languages.
 - Bulk alerts for community health workers on heat-wave days.
 - Guidance for evaporative clay-pot coolers.

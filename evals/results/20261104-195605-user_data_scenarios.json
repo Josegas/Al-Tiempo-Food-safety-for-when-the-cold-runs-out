@@ -1,0 +1,153 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 6,
+  "passed": 6,
+  "median_latency_ms": 2901,
+  "avg_input_tokens": 12377,
+  "avg_output_tokens": 191,
+  "cost_per_turn_usd": 0.00461,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 5,
+  "explained_why": 3,
+  "rows": [
+   {
+    "id": "ud-es-aire-acondicionado",
+    "category": "user_room_temp",
+    "passed": true,
+    "fails": [],
+    "answer": "Según WHO, cómelo antes de las 14:00 o deséchalo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (22 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco. Puedo recordártelo a las 13:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Según WHO, cómelo antes de las 14:00 o deséchalo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (22 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco. Puedo recordártelo a las 13:45."
+    ],
+    "tools": [
+     "compute_safe_window",
+     "compute_safe_window"
+    ],
+    "latency_ms": 4904,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 18607,
+    "output_tokens": 274,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-en-ac-room",
+    "category": "user_room_temp",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO, eat it before 14:00 or throw it away. At room temperature, germs multiply very quickly: with the temperature you told me (22 °C) the limit is 2 hours, not 1; at room temperature it is never more than 2 hours, even in a cool room. I can remind you at 13:45.",
+    "answers": [
+     "According to U.S. FDA, eat it before 13:00 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45.",
+     "According to WHO, eat it before 14:00 or throw it away. At room temperature, germs multiply very quickly: with the temperature you told me (22 °C) the limit is 2 hours, not 1; at room temperature it is never more than 2 hours, even in a cool room. I can remind you at 13:45."
+    ],
+    "tools": [
+     "compute_safe_window",
+     "compute_safe_window"
+    ],
+    "latency_ms": 4253,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 17693,
+    "output_tokens": 250,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-es-ensalada-sin-datos",
+    "category": "plan_needs_user_data",
+    "passed": true,
+    "fails": [],
+    "answer": "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servir la comida. ¿Cuántos comensales son? ¿A qué horas planeas servir la ensalada?",
+    "answers": [
+     "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servir la comida. ¿Cuántos comensales son? ¿A qué horas planeas servir la ensalada?"
+    ],
+    "tools": [],
+    "latency_ms": 1021,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3782,
+    "output_tokens": 60,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-es-ensalada-cruda",
+    "category": "plan_needs_user_data",
+    "passed": true,
+    "fails": [],
+    "answer": "Según la regla de la FDA, la ensalada de lechuga y jitomate es comida cruda. **Prepárala justo antes de servirla a las 14:00.** No la dejes fuera más de una hora; como hoy hará 38 °C, lo más seguro es tirarla después de las 15:00 si no se consume.\n\nPara 40 personas, cocina solo para esta comida y no guardes sobras a temperatura ambiente.",
+    "answers": [
+     "Según la regla de la FDA, la ensalada de lechuga y jitomate es comida cruda. **Prepárala justo antes de servirla a las 14:00.** No la dejes fuera más de una hora; como hoy hará 38 °C, lo más seguro es tirarla después de las 15:00 si no se consume.\n\nPara 40 personas, cocina solo para esta comida y no guardes sobras a temperatura ambiente."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 2528,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8000,
+    "output_tokens": 170,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-es-voy-a-cocinar",
+    "category": "planned_cooking",
+    "passed": true,
+    "fails": [],
+    "answer": "Recordatorio programado para las 14:45: \"Al Tiempo: come la comida antes de las 15:00. Después, deséchala. Fuente: U.S. FDA\".",
+    "answers": [
+     "Si lo cocinas a las 14:00, según U.S. FDA, cómelo antes de las 15:00; lo que sobre después, tíralo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Cocina solo lo que se va a comer. Puedo recordártelo a las 14:45.",
+     "Recordatorio programado para las 14:45: \"Al Tiempo: come la comida antes de las 15:00. Después, deséchala. Fuente: U.S. FDA\"."
+    ],
+    "tools": [
+     "compute_safe_window",
+     "schedule_reminder"
+    ],
+    "latency_ms": 3275,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 18167,
+    "output_tokens": 252,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-en-going-to-cook",
+    "category": "planned_cooking",
+    "passed": true,
+    "fails": [],
+    "answer": "If you cook it at 14:00, according to U.S. FDA, eat it before 15:00; throw away what is left after that. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. Cook only what will be eaten. I can remind you at 14:45.",
+    "answers": [
+     "If you cook it at 14:00, according to U.S. FDA, eat it before 15:00; throw away what is left after that. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. Cook only what will be eaten. I can remind you at 14:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1998,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8013,
+    "output_tokens": 141,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

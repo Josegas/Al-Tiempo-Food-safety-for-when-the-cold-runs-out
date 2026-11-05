@@ -41,6 +41,18 @@ Each rule's one-sentence reason (`why` in `rules/food_rules.yaml`), the objectio
 
 Project policy, not an official source: "don't give spoiled food to animals" (`ANIMALS` in `rules/objections.yaml`) and "if you use a disinfectant, follow the instructions on its label".
 
+## A3. What to do with food that is thrown away (checked 2026-11-04)
+Shown as a small note under a "throw it away" decision (`rules/leftover_tips.yaml`, chosen by code). Source: US EPA, "Composting At Home", https://www.epa.gov/recycle/composting-home (page "Last updated on December 8, 2025").
+
+| Used for | Verbatim (section) |
+|---|---|
+| Fruit and vegetable scraps can go in a home compost pile | "Fruit and vegetable scraps" (What to Add to a Backyard Compost Pile) |
+| Only small amounts of cooked food | "Cooked food (small amounts are fine)" (What to Avoid Adding to a Backyard Compost Pile) |
+| Meat, fish, dairy and grease stay out | "Meat, fish, and bones" · "Cheese and dairy products" · "Fats, oils, and grease" (same section) |
+| Why | "These foods can attract animals." · "Backyard composting piles generally do not reach high enough temperatures to fully decompose these materials." |
+
+Feeding thrown-away food to animals is **not** suggested (project policy, `ANIMALS` in `rules/objections.yaml`): none of our sources says it is safe for animals.
+
 ## B. Numbers for the article (latest available)
 
 | Claim | Number | Source | Status |

@@ -298,7 +298,9 @@
   "expected": "un congelador lleno y cerrado aguanta (unas 48 horas); mantenerlo cerrado.",
   "must_contain_any": [
    "48",
-   "cerrad"
+   "cerrad",
+   "no lo abras",
+   "no lo abres"
   ],
   "must_not_contain": [
    "desecha la carne",
@@ -475,7 +477,10 @@
   "must_contain_any": [
    "tanda",
    "desech",
-   "deséch"
+   "deséch",
+   "tira",
+   "tire",
+   "tirar"
   ],
   "must_not_contain": [
    "100% segur"

@@ -22,6 +22,7 @@ from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from agent.agent import build_agent, clean_answer
 from agent.decision import safe_window_decision, shelter_plan_decision
 from agent.hygiene import pick_tip
+from agent.leftovers import pick_leftover_tip
 from agent.request_context import RequestSettings, set_current
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -140,9 +141,16 @@ def invoke(payload: dict, context=None) -> dict:
     decision = safe_window_decision(turn) or shelter_plan_decision(turn)
     if decision:  # optional: lets the web draw the timeline (safe window / shelter batches) from the engine's numbers
         response["decision"] = decision
+        if decision.get("kind") == "safe_window" and agent.state.get("last_hourly"):
+            # the day's heat curve (forecast, not shown to the model); drawn by the web
+            decision["hourly"] = agent.state.get("last_hourly")
     tip = pick_tip(prompt, language)  # chosen in code from the user's words; shown after the answer
     if tip:
         response["hygiene_tip"] = tip
+    else:  # one small note at most: what to do with food that must be thrown away (compost)
+        leftover = pick_leftover_tip(decision, language)
+        if leftover:
+            response["leftover_tip"] = leftover
     return response
 
 

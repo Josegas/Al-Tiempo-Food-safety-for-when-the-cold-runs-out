@@ -1,0 +1,116 @@
+[
+  {
+    "id": "ud-es-aire-acondicionado",
+    "category": "user_room_temp",
+    "lang": "es",
+    "turns": [
+      "Hice frijoles a las 12:00, ¿hasta qué hora se pueden comer?",
+      "pero están en un cuarto con aire acondicionado a 22 grados"
+    ],
+    "prompt": "pero están en un cuarto con aire acondicionado a 22 grados",
+    "expect_tool_last_turn": "compute_safe_window",
+    "must_contain_any": [
+      "14:00"
+    ],
+    "must_not_contain": [
+      "no puedo aceptar",
+      "es tu decisión",
+      "100% segur"
+    ],
+    "no_repeat": true
+  },
+  {
+    "id": "ud-en-ac-room",
+    "category": "user_room_temp",
+    "lang": "en",
+    "turns": [
+      "I cooked beans at 12:00, until when can we eat them?",
+      "the kitchen has AC, it's 22 degrees C in there"
+    ],
+    "prompt": "the kitchen has AC, it's 22 degrees C in there",
+    "expect_tool_last_turn": "compute_safe_window",
+    "must_contain_any": [
+      "14:00"
+    ],
+    "must_not_contain": [
+      "can't accept",
+      "your decision",
+      "100% safe"
+    ],
+    "no_repeat": true
+  },
+  {
+    "id": "ud-es-ensalada-sin-datos",
+    "category": "plan_needs_user_data",
+    "lang": "es",
+    "turns": [
+      "voy a hacer ensalada de lechuga y jitomate para el comedor"
+    ],
+    "prompt": "voy a hacer ensalada de lechuga y jitomate para el comedor",
+    "must_contain_any": [
+      "cuántas",
+      "cuantas",
+      "personas"
+    ],
+    "must_not_contain": [
+      "cocina la ensalada",
+      "10 personas",
+      "Perdón, no pude responder"
+    ]
+  },
+  {
+    "id": "ud-es-ensalada-cruda",
+    "category": "plan_needs_user_data",
+    "lang": "es",
+    "turns": [
+      "vamos a servir ensalada de lechuga y jitomate en el comedor, somos 40 personas y comemos a las 14:00"
+    ],
+    "prompt": "vamos a servir ensalada de lechuga y jitomate en el comedor, somos 40 personas y comemos a las 14:00",
+    "expect_tool_last_turn": "plan_meals",
+    "must_contain_any": [
+      "prepár",
+      "prepar"
+    ],
+    "must_not_contain": [
+      "cocina la ensalada",
+      "cocínala",
+      "Cocina a las 13:00",
+      "Perdón, no pude responder"
+    ]
+  },
+  {
+    "id": "ud-es-voy-a-cocinar",
+    "category": "planned_cooking",
+    "lang": "es",
+    "turns": [
+      "Voy a cocinar frijoles a las 14:00 y no tengo refri. ¿Hasta qué hora se pueden comer?",
+      "sí, ponme el recordatorio"
+    ],
+    "prompt": "sí, ponme el recordatorio",
+    "expect_tool_last_turn": "schedule_reminder",
+    "must_contain_any": [
+      "14:45"
+    ],
+    "must_not_contain": [
+      "ya pasó",
+      "Perdón, no pude responder"
+    ]
+  },
+  {
+    "id": "ud-en-going-to-cook",
+    "category": "planned_cooking",
+    "lang": "en",
+    "turns": [
+      "I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?"
+    ],
+    "prompt": "I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?",
+    "expect_tool_last_turn": "compute_safe_window",
+    "must_contain_any": [
+      "15:00"
+    ],
+    "must_not_contain": [
+      "has passed",
+      "throw it away now"
+    ]
+  }
+]

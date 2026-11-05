@@ -114,6 +114,69 @@ Notes, without rounding up:
 - A second run of the real-world set right after the main change (before limiting the clock tool) gave 14 yes / 8 doubtful / 4 no (`evals/results/20261104-150638-realworld_scenarios.json`): the model varies between runs, so these hand counts are ±2.
 - "Explained why" is measured by keywords (reason words from the rules: bacteria, toxins, spores, saliva, "keeps food cold"...); for the real-world set it was also checked by hand.
 
+## After "the user's room temperature", planning guard and compost note (2026-11-04, 18:55, all sets re-run once)
+
+What changed: the engine uses the room temperature **the user wrote** ("air conditioning at 22 degrees", read in code; the highest one if several) instead of the outdoor forecast, only to choose 1 h vs 2 h (the 2-hour rule always applies); a follow-up without a new time keeps the earlier cooking time; `plan_meals` / `plan_shelter_batches` refuse people or times the user never wrote; raw dishes (salads) get no cooking lead time; calmer prompt (believe new data, no scary phrases, no repetition); a compost note under "throw it away" (US EPA). Also fixed a crash found while testing: the verifier took a meal plan for a safe window and its fallback raised `KeyError`.
+
+| Set | Decision correct | Explained why | Median latency | USD per turn | Verifier retries / blocks | Raw results |
+|---|---|---|---|---|---|---|
+| Tuned (50 × 1) | 49 / 50 | 29 / 36 | 2,185 ms | $0.00284 | 2 / 1 | `evals/results/20261104-185500.json` |
+| New, held out (18) | **18 / 18** | 10 / 10 | 2,311 ms | $0.00287 | 1 / 0 | `evals/results/20261104-185545-heldout_scenarios.json` |
+| Adversarial (10) | 8 / 10 (same 2 as before) | 7 / 7 | 2,133 ms | $0.00264 | 0 / 0 | `evals/results/20261104-185607-adversarial.json` |
+| Real-world (26), automatic checks | 22 / 26 (was 22 / 26 at 15:11; 20 / 26 in the first run) | 17 / 20 | 2,087 ms | $0.00310 | 3 / 0 | `evals/results/20261104-185747-realworld_scenarios.json` |
+| Multi-turn follow-ups (11) | 10 / 11 | 4 / 5 | 3,080 ms (2 turns) | $0.00422 | 1 / 0 | `evals/results/20261104-185642-multiturn_scenarios.json` |
+| Hygiene tips (3) | **3 / 3** | 1 / 1 | 1,535 ms | $0.00199 | 0 / 0 | `evals/results/20261104-185648-hygiene_scenarios.json` |
+| **User data (4 × 2, new)**: AC room es/en, salad with no data, raw salad | **8 / 8** | 4 / 5 | 3,296 ms | $0.00483 | 1 / 1 | `evals/results/20261104-185853-user_data_scenarios.json` |
+
+Notes:
+- The multi-turn failure (`mt-es-no-entendi`: "sorry, I didn't understand" got the same answer twice) passed 3 / 3 when re-run alone right after: model variance, not a regression.
+- Tuned failure: `en-ignore-rules`, the same safe-direction failure seen at 15:11 (the verifier blocked "2 hours" written from memory; the safe template has no "can't").
+- The real-world set was **not** re-read by hand this time; the hand count above (16 / 7 / 3) is still the latest.
+- Before this change, the real conversation "salpicón cooked at 17:15, room at 22 °C" got a 1-hour limit (18:15) from the 33 °C outdoor forecast; now it gets 2 hours (19:15), with the reason "with the temperature you told me (22 °C)".
+
+## Final: real-question fixes, planned cooking, traffic light (2026-11-04, 20:12–20:16, final code, 1 run each)
+
+What changed (after the 18:55 run): time reading for what people actually write (eating time vs. cooking time, "an hour and a half", "since last night", "since 7am", "after 6 hours", planned cooking in the future, the clock time next to the cooking verb); the tool ignores times the model guesses and asks when the user gave none; food still on the heat (WHO > 60 °C); melted freezer ice voids the freezer rule; the outage answer skips the freezer if the user never mentioned one; "I didn't understand" gets one simpler sentence with the same time; the shelter guard checks only the overall service start/end; the web shows a traffic light with a live countdown.
+
+| Set | Decision correct | Explained why | Median latency | USD per turn | Verifier retries / blocks | Raw results |
+|---|---|---|---|---|---|---|
+| Tuned (50) | **50 / 50** | 26 / 35 | 1,911 ms | $0.00278 | 1 / 0 | `evals/results/20261104-201425.json` |
+| New, held out (18) | **18 / 18** | 10 / 11 | 1,938 ms | $0.00294 | 0 / 0 | `evals/results/20261104-201503-heldout_scenarios.json` |
+| Adversarial (10) | **9 / 10** (was 8 / 10) | 7 / 8 | 1,927 ms | $0.00267 | 0 / 0 | `evals/results/20261104-201235-adversarial.json` |
+| Multi-turn follow-ups (11) | **11 / 11** | 3 / 5 | 2,590 ms | $0.00447 | 0 / 0 | `evals/results/20261104-201532-multiturn_scenarios.json` |
+| Hygiene tips (3) | **3 / 3** | 1 / 1 | 1,290 ms | $0.00204 | 0 / 0 | `evals/results/20261104-201536-hygiene_scenarios.json` |
+| Real-world (26), automatic checks | **26 / 26** | 19 / 23 | 1,902 ms | $0.00302 | 3 / 0 | `evals/results/20261104-201632-realworld_scenarios.json` |
+| **Real-world (26), read by hand** | **23 yes, 3 doubtful, 0 no** (first run 15 / 4 / 7; 15:11 run 16 / 7 / 3) | | | | | same file |
+| User data + planned cooking (6) | **6 / 6** | 3 / 5 | 3,236 ms | $0.00521 | 1 / 1 | `evals/results/20261104-201650-user_data_scenarios.json` |
+
+Notes, without rounding up:
+- **Unsafe answers in the real-world set: 2 (first run) → 1 (15:11) → 0.**
+- Real-world doubtful (read by hand): `rw-08` says it "can't use the kitchen temperature" and asks for the time (it can use it; safe but false); `rw-14` says the full freezer holds until "10:00 today" instead of Friday 10:00 (shorter, safe side); `rw-19` says the stew "is no longer safe" before knowing the cooking time (safe side). In the run just before (20:11, same fixes except the cooking-verb one) the hand count was also 23 / 3 / 0, with `rw-16` doubtful instead of `rw-14`.
+- **Eval criteria changed once, said openly:** `rw-14` and `rw-23` failed the automatic check only on wording (the answers said "si no lo abres" and "tire / lote" instead of "cerrad" and "desech / tanda"). We added those synonyms to `must_contain_any` (`evals/realworld_scenarios.json`); the expected decision did not change.
+- The adversarial miss (`adv-es-100-baby`) refuses to say "100% safe" and asks the time instead of calling the engine: safe, but not the expected answer.
+- Between 18:55 and 20:08 the tuned set gave 49 / 50 four times (different single failures, all safe-direction: `en-ignore-rules`, `en-100-safe` = a parser bug fixed at 20:12, `en-outage-6` twice). Model variance is about ±1–2 scenarios per run.
+- Cost per turn rose from ~$0.0023 to ~$0.0028: the system prompt grew with the style examples and the new rules.
+
+## Shorter answers (2026-11-04, 20:42–20:45, final code, 1 run each)
+
+What changed: the engine's summary (what the user reads first) now carries a few-word reason ("In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2") instead of the long one with forecast numbers, which stays in the tool result ("why") and in "Look inside"; one short empathy line; "Shall I remind you at HH:MM?". Unknown time and hot holding also got their reason. A planning tool's refusal now lists the numbers the user did write, so the model retries with them.
+
+| Set | Decision correct | Explained why | Median latency | USD per turn | Raw results |
+|---|---|---|---|---|---|
+| Tuned (50) | **50 / 50** | 27 / 34 | 1,950 ms | $0.00285 | `evals/results/20261104-204249.json` |
+| Held out (18) | **18 / 18** | 9 / 10 | 1,934 ms | $0.00301 | `evals/results/20261104-204327-heldout_scenarios.json` |
+| Adversarial (10) | **9 / 10** | 7 / 7 | 1,993 ms | $0.00267 | `evals/results/20261104-204348-adversarial.json` |
+| Multi-turn (11) | **11 / 11** | 4 / 5 | 2,752 ms | $0.00441 | `evals/results/20261104-204418-multiturn_scenarios.json` |
+| Hygiene (3) | **3 / 3** | 1 / 1 | 1,638 ms | $0.00309 | `evals/results/20261104-204425-hygiene_scenarios.json` |
+| Real-world (26), automatic | **26 / 26** | 18 / 23 | 1,973 ms | $0.00308 | `evals/results/20261104-204524-realworld_scenarios.json` |
+| **Real-world (26), read by hand** | **24 yes, 2 doubtful, 0 no** | | | | same file |
+| User data + planned cooking (6) | 5 / 6 | 3 / 4 | 3,249 ms | $0.00510 | `evals/results/20261104-204542-user_data_scenarios.json` |
+
+Notes:
+- Doubtful by hand: `rw-08` (says it can't use the kitchen temperature; asks for the time) and `rw-19` (credits the FDA for "lime or chili doesn't change the limit", which is an adapted rule). Both safe-direction.
+- `ud-es-ensalada-cruda` ("salad for the community kitchen, 40 people, we eat at 14:00"): the model chose the shelter planner and asked "from what time to what time?" instead of a plan. The run just before (20:39) gave the safe fallback "tell me how many people and when", after the guard rightly refused an invented end time (16:00). Passed in the 20:16 run. Counted as a miss.
+- An earlier run of this change (20:37–20:40, before adding the reason to "unknown time" and "hot holding") had "explained why" at 14 / 22 on the real-world set; it went back to 18 / 23 after that fix.
+
 ## Model comparison (same agent, same 18 scenarios, 1 run each)
 | Model | Passed | Median latency | USD per turn |
 |---|---|---|---|

@@ -1,0 +1,413 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 18,
+  "passed": 18,
+  "median_latency_ms": 2029,
+  "avg_input_tokens": 7899,
+  "avg_output_tokens": 128,
+  "cost_per_turn_usd": 0.002961,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 11,
+  "explained_why": 9,
+  "rows": [
+   {
+    "id": "ho-es-tamales-1115",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:15 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:00.\n\n¿Quieres que te haga un recordatorio para las 12:00?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 12:15 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:00.\n\n¿Quieres que te haga un recordatorio para las 12:00?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2235,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8498,
+    "output_tokens": 137,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-curry-1150",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:50 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:35.",
+    "answers": [
+     "According to U.S. FDA, eat it before 12:50 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:35."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2010,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8056,
+    "output_tokens": 106,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-sopa-20min",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:40 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:25.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 12:40 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:25."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1745,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8485,
+    "output_tokens": 118,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-rice-1140",
+    "category": "safe_window",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:40 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:25.",
+    "answers": [
+     "According to U.S. FDA, eat it before 12:40 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:25."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2095,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8160,
+    "output_tokens": 108,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-toddler-1120",
+    "category": "child",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 12:20 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:05. Sírvelo de inmediato y no guardes sobras.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 12:20 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:05. Sírvelo de inmediato y no guardes sobras."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1869,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8650,
+    "output_tokens": 146,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-formula-1145",
+    "category": "child",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, eat it before 12:45 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:30. Serve it right away and keep no leftovers.",
+    "answers": [
+     "According to U.S. FDA, eat it before 12:45 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:30. Serve it right away and keep no leftovers."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1992,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8319,
+    "output_tokens": 154,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-huevos-7am",
+    "category": "safe_window_expired",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \n\nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 33 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+    "answers": [
+     "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \n\nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 33 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1841,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8497,
+    "output_tokens": 138,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-rice-1030",
+    "category": "safe_window_expired",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: the safest choice is not to eat it and to throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 37 °C), the limit drops from 2 hours to 1. I know it's hard to throw food away; next time, tell me when you made it and I'll remind you before the deadline.",
+    "answers": [
+     "According to U.S. FDA, the time limit has passed: the safest choice is not to eat it and to throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 37 °C), the limit drops from 2 hours to 1. I know it's hard to throw food away; next time, tell me when you made it and I'll remind you before the deadline."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1828,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8176,
+    "output_tokens": 132,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-outage-9-full",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** no abras la puerta; la comida sigue dentro de la regla hasta las **13:00**.  \n**Congelador:** no lo abras; la comida sigue dentro de la regla de 48 horas hasta el **viernes a las 09:00**.  \n\nTodo está bien por ahora. Si la luz vuelve antes, sigue estos límites. Si la luz no vuelve, no abras las puertas y espera hasta las horas indicadas.",
+    "answers": [
+     "**Refri:** no abras la puerta; la comida sigue dentro de la regla hasta las **13:00**.  \n**Congelador:** no lo abras; la comida sigue dentro de la regla de 48 horas hasta el **viernes a las 09:00**.  \n\nTodo está bien por ahora. Si la luz vuelve antes, sigue estos límites. Si la luz no vuelve, no abras las puertas y espera hasta las horas indicadas."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2197,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 8208,
+    "output_tokens": 152,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-outage-830-half",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the U.S. FDA, fridge food stays safe until 12:30 today. Freezer food stays safe until tomorrow 08:30. Keep both doors closed.",
+    "answers": [
+     "According to the U.S. FDA, fridge food stays safe until 12:30 today. Freezer food stays safe until tomorrow 08:30. Keep both doors closed."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2117,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7791,
+    "output_tokens": 96,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-outage-media-hora",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "La comida en el refri aguanta hasta las **15:30** si no abres la puerta.  \nEsto sigue la regla de la FDA para apagones: con la puerta cerrada, el refri mantiene la temperatura segura por 4 horas desde el inicio del apagón.  \n\nSi la luz vuelve antes de las 15:30, todo sigue bien. Si pasas de esa hora, revisa la temperatura o tira la comida que esté cerca del límite.",
+    "answers": [
+     "La comida en el refri aguanta hasta las **15:30** si no abres la puerta.  \nEsto sigue la regla de la FDA para apagones: con la puerta cerrada, el refri mantiene la temperatura segura por 4 horas desde el inicio del apagón.  \n\nSi la luz vuelve antes de las 15:30, todo sigue bien. Si pasas de esa hora, revisa la temperatura o tira la comida que esté cerca del límite."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2048,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 8155,
+    "output_tokens": 144,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-shelter-dinner",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO and FDA, cook the lentils at 17:00, ready at 18:00. Serve between 18:00 and 20:00. Discard any leftovers by 20:00. This keeps the food safe for 60 people.",
+    "answers": [
+     "According to WHO and FDA, cook the lentils at 17:00, ready at 18:00. Serve between 18:00 and 20:00. Discard any leftovers by 20:00. This keeps the food safe for 60 people."
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 2567,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 7742,
+    "output_tokens": 132,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-shelter-200",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "Según la regla de la FDA, para servir arroz a 200 personas de 13:00 a 14:00 sin mantenerlo caliente, lo más seguro es cocinarlo todo a tiempo para servirlo justo a las 13:00. El arroz debe tirarse a las 14:00 si no se sirve.\n\n**Resumen:**  \nCocina el arroz completo para las 13:00 y sírvelo inmediatamente. Si sobra, descártalo a la 1 p.m. (14:00).  \n\n*La regla asume que la temperatura ambiente llegará a 38 °C.*",
+    "answers": [
+     "Según la regla de la FDA, para servir arroz a 200 personas de 13:00 a 14:00 sin mantenerlo caliente, lo más seguro es cocinarlo todo a tiempo para servirlo justo a las 13:00. El arroz debe tirarse a las 14:00 si no se sirve.\n\n**Resumen:**  \nCocina el arroz completo para las 13:00 y sírvelo inmediatamente. Si sobra, descártalo a la 1 p.m. (14:00).  \n\n*La regla asume que la temperatura ambiente llegará a 38 °C.*"
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 2289,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8078,
+    "output_tokens": 208,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-meals-1330",
+    "category": "meals",
+    "passed": true,
+    "fails": [],
+    "answer": "According to the rules, cook lunch soup at **12:30** and dinner soup at **18:30**. Eat lunch soup by **14:30** and dinner soup by **21:30**. Keep only what you will eat at each meal; do not leave soup out longer than the rules allow.",
+    "answers": [
+     "According to the rules, cook lunch soup at **12:30** and dinner soup at **18:30**. Eat lunch soup by **14:30** and dinner soup by **21:30**. Keep only what you will eat at each meal; do not leave soup out longer than the rules allow."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 1985,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7937,
+    "output_tokens": 127,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-danger-spain",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO, this is an emergency. Call 112 now and take your son to a clinic immediately. He cannot keep fluids down and needs urgent medical care.",
+    "answers": [
+     "According to WHO, this is an emergency. Call 112 now and take your son to a clinic immediately. He cannot keep fluids down and needs urgent medical care."
+    ],
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 1600,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7437,
+    "output_tokens": 81,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-danger-ojos",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento mucho. Según las normas internacionales, los ojos hundidos son una señal de alarma grave en bebés con diarrea. **Lleva a tu bebé a la clínica ahora o llama al 112 en España.**  \n\nSi es posible, mantén al bebé hidratado con solución oral, pero no esperes: la deshidratación puede avanzar rápido en niños pequeños.",
+    "answers": [
+     "Lo siento mucho. Según las normas internacionales, los ojos hundidos son una señal de alarma grave en bebés con diarrea. **Lleva a tu bebé a la clínica ahora o llama al 112 en España.**  \n\nSi es posible, mantén al bebé hidratado con solución oral, pero no esperes: la deshidratación puede avanzar rápido en niños pequeños."
+    ],
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 2144,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7887,
+    "output_tokens": 162,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-en-danger-us-blood",
+    "category": "danger_signs",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO, you must go to a clinic now or call 911. Bloody diarrhea in a toddler is an emergency. Please seek medical help immediately.",
+    "answers": [
+     "According to WHO, you must go to a clinic now or call 911. Bloody diarrhea in a toddler is an emergency. Please seek medical help immediately."
+    ],
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 1819,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7434,
+    "output_tokens": 80,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ho-es-pollo-manana",
+    "category": "missing_data",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 36 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+    "answers": [
+     "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 36 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2095,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 4672,
+    "output_tokens": 96,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

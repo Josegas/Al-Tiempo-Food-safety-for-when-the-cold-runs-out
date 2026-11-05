@@ -165,6 +165,15 @@ SAFE_TEMPLATE_AGAIN = {
 }
 
 
+# Fallback when a planning tool refused invented data: ask for it, with no times at all.
+ASK_PLAN_DATA = {
+    "en": "To plan it with the official rules, tell me how many people will eat and at what "
+    "time you will serve it.",
+    "es": "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué "
+    "hora lo van a servir.",
+}
+
+
 @dataclass
 class VerifierHook(HookProvider):
     language: str = "en"
@@ -177,6 +186,7 @@ class VerifierHook(HookProvider):
     session_minutes: set[int] = field(default_factory=set)
     last_safe: str = ""  # last fallback text: never repeated word for word
     last_window: dict | None = None
+    ask_plan_data: bool = False  # a planning tool said the user never gave people / times
     retries: int = 0
     blocked_count: int = 0  # metrics: unsafe answers blocked
     retried_count: int = 0
@@ -196,6 +206,7 @@ class VerifierHook(HookProvider):
             self.session_minutes = set(self.turn_tool_minutes)
         self.turn_tool_times, self.turn_tool_minutes = set(), set()
         self.last_window = None
+        self.ask_plan_data = False
         self.retries = 0
         # Times the user wrote (e.g. "I cooked at 12:30") may be repeated back.
         for msg in event.messages or []:
@@ -212,11 +223,17 @@ class VerifierHook(HookProvider):
         self.turn_tool_minutes |= m
         for block in (event.result or {}).get("content", []):
             text = block.get("text", "")
-            if '"eat_by_hhmm"' in text:
+            if '"eat_by_hhmm"' in text or '"not_said_by_user"' in text:
                 try:
-                    self.last_window = json.loads(text)
+                    data = json.loads(text)
                 except ValueError:
-                    pass
+                    continue
+                # Only a safe window has eat_by_hhmm at the top level (meal plans have it per
+                # meal: taking one for a window crashed the fallback with a KeyError).
+                if isinstance(data, dict) and "eat_by_hhmm" in data:
+                    self.last_window = data
+                if isinstance(data, dict) and data.get("error") == "not_said_by_user":
+                    self.ask_plan_data = True
 
     def on_model_response(self, event: AfterModelCallEvent) -> None:
         resp = event.stop_response
@@ -271,6 +288,9 @@ class VerifierHook(HookProvider):
         self, session_window: dict | None = None, objection_ids: list[str] | None = None
     ) -> str:
         lang = self.language if self.language in SAFE_TEMPLATE else "en"
+        if self.ask_plan_data and not self.last_window:
+            self.last_safe = ASK_PLAN_DATA[lang]
+            return self.last_safe
         window = ""
         if not self.last_window and session_window:
             window = _previous_window_sentence(session_window, lang)

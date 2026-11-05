@@ -1,0 +1,173 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 6,
+  "passed": 5,
+  "median_latency_ms": 3249,
+  "avg_input_tokens": 13758,
+  "avg_output_tokens": 204,
+  "cost_per_turn_usd": 0.005104,
+  "verifier_retries": 1,
+  "verifier_blocks": 1,
+  "with_decision": 4,
+  "explained_why": 3,
+  "rows": [
+   {
+    "id": "ud-es-aire-acondicionado",
+    "category": "user_room_temp",
+    "passed": true,
+    "fails": [],
+    "answer": "Según WHO, cómelo antes de las 14:00 o deséchalo. Con los 22 °C que me dijiste aguanta 2 horas, nunca más: afuera del refri las bacterias se multiplican. ¿Te aviso a las 13:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?",
+     "Según WHO, cómelo antes de las 14:00 o deséchalo. Con los 22 °C que me dijiste aguanta 2 horas, nunca más: afuera del refri las bacterias se multiplican. ¿Te aviso a las 13:45?"
+    ],
+    "tools": [
+     "compute_safe_window",
+     "compute_safe_window"
+    ],
+    "latency_ms": 3475,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 18711,
+    "output_tokens": 234,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-en-ac-room",
+    "category": "user_room_temp",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO, eat it before 14:00 or throw it away. At the 22 °C you told me, it lasts 2 hours, never more: out of the fridge bacteria multiply. Shall I remind you at 13:45?",
+    "answers": [
+     "According to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at 12:45?",
+     "According to WHO, eat it before 14:00 or throw it away. At the 22 °C you told me, it lasts 2 hours, never more: out of the fridge bacteria multiply. Shall I remind you at 13:45?"
+    ],
+    "tools": [
+     "compute_safe_window",
+     "compute_safe_window"
+    ],
+    "latency_ms": 3752,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 17786,
+    "output_tokens": 217,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-es-ensalada-sin-datos",
+    "category": "plan_needs_user_data",
+    "passed": true,
+    "fails": [],
+    "answer": "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir.",
+    "answers": [
+     "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 3023,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 11851,
+    "output_tokens": 267,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "12:00",
+       "13:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "12:00",
+       "13:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "ud-es-ensalada-cruda",
+    "category": "plan_needs_user_data",
+    "passed": false,
+    "fails": [
+     "missing any of ['prepár', 'prepar']",
+     "tool plan_meals not called in the last turn"
+    ],
+    "answer": "Para planear la ensalada de lechuga y jitomate para 40 personas, necesito saber los horarios de servicio exactos. Por ejemplo, ¿de qué hora a qué hora se servirá la comida? Por favor, dime los horarios de servicio para poder ayudarte mejor.",
+    "answers": [
+     "Para planear la ensalada de lechuga y jitomate para 40 personas, necesito saber los horarios de servicio exactos. Por ejemplo, ¿de qué hora a qué hora se servirá la comida? Por favor, dime los horarios de servicio para poder ayudarte mejor."
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 1769,
+    "decision_correct": false,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7891,
+    "output_tokens": 152,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-es-voy-a-cocinar",
+    "category": "planned_cooking",
+    "passed": true,
+    "fails": [],
+    "answer": "Recordatorio programado para las 14:45:  \n\"Al Tiempo: come la comida antes de las 15:00. Después, deséchala. Fuente: U.S. FDA\"  \n\n¡Listo! El recordatorio está listo para recordarte a tiempo.",
+    "answers": [
+     "Si lo cocinas a las 14:00, según U.S. FDA, cómelo antes de las 15:00. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. Cocina solo lo que se va a comer. ¿Te aviso a las 14:45?",
+     "Recordatorio programado para las 14:45:  \n\"Al Tiempo: come la comida antes de las 15:00. Después, deséchala. Fuente: U.S. FDA\"  \n\n¡Listo! El recordatorio está listo para recordarte a tiempo."
+    ],
+    "tools": [
+     "compute_safe_window",
+     "schedule_reminder"
+    ],
+    "latency_ms": 3646,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 18239,
+    "output_tokens": 234,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "ud-en-going-to-cook",
+    "category": "planned_cooking",
+    "passed": true,
+    "fails": [],
+    "answer": "If you cook it at 14:00, according to U.S. FDA, eat it before 15:00. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at 14:45?",
+    "answers": [
+     "If you cook it at 14:00, according to U.S. FDA, eat it before 15:00. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at 14:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1682,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8075,
+    "output_tokens": 125,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

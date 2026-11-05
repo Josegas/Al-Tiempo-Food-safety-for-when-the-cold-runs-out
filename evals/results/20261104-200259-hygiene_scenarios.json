@@ -1,0 +1,98 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 2041,
+  "avg_input_tokens": 8045,
+  "avg_output_tokens": 173,
+  "cost_per_turn_usd": 0.003131,
+  "verifier_retries": 1,
+  "verifier_blocks": 1,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir.",
+    "answers": [
+     "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 3481,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 11819,
+    "output_tokens": 274,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "08:00",
+       "13:00",
+       "19:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "08:00",
+       "13:00",
+       "19:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de comidas crudas en la misma tabla que carnes cocidas. Para evitar contaminación cruzada y garantizar la inocuidad, es importante usar tablas de cortar separadas para carnes crudas y vegetales. \n\nSi ya cortaste el pollo crudo y el tomate en la misma tabla, lo más seguro es descartar ambos para evitar riesgos de intoxicación alimentaria. Si aún no los has cortado, usa tablas diferentes y lava bien las manos y utensilios entre cada paso. \n\n¿Necesitas ayuda para planificar una preparación segura?",
+    "answers": [
+     "Mis reglas no cubren la preparación de comidas crudas en la misma tabla que carnes cocidas. Para evitar contaminación cruzada y garantizar la inocuidad, es importante usar tablas de cortar separadas para carnes crudas y vegetales. \n\nSi ya cortaste el pollo crudo y el tomate en la misma tabla, lo más seguro es descartar ambos para evitar riesgos de intoxicación alimentaria. Si aún no los has cortado, usa tablas diferentes y lava bien las manos y utensilios entre cada paso. \n\n¿Necesitas ayuda para planificar una preparación segura?"
+    ],
+    "tools": [],
+    "latency_ms": 2041,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3822,
+    "output_tokens": 126,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1913,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8494,
+    "output_tokens": 119,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

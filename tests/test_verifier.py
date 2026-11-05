@@ -295,3 +295,29 @@ def test_copied_example_placeholder_is_blocked():
     from agent.hooks.verifier import PLACEHOLDER_RE
 
     assert PLACEHOLDER_RE.search("Según {fuente}, cómelo antes de las {hora_limite}.")
+
+
+def test_meal_plan_result_is_not_taken_for_a_safe_window():
+    """Bug seen locally: a plan_meals result (eat_by_hhmm per meal) was stored as the safe window
+    and the safe fallback crashed with KeyError('eat_by_hhmm')."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    plan = {"meals": [{"meal_hhmm": "14:00", "eat_by_hhmm": "15:00"}], "sources": []}
+    v.on_tool_result(SimpleNamespace(result={"content": [{"text": json.dumps(plan)}]}))
+    assert v.last_window is None
+    assert "Según" not in v.safe_answer()  # generic fallback, no crash
+
+
+def test_fallback_asks_for_people_and_times_when_plan_data_was_invented():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    refused = {"error": "not_said_by_user", "missing": ["people", "meal times"]}
+    v.on_tool_result(SimpleNamespace(result={"content": [{"text": json.dumps(refused)}]}))
+    text = v.safe_answer()
+    assert "cuántas personas" in text and extract_claims(text) == (set(), set())

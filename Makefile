@@ -1,4 +1,4 @@
-.PHONY: web loadtest figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
+.PHONY: web local qr loadtest figures install lint format test rules check chat evals package synth diff-access deploy-access dev-profile diff deploy smoke outputs activate-cost-tag
 
 CHAT_LANG ?= es
 ADMIN_PROFILE ?= default
@@ -65,6 +65,12 @@ activate-cost-tag:  ## admin: make the "project" tag usable in budgets/Cost Expl
 
 figures:  ## article images from code + eval results (needs Pillow)
 	python3 scripts/make_figures.py
+
+qr:  ## QR code of the demo for the printable cards (web/icons/qr-demo.png; needs qrcode)
+	.venv/bin/python scripts/make_qr.py
+
+local:  ## local preview at http://localhost:8088 with the chat running THIS checkout's agent (Bedrock, costs cents)
+	$(ENV_FILE) .venv/bin/python scripts/dev_server.py --local
 
 web:  ## local preview of web/ at http://localhost:8088 (API calls go to the deployed demo)
 	.venv/bin/python scripts/dev_server.py
