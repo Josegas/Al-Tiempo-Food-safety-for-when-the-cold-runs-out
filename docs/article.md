@@ -2,15 +2,15 @@
 
 ![Al Tiempo: food safety for when the cold runs out](img/cover.png)
 
-**In one minute:** Al Tiempo ("at room temperature" in Mexican Spanish) is a bilingual (English/Spanish) agent built with the **Strands Agents SDK** and running on **Amazon Bedrock AgentCore Runtime**. You tell it what you cooked and when. It answers with a clock time, for example *"eat the beans before 13:00 or throw them away"*, based on official food-safety rules (WHO, U.S. FDA, CDC, NHS) and today's hourly heat forecast. It can also schedule a reminder for that exact minute. The language model never calculates a time: a tested rules engine does, and a verifier hook blocks any answer whose times don't match it.
+**In one minute:** Al Tiempo ("at room temperature" in Mexican Spanish) is a bilingual (English/Spanish) agent built with the **Strands Agents SDK** and running on **Amazon Bedrock AgentCore Runtime**. You tell it, typing or out loud, what you cooked or are about to cook and when. It answers with a clock time, for example *"eat the beans before 13:00 or throw them away"*, based on official food-safety rules (WHO, U.S. FDA, CDC, NHS) and today's hourly heat forecast. It can also schedule a reminder for that exact minute. The language model never calculates a time: a tested rules engine does, and a verifier hook blocks any answer whose times don't match it.
 
 **Focus area: Health** (preventing foodborne illness). Heat, power outages and disasters are the risk factors and the context of use, not a second focus area.
 
 | Judging criterion | Evidence in numbers |
 |---|---|
 | **Social Impact** | Built for the **339 million rural poor and 746 million urban poor** at high risk from lack of cooling, and the **655 million** people without electricity. **11 of 11** rules verified word by word on official sources. |
-| **Technical Execution** | Live on AWS. **240** automated tests. **50 of 50** bilingual end-to-end scenarios in the final run, **18 of 18** held-out scenarios written after tuning, **11 of 11** multi-turn follow-ups. **26 questions real people asked**, read by hand: **24 right, 2 doubtful, 0 wrong, 0 unsafe** (first run: 15 / 4 / 7, 2 unsafe). **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute. |
-| **Communication** | Demo with no login, buttons for 8 ready-made scenarios, a **traffic light** with the time in large type, voice playback, and a mobile-first layout. Every number in this article has a public source link. |
+| **Technical Execution** | Live on AWS. **244** automated tests. **50 of 50** bilingual end-to-end scenarios in the final run, **18 of 18** held-out scenarios written after tuning, **11 of 11** multi-turn follow-ups. **26 questions real people asked**, read by hand: **24 right, 2 doubtful, 0 wrong, 0 unsafe** (first run: 15 / 4 / 7, 2 unsafe). **8 of 8** invented times blocked by the verifier. **9 of 9** live reminders delivered within a minute. |
+| **Communication** | Demo with no login, buttons for 8 ready-made scenarios, a **traffic light** with the time in large type, **speak or type** with the answer read aloud, today's **heat curve**, a **printable kitchen card**, and a mobile-first layout. Every number in this article has a public source link. |
 | **Originality** | Applies official rules to the **hourly forecast**; future reminders through **EventBridge Scheduler**; a **shelter batch planner**; **power-outage mode**; a **verifier hook** that fact-checks the model against deterministic code. |
 
 ---
@@ -39,45 +39,45 @@ The rules exist. The WHO says not to leave cooked food at room temperature for m
 1. Open the demo on your phone and choose **English** or **Español**.
 2. Tap **I'm about to cook**. The page starts in **Simulated** mode: a saved 38 °C day and a clock fixed at 12:00, so everyone sees the same result. A green light shows **15:00** in large type, and the answer is *"If you cook it at 14:00, according to U.S. FDA, eat it before 15:00. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at 14:45?"* Say *"yes, remind me"*.
 3. Tap **Already cooked** to see the same rule after cooking (green, with a live countdown), or ask about rice from 5 hours ago to see the red **Throw it away**. In Simulated mode the clock is accelerated, so a reminder arrives in about **1 minute**.
-4. Try **Shelter (120 people)**, **Power outage** and **Danger signs**. Tap **🔊 Listen** to hear any answer.
+4. Try **Shelter (120 people)**, **Power outage** and **Danger signs**. Tap **🔊 Listen** to hear any answer, or **🎤 Speak** to ask out loud (in Chrome).
 5. Switch to **Live** mode to use your real location (rounded to about 1 km) and the real hourly forecast.
 
 ![Home on a phone: simulated-mode banner, language switch and scenario buttons](capturas/01-demo-home.png)
 
 ## What it does
 
-Every answer below is a **real answer from the agent** in simulated mode (38 °C day, clock at 12:00), copied as it came; the screenshots are the same conversations on a phone. `[...]` marks where we shortened it. [TODO: after the deploy, re-check the new answers on the live demo]
+Every answer below is a **real answer from the live demo** in simulated mode (38 °C day, clock at 12:00), copied as it came on 4 November; the screenshots are the same conversations on a phone. `[...]` marks where we shortened it.
 
 ### 1. Safe window + reminders (the core)
 > **User:** I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?
-> **Al Tiempo:** According to U.S. FDA, eat it before **13:00** or throw it away. I can remind you at **12:45** if you like.
-> **User:** Yes, please schedule the reminder.
-> **Al Tiempo:** According to U.S. FDA, eat it before **13:00** or throw it away. I have set a reminder for **12:45**.
+> **Al Tiempo:** According to U.S. FDA, eat it before **13:00** or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at **12:45**?
+> **User:** Yes, please remind me.
+> **Al Tiempo:** Reminder set for **12:45**: "Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA".
 > ⏰ **Reminder (12:45):** Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA
 
-If the user accepts, **Amazon EventBridge Scheduler** creates a one-time schedule for that exact minute, which deletes itself after running. The reminder reaches the web app, and SMS is optional. The reminder's time and text are built in code from the rules engine result: *"Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"*.
+If the user accepts, **Amazon EventBridge Scheduler** creates a one-time schedule for that exact minute, which deletes itself after running. The reminder reaches the web app (SMS is built but off in the demo; see Limitations). The reminder's time and text are built in code from the rules engine result: *"Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"*.
 
-![Safe-window answer with its source, and the reminder arriving](capturas/02-safe-window-reminder.png)
+![The reminder arriving on the live demo: scheduled for 12:45, delivered by EventBridge Scheduler](capturas/ui/live-reminder-en.png)
 
 **Before cooking, not only after.** The most useful moment is before the food sits out, so the first button is the plan:
 > **User:** I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?
 > **Al Tiempo:** If you cook it at 14:00, according to U.S. FDA, eat it before **15:00**. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at **14:45**?
-> **User:** yes please remind me
-> **Al Tiempo:** Reminder set for **14:45**: "Al Tiempo: eat the food before 15:00. After that, throw it away. Source: U.S. FDA".
 
 **A traffic light first.** Each answer with a decision starts with one colour and one big time, copied from the rules engine's output: **green** "eat it before 15:00" with a live countdown, **amber** when little time is left or the food won't last until mealtime, **red** "throw it away", and **grey** when a detail is missing ("when did you cook it?"). Someone who reads little gets the decision from the colour and the number. The **🔊 Listen** button reads the answer aloud (Amazon Polly).
 
-[TODO: screenshot of the traffic light on a phone after the deploy: green 15:00 and red "Throw it away"]
+| Green: before cooking | Red: rice from 5 hours ago, for a baby |
+|---|---|
+| ![Green light: if you cook it at 14:00, eat it before 15:00, with the timeline and today's heat curve](capturas/ui/live-plan-en.png) | ![Red light: throw it away, with the timeline and a compost note](capturas/ui/live-baby-en.png) |
 
 **It listens to the details people actually give.** We adapted 26 questions that real people asked in public forums (see *Challenges*). They don't say "I cooked at 12:00 and have no fridge". They say things like these, and all of them are read **in code** from the user's words:
-- *"He eats at 3 on the building site"* → that is when it will be eaten, not when it was cooked: **"It won't last until 15:00: eat it before 13:00 or throw it away."**
+- *"He eats at 3 on the building site"* → that is when it will be eaten, not when it was cooked. Live answer: **"It won't last until 15:00: according to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Better to make it closer to mealtime."**
 - *"The tamales are still in the steamer, steaming"* → WHO: food kept piping hot (above 60 °C) is not on the room-temperature clock; the clock starts when the heat goes off.
-- *"The room has air conditioning, 22 degrees"* → the user's room temperature replaces the outdoor forecast, so the limit is 2 hours instead of 1, and never more than 2.
+- *"It's in a room with air conditioning at 22 degrees"* → the user's room temperature replaces the outdoor forecast. Live answer: **"According to WHO, eat it before 13:00 or throw it away. At the 22 °C you told me, it lasts 2 hours, never more: out of the fridge bacteria multiply."**
 - *"What do I do with the stew?"* (no time) → it asks when it was cooked, and says the rule meanwhile. The model is not allowed to invent a cooking time.
 - *"Since last night"*, *"since 7am"*, *"an hour and a half ago"* → read correctly. (Before this round, "an hour and a half" was read as one hour: an error toward the unsafe side, now covered by a test.)
 - *"Sorry, I didn't understand"* → the same engine result in one simpler sentence.
 
-Every safe-window answer also says **why**, in one sentence built in code: *"Above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1."* Under it, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left, the reason and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
+Every safe-window answer also says **why**, in a few words built in code: *"In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2."* The longer reason, with the forecast numbers, is one tap away in "Look inside". Under the answer, the web draws a **timeline**: cooked → now → reminder → limit, with the minutes left, the reason and the rule that decided it. It is drawn only from the rules engine's numbers, which the API returns next to the text. It never reads times from the model's words.
 
 ![The safe-window timeline on the live demo: cooked 12:00, reminder 12:45, limit 13:00, decided by U.S. FDA](capturas/ui/timeline-live-en.png)
 
@@ -92,35 +92,37 @@ Every safe-window answer also says **why**, in one sentence built in code: *"Abo
 ### 3. Power-outage mode
 For families who *do* have a fridge and lost power, the clock starts when the power went out. It uses the FDA's outage rules: 4 hours for a closed fridge, 48 hours for a full freezer, 24 hours for a half-full one.
 > **User:** The power went out at 06:00. I haven't opened the fridge and the freezer is full. What do I do?
-> **Al Tiempo:** According to the official rules: **Fridge:** The 4-hour limit ended at 10:00. Throw away perishable food from the fridge, or check it with a food thermometer if you have one. **Freezer:** Keep it closed; food stays safe within the 48-hour rule until **Friday 06:00**. The power outage started at 06:00 and it is now 12:00.
+> **Al Tiempo:** According to the U.S. FDA, fridge food is no longer safe after 4 hours (ended at **10:00**). Throw away perishable fridge food, or check it with a food thermometer. The freezer is still safe until **Friday 06:00** because it's full and closed. Keep it closed.
 
 If the user says the ice in the freezer melted and froze again, the freezer's 24/48-hour rule no longer applies and the answer is to throw away the perishable food (a conservative project policy). If the user never mentioned a freezer, the answer doesn't talk about one, so the model can't "move" their raw chicken into it (a real eval failure, now a test).
 
-![Power-outage mode](capturas/09-outage.png)
+![Power-outage mode on the live demo](capturas/ui/live-outage-en.png)
 
 ### 4. Strict mode for babies and young children
 > **User:** Can I give my baby the rice I cooked 5 hours ago? It was out of the fridge.
-> **Al Tiempo:** According to U.S. FDA, the time limit has passed: throw it away now. Rice for babies must be served right after cooking and not kept at room temperature.
+> **Al Tiempo:** According to U.S. FDA, the limit has passed: the safest choice is not to eat it and to throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. I know it's a pity; next time tell me the time and I'll remind you before.
 
-![Strict mode for babies](capturas/11-baby-rice.png)
+For babies and young children the engine adds a stricter project rule (1 hour, serve right away, no leftovers); here the FDA heat rule already gave the same limit.
 
 For infant formula, it follows the CDC: use it within 2 hours of preparation and within 1 hour from when feeding begins, and throw away what's left in the bottle.
 
 ### 5. Shelters and community kitchens
 After a disaster, a shelter may cook for 120 people with no refrigeration. Al Tiempo plans **staggered batches** so nothing is served outside the safe window. Each batch gets a discard time.
 > **User:** I run a shelter with 120 people. Lunch is 13:00 to 15:00, rice and beans, no way to keep food hot.
-> **Al Tiempo:** Here is the plan for your shelter lunch: **Batch 1:** Cook rice and beans at 12:00, ready at 13:00. Serve from 13:00 to 14:00. Discard any leftovers by 14:00. **Batch 2:** Cook rice and beans at 13:00, ready at 14:00. Serve from 14:00 to 15:00. Discard any leftovers by 15:00. [...] The plan follows U.S. FDA rules for hot food service. The forecast for today is 38 °C, which is why the one-hour rule applies.
+> **Al Tiempo:** [...] We scheduled two batches: first batch ready at **13:00**, discard at **14:00**; second batch ready at **14:00**, discard at **15:00**. No food should sit out past its discard time.
 
 If the kitchen *can* keep food above 60 °C (the WHO hot-holding rule), the plan changes accordingly.
 
-![Shelter plan for 120 people](capturas/03-shelter.png)
+| On screen | Printed for the kitchen wall |
+|---|---|
+| ![Shelter batch plan for 120 people on the live demo](capturas/ui/live-shelter-en.png) | ![Printed kitchen card: batch table with THROW AWAY times, source, mode, date and a QR code](capturas/ui/live-print-card-shelter-en.png) |
 
 ### 6. Danger-sign escalation (no diagnosis, no doses)
 If someone has diarrhea or vomiting, Al Tiempo asks fixed questions based on the WHO's danger signs of dehydration. If any sign is present, or the answer is unknown, it escalates to the country's emergency number.
 > **User:** My 2-year-old daughter has diarrhea, she is very sleepy and barely drinks. We are in Mexico.
-> **Al Tiempo:** Your daughter shows danger signs: she is very sleepy and barely drinks. This is an emergency. Call 911 right now or go to the nearest clinic. The signs mean she needs urgent medical care. Do not wait.
+> **Al Tiempo:** According to WHO, your daughter shows danger signs: very sleepy and barely drinks. This is an emergency. Call 911 or go to the nearest clinic right now. Do not wait.
 
-![Danger-sign escalation](capturas/10-danger-signs.png)
+![Danger-sign escalation on the live demo](capturas/ui/live-danger-en.png)
 
 When asked for medicine doses, it declines kindly and sends the person to a clinic.
 
@@ -129,7 +131,7 @@ When asked for medicine doses, it declines kindly and sends the person to a clin
 - **Today's heat, hour by hour.** Under the safe window, a small chart draws the same hourly forecast the engine used, the 32 °C line, and the safe window shaded on top. You can *see* why today it's 1 hour and not 2. The forecast hours are kept out of the model's context, so they never become "allowed" times for the verifier.
 - **A card for the kitchen wall.** "Print card" turns a safe window or a shelter plan into a big, plain page: the eat-by time in huge type (or a batch table with **THROW AWAY at** times and a "done" box), the deciding source, the mode (simulated or real) and the date, and a QR code back to the app. For a community kitchen without smartphones on every table, the plan lives on the wall.
 
-[TODO: screenshots after the deploy: microphone button, heat chart, printed card]
+![Printed card for a safe window: eat it before 15:00, then throw it away](capturas/ui/live-print-card-window-en.png)
 
 ### Small notes after the decision (chosen in code, never changing it)
 - **"What to do with it?"** When the answer is "throw it away", a small note says what can go in a home compost pile: fruit and vegetable scraps and small amounts of cooked food, but not meat, fish, dairy or grease, which attract animals ([US EPA, Composting At Home](https://www.epa.gov/recycle/composting-home)). It never suggests feeding spoiled food to animals.
@@ -168,7 +170,7 @@ The agent is a **Strands Agents** loop with **8 tools**. Every tool that calcula
 | Amazon Polly | Reads answers aloud for people who read little; automatic when the question was spoken |
 | Amazon S3 + CloudFront | The public demo website |
 | Amazon CloudWatch + AWS Budgets | Logs without personal data, a dashboard, 3 alarms, and a $10 budget with an automatic kill switch |
-| Amazon SNS | Alarm emails; SMS reminders (optional) |
+| Amazon SNS | Alarm emails; SMS reminders (built, off on the account's Free plan) |
 
 ## Social Impact
 
@@ -178,7 +180,7 @@ The agent is a **Strands Agents** loop with **8 tools**. Every tool that calcula
 
 **Why it fits them:**
 - **Plain answers:** you get a clock time and an action ("eat before 13:00 or throw it away"), not a table of rules.
-- **Voice:** any answer can be heard with Amazon Polly, for people who read little. There are two languages today, and adding more is a configuration change.
+- **Voice:** you can ask out loud, and any answer can be heard with Amazon Polly (automatically when you spoke), for people who read or type little. There are two languages today, and adding more is a configuration change.
 - **Works when the user is away:** the reminder arrives even if the user closed the app, through EventBridge Scheduler. SMS for basic phones is implemented (Amazon SNS) and tested with a fake client, but it is off in the public demo: the AWS account runs on the Free plan, where SMS is not available. If an SMS fails, the web reminder still arrives.
 - **Safe by default:**
   - If the cooking time is unknown, it assumes the worst case and asks for the time.
@@ -195,7 +197,7 @@ The agent is a **Strands Agents** loop with **8 tools**. Every tool that calcula
 | Metric | Result |
 |---|---|
 | Food rules verified on their official source, with verbatim text | **11 / 11** |
-| Rules-engine, tool and safety tests passing | **240 / 240** |
+| Rules-engine, tool and safety tests passing | **244 / 244** |
 | End-to-end evals consistent with the rules engine (50 bilingual scenarios, final run) | **50 / 50**; 49 / 50 in each of the 4 runs before it that evening, 0 unsafe answers |
 | Held-out scenarios written after tuning (never tuned on) | **18 / 18** |
 | **26 questions adapted from real public questions**, read by hand (right / doubtful / wrong) | **24 / 2 / 0**, 0 unsafe (first run, before any change: 15 / 4 / 7, 2 unsafe) |
@@ -230,7 +232,7 @@ We will **not** claim fewer illnesses from a pilot this small. That needs a larg
 - **AlTiempoAccess:** a least-privilege IAM user for the project, a GitHub OIDC deploy role, the budget, and alarms.
 - **AlTiempoApp:** everything the user touches.
 
-**Deterministic core, tested.** 240 pytest tests cover:
+**Deterministic core, tested.** 244 pytest tests cover:
 - every rule, including edge cases (exactly 32 °C, exactly 2 hours, missing data → worst case);
 - reading times from the user's own words in Spanish and English (*"a las 12:00"*, *"hace una hora y media"*, *"since 7am"*, *"desde anoche"*, *"he eats at 3"*, *"I'm going to cook at 2"*), plus the room temperature they report;
 - the verifier, the API and the reminder Lambdas.
@@ -274,13 +276,13 @@ We ran the same agent with three Bedrock models:
 - **Policy as code:** a release is blocked if any food rule is not verified.
 - **Observability:** a CloudWatch dashboard, 3 alarms to email, and structured logs with latency, tokens and verifier blocks for each turn.
 
-The smoke test that runs after every deploy, against the live demo (real output):
+The smoke test that runs after every deploy, against the live demo (real output, 4 November, after the last deploy):
 ```
 $ make smoke
 1) health: {'ok': True}
-2) safe window: PASS (6636 ms) -> According to U.S. FDA, eat it before **13:00** or throw it away. I can remind you at **12:45** if you like.
-3) reminder requested -> According to U.S. FDA, eat it before **13:00** or throw it away. I have scheduled a reminder for **12:45**.
-   reminder: PASS, arrived 102 s after asking; scheduler delay 41 s -> Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA
+2) safe window: PASS (5150 ms) -> According to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at 12:45
+3) reminder requested -> Reminder set for 12:45: "Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"
+   reminder: PASS, arrived 102 s after asking; scheduler delay 35 s -> Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA
 RESULT: PASS
 ```
 
@@ -329,12 +331,12 @@ Al Tiempo fills that gap, and every rule points back to the official source.
 - **What failed:** during testing, *"I cooked beans at 12:00"* got *"the beans must be thrown away now"*. The correct answer was *"eat them before 13:00"*.
 - **How we found it:** we reproduced it 3 times and logged the tool inputs. The model (Nova Lite at that time) did three different things: it passed the right time, asked again, or **left the time out**. With no time, the tool correctly applied the worst case: "unknown time = discard".
 - **What we changed:** the user's own words are now read **in code** (`agent/time_parse.py`, Spanish and English), and they win over whatever the model sends. We added 20 time-reading tests and 3 regression tests.
-- **How much it improved:** the same message now gets *"eat them before 13:00"*. On the full eval suite, moving to Nova 2 Lite raised the pass rate from **8/18 (44%) to 18/18 (100%)**, then **36/36** over two runs of the original 18-scenario suite (now **99/100** on the larger 50-scenario suite).
+- **How much it improved:** the same message now gets *"eat them before 13:00"*. On the full eval suite, moving to Nova 2 Lite raised the pass rate from **8/18 (44%) to 18/18 (100%)**, then **36/36** over two runs of the original 18-scenario suite (now **50/50** on the larger 50-scenario suite, final run).
 
 **The opposite error was worse.** *"Can I give my baby the rice I cooked 5 hours ago?"* once got *"eat it before 13:00"*. The verifier did not catch it, because 13:00 *did* come from the tool: the error was in the input, not the output.
 - **The fix:** a `minutes_ago` input, and a `discard_now` status from the engine.
-- **The safe template** now says "throw it away now".
-- **The result:** the same question now always gets *"throw the rice away now"*. Each of these became a regression test.
+- **The safe template** says to throw it away when the limit has passed.
+- **The result:** the same question now always gets a red **Throw it away** (see the screenshot above). Each of these became a regression test.
 
 **Two more real bugs, found on the live system:**
 - **Reminder text:** the first live reminders were written by the model, and one of the first three arrived as *"Eat the beans now, discard after"*, with no time. Reminder time and text are now built in code from the engine result.
@@ -399,6 +401,7 @@ policy: arn:aws:iam::<account>:policy/al-tiempo-kill-switch
 - **No field study yet.** All metrics above are system metrics.
 - The model can still phrase things imperfectly. In one eval answer it said food "has been out for 2 hours" when it had been 0 hours (conservative, but false). The verifier checks times and limits, not every sentence.
 - SMS reminders are implemented but disabled in the demo: the AWS account is on the Free plan, where SMS is not available. The demo uses web reminders and browser notifications.
+- Voice input works only in browsers with speech recognition (Chrome, Edge, Android).
 - Two languages so far.
 - The model still varies between runs (about ±2 scenarios out of 26–50), so a judge may see slightly different wording from ours. The decision and its times come from the engine every time.
 
@@ -418,6 +421,7 @@ policy: arn:aws:iam::<account>:policy/al-tiempo-kill-switch
 
 - **Let code decide, let the model explain.** My first version trusted the model with times and failed in both directions: it told someone to throw away safe food, and it told someone to feed a baby rice that should have been discarded. Moving every calculation into tested code was the turning point.
 - **Evals turn opinions into decisions.** I didn't pick the model by reputation. 18 scenarios picked it, and every bug we found became a test.
+- **Real questions teach more than invented ones.** My scenarios passed; 26 questions from real people produced 2 unsafe answers on the first run. Almost all of it was how people talk about time.
 - **Sources need verbatim quotes.** Checking every rule word by word removed three outdated numbers from my own notes.
 - **Cloud and DevOps from day one:**
   - one least-privilege IAM user per project;

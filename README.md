@@ -82,9 +82,10 @@ make smoke           # end-to-end check of the live demo
 - **Policy as code:** a release (`v*` tag) is blocked while any food rule is not verified on its official source.
 - **Safety regression tests:** every real unsafe answer we found becomes a test (see `docs/diario.md`).
 - **Evals drive decisions:** 18 bilingual scenarios picked the model (Nova Lite 8/18, Nova Pro
-  15/18, **Nova 2 Lite 18/18**). The suite now has **50 scenarios** (incl. 15 adversarial) and passes
-  **99/100** over two runs at $0.00227 per turn, with 0 unsafe answers (`docs/metrics.md`,
-  `docs/costs.md`). Every number we publish is in `docs/sources.md`.
+  15/18, **Nova 2 Lite 18/18**). Final run on 4 November: **50/50** tuned scenarios, **18/18** held-out,
+  **11/11** multi-turn follow-ups, **9/10** adversarial, at ~$0.003 per turn. **26 questions adapted from
+  real public questions**, read by hand: **24 right, 2 doubtful, 0 wrong, 0 unsafe** (first run: 15 / 4 / 7,
+  2 unsafe). Details in `docs/metrics.md`; every number we publish is in `docs/sources.md`.
 - **Load-tested guardrails:** `make loadtest` shows normal traffic answered and bursts stopped
   before they reach the model (`docs/costs.md`).
 

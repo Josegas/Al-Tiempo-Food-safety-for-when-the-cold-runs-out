@@ -290,3 +290,14 @@
   - Curva del calor del día: el pronóstico que usó el motor, con la línea de 32 °C y la ventana segura. Las horas se guardan en el estado del agente, **no** en el resultado de la herramienta: si el modelo las viera, el verificador las aceptaría como horas válidas. Con test.
   - Tarjeta imprimible (ventana segura o tandas del albergue) con la hora enorme, la fuente, el modo (simulado/real), la fecha y un QR a la demo (`make qr`, imagen fija, sin librería en la web).
   - Probado en Chromium a 375/390/1280 px, es/en: sin errores de consola, sin scroll horizontal; PDF de impresión revisado.
+
+## 2026-11-04 22:20 — después del despliegue: capturas en vivo, artículo y guion
+- Qué intenté: revisar en la demo en vivo (inglés, modo simulado) las 9 conversaciones del artículo y tomar las capturas reales.
+- Qué pasó: todas respondieron bien y el recordatorio llegó (`make smoke`: RESULT: PASS, 102 s). Dos detalles: la etiqueta del máximo de la curva se cortaba en la orilla, y en una corrida el plan del albergue dijo "According to FDA_HOT_1H" (el id interno de la regla).
+- Cómo lo supe: capturas con Playwright sobre la URL pública (`docs/capturas/ui/live-*`).
+- Qué decidí: la etiqueta se acomoda sola en las orillas; el plan del albergue trae ahora su resumen armado en código (como la ventana segura y el apagón), con test. Ambos necesitan un despliegue más. Artículo (en y es), README, diagramas y guion del video actualizados con las respuestas en vivo.
+
+## 2026-11-04 22:40 — el recordatorio suena y llega más rápido en la demo
+- Qué intenté: que el recordatorio se note (antes solo aparecía en la página) y que en la demo llegue en menos de un minuto, para el video y para los jueces.
+- Qué pasó: medido con `make smoke`, tardaba ~100 s: 60 s programado + ~35 s de EventBridge + hasta 15 s de revisión de la web.
+- Qué decidí: en modo Simulado se programa a 10 s y la web revisa cada 4 s durante 3 minutos después de pedirlo (esperado ~50 s; el retraso de EventBridge no lo controlamos). Al llegar: timbre de 3 tonos generado por el navegador (sin archivo ni costo), vibración y lectura en voz alta con Polly, más un botón Escuchar. El audio se habilita con el primer toque de la página, como exigen los navegadores. Probado con una respuesta simulada de la API: timbre, vibración y Polly, sin errores.

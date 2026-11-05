@@ -332,3 +332,26 @@ def test_shelter_tool_accepts_split_service_window():
         )
     )
     assert "error" not in r and r["batches"]
+
+
+def test_shelter_summary_is_built_in_code_without_rule_ids():
+    # live answer once said "According to FDA_HOT_1H": the plan is now worded in code
+    r = j(
+        plan_shelter_batches(
+            people=120,
+            service_windows=[["13:00", "15:00"]],
+            dishes=["rice"],
+            can_hot_hold=False,
+            tool_context=ctx("Albergue con 120 personas, comida de 13:00 a 15:00", "es"),
+        )
+    )
+    assert r["summary"].startswith(
+        "Según U.S. FDA, plan para 120 personas: tanda 1: cocinar a las 12:00"
+    )
+    assert "tirar a las 14:00" in r["summary"] and "FDA_HOT_1H" not in r["summary"]
+    from agent.hooks.verifier import collect_allowed, find_unbacked
+
+    assert find_unbacked(r["summary"], *collect_allowed(json.dumps(r))) == {
+        "times": [],
+        "minutes": [],
+    }

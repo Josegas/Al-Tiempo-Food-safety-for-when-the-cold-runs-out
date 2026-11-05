@@ -324,6 +324,7 @@ const state = {
   coords: null,
   geo: "idle",
   seenReminders: new Set(),
+  fastPollUntil: 0, // look for reminders every 4 s until this time (right after scheduling one)
   busy: false,
   warm: null,
   lastPrompt: "",
@@ -537,6 +538,9 @@ function botMessage(answer, metrics, decision, hygiene, leftover) {
   btn.append(icon("speaker"), el("span", "", t("listen")));
   btn.addEventListener("click", () => speak(answer, btn));
   meta.appendChild(btn);
+  if (metrics && Array.isArray(metrics.tools_used) && metrics.tools_used.includes("schedule_reminder")) {
+    state.fastPollUntil = Date.now() + 3 * 60 * 1000;
+  }
   if (state.voiceReply) { // asked by voice -> answer by voice (Amazon Polly)
     state.voiceReply = false;
     speak(answer, btn);
@@ -624,7 +628,9 @@ function heatChart(d) {
   // axis labels: every other hour, and the max
   pts.forEach((p, i) => { if (i % 2 === 0) add("text", { x: X(p[0]), y: Ht - 6, "text-anchor": "middle", class: "heat-ax" }, p[0].slice(0, 2)); });
   const mp = pts[temps.indexOf(max)];
-  add("text", { x: X(mp[0]), y: Y(max) - 6, "text-anchor": "middle", class: "heat-max" }, `${max} °C`);
+  const mx = X(mp[0]); // keep the label inside the chart when the max is at an edge
+  const anchor = mx > W - R - 28 ? "end" : mx < L + 28 ? "start" : "middle";
+  add("text", { x: mx, y: Y(max) - 6, "text-anchor": anchor, class: "heat-max" }, `${max} °C`);
   [lo + 1, hi - 1].forEach((c) => add("text", { x: L - 4, y: Y(c) + 3, "text-anchor": "end", class: "heat-ax" }, `${Math.round(c)}°`));
   const fig = el("figure", "heat");
   fig.append(el("figcaption", "tl-title", H.title), svg);
@@ -1060,13 +1066,51 @@ window.addEventListener("offline", renderNetbar);
 
 function reminderMessage(r) {
   const m = el("div", "msg msg-reminder");
+  m.setAttribute("role", "alert");
   const head = el("p", "rem-head");
   head.append(icon("bell"), el("span", "", t("reminder")), el("span", "rem-time", `${t("reminderAt")} ${r.at_local}`));
   const body = el("p", "ans-p");
   appendInline(body, r.message);
-  m.append(head, body);
-  return addNode(m);
+  const btn = el("button", "listen listen-main");
+  btn.type = "button";
+  btn.append(icon("speaker"), el("span", "", t("listen")));
+  btn.addEventListener("click", () => speak(r.message, btn));
+  const meta = el("div", "meta");
+  meta.appendChild(btn);
+  m.append(head, body, meta);
+  addNode(m);
+  return btn;
 }
+
+// ---------------------------------------------------------------- reminder sound
+// Browsers only play sound after the person has touched the page, so the audio is "unlocked" on
+// the first send / tap. Then a reminder rings (3 short tones made by the browser: no file, no
+// cost), vibrates the phone where supported, and is read aloud with Amazon Polly.
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = audioCtx || new AC();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  } catch (e) { /* no audio: the reminder still shows */ }
+}
+function chime() {
+  if (!audioCtx || audioCtx.state !== "running") return false;
+  const t0 = audioCtx.currentTime + 0.05;
+  [880, 660, 880].forEach((f, i) => {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    const at = t0 + i * 0.32;
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.35, at + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.28);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(at); o.stop(at + 0.3);
+  });
+  return true;
+}
+["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, unlockAudio, { passive: true }));
 
 // ---------------------------------------------------------------- API
 async function api(path, options) {
@@ -1142,9 +1186,12 @@ async function pollReminders() {
     for (const r of data.reminders || []) {
       if (state.seenReminders.has(r.reminder_id)) continue;
       state.seenReminders.add(r.reminder_id);
-      reminderMessage(r);
+      const btn = reminderMessage(r);
       const text = `${t("reminder")} (${r.at_local}): ${r.message}`;
       if ("Notification" in window && Notification.permission === "granted") new Notification("Al Tiempo", { body: text });
+      const rang = chime();
+      if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+      setTimeout(() => speak(r.message, btn), rang ? 1100 : 0); // then read it aloud (Polly)
     }
   } catch (e) { /* offline: try again later */ }
 }
@@ -1273,6 +1320,8 @@ renderNetbar();
 syncHeader();
 warmUp();
 setInterval(pollReminders, 15000);
+// Right after a reminder is scheduled, look every 4 s for 3 minutes (so it shows up quickly).
+setInterval(() => { if (Date.now() < state.fastPollUntil) pollReminders(); }, 4000);
 
 // Installable + opens offline (https or localhost only; browsers require it).
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
