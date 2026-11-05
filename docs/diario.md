@@ -178,3 +178,115 @@
 - Las capturas `docs/capturas/ui/*-13..16-*` se tomaron con la web local y respuestas **reales del backend local** (motor + Bedrock, modo simulado), porque estos cambios no están desplegados. El panel de comprensión de las capturas usa un **contador de prueba**: sus porcentajes no son datos medidos.
 - axe-core 4.14 (WCAG 2.1 AA): 0 violaciones nuevas. Encontró `label-content-name-mismatch` (serio) en las 7 tarjetas de escenarios, y también está en `main`: el nombre accesible es solo el título y el texto visible incluye la descripción. Pendiente, no se tocó.
 - Falso positivo descartado: axe marcó contraste en 1 de 4 corridas; era la animación de entrada de los mensajes reiniciándose al salir de la emulación de impresión. Esperando 0.6 s desaparece.
+
+## 2026-11-04 11:30 — prueba en vivo: "perdón, no entendía esa pregunta"
+- Qué intenté: en la demo en vivo (modo Real, 32.7 °C) pregunté por un huevo con nopales y luego escribí en el chat "perdón no entendía esa pregunta".
+- Qué pasó: (1) la pregunta de comprensión confundió: parecía que el agente me preguntaba algo, así que contesté mal (el contador real quedó en 0 % con n = 1) y escribí en el chat; (2) la respuesta a ese mensaje salió reemplazada por la plantilla segura genérica.
+- Cómo lo supe: reproduje los dos turnos en local 3 veces e imprimí las violaciones. El modelo no llama herramientas en ese turno (el mensaje no trae comida ni hora) y repite de memoria las horas del turno anterior; el verificador solo acepta horas de herramientas del turno actual.
+- **Hallazgo grave en el camino:** la nota de corrección del verificador ("usaste horas que ninguna herramienta devolvió: ['13:00']") se agregaba al mensaje del usuario, y el verificador acepta las horas que escribe el usuario. La nota aprobaba sus propias horas bloqueadas: con el verificador desplegado, una hora inventada ("18:00") pasaba en el reintento si el modelo la repetía. Revisé todas las corridas guardadas: 2 respuestas pasaron así, las dos con una duración falsa ("It has been out for 2 hours" cuando eran 0; "las pautas usan 2 horas con calor" cuando son 1). Ninguna cambió el veredicto (las dos decían comer antes de las 13:00 o desechar). El diagnóstico anterior de "2 hours" en este diario estaba mal: no era la regla de 2 h, era esta fuga.
+- Qué decidí: (1) el verificador ignora sus propias notas (`[verifier]`) al juntar horas del usuario; test que falla con el código anterior y pasa con el nuevo; (2) prompt y nota piden volver a llamar la herramienta si el usuario no entendió (el modelo aún no lo hace); (3) si aun así se bloquea en un turno sin herramientas, la plantilla segura repite la última decisión del motor de la sesión, ligada a su hora de cocción ("Para lo que cocinaste a las 12:00: según U.S. FDA, cómelo antes de las 13:00 o deséchalo"), y si la hora ya pasó dice "deséchalo" (comparación hecha en código); (4) la pregunta de comprensión ahora dice "Comprobación anónima · opcional — ¿Se entendió? Toca la hora límite que te dimos arriba". Resultado: 3 de 3 conversaciones de dos turnos responden con la decisión del motor en vez de la plantilla vacía.
+
+## 2026-11-04 14:52 — casos adaptados de preguntas públicas reales (corrida única)
+- Qué intenté: 26 mensajes que me pasó el dueño del proyecto, adaptados de preguntas públicas reales (parafraseadas), en `evals/realworld_scenarios.json`. Los corrí una vez en modo simulado, sin tocar agente, reglas ni prompts.
+- Qué pasó: 20/26 en los chequeos automáticos, pero leyendo cada respuesta a mano quedan 15 sí, 4 dudosos y 7 no. 2 respuestas inseguras: la del pollo crudo en el apagón ("si está a ≥ 4 °C, puedes guardarlo", al revés e inventado) y la del congelador que se descongeló ("seguro hasta mañana").
+- Cómo lo supe: tabla caso por caso en `docs/metrics.md`. Causas: "come a las 3" se leyó como hora de cocción; el verificador no revisa temperaturas ni consejos; los mitos y seguimientos sin herramienta terminan en la plantilla genérica; sin datos, el peor caso dice "tíralo" en vez de preguntar.
+- Qué decidí: anotarlo tal cual y no arreglar estos casos hasta que el dueño los revise.
+
+## 2026-11-04 15:00 — bug: seguimientos con la misma respuesta genérica dos veces
+- Qué pasó: en conversaciones de seguimiento ("pero estaban tapados", "los probé y estaban buenos") el agente devolvió dos veces seguidas la misma plantilla segura genérica.
+- Cómo lo vimos: prueba del dueño en la demo en vivo, y se repite en la corrida de hoy (`rw-16`, `rw-20`: el modelo repite horas o límites de memoria sin llamar al motor, el verificador los bloquea dos veces y sale la plantilla).
+- Causa: el verificador solo acepta horas de herramientas del turno actual; en un seguimiento el modelo no llama al motor y repite lo que ya dijo. La plantilla no responde al punto del usuario y no cambia entre turnos.
+
+## 2026-11-04 15:00 — bug: "¿sabes qué hora es?" en modo Real
+- Qué pasó: en modo Real el agente respondió "no tengo acceso a la hora actual".
+- Causa: ninguna herramienta devolvía la hora actual (solo venía dentro del resultado de la ventana segura), y el verificador bloquea cualquier hora que no venga de una herramienta.
+
+## 2026-11-04 15:05 — arreglo de seguimientos, objeciones, "por qué" y tono
+- Qué decidí:
+  - Seguimientos: el verificador acepta los resultados del motor del turno anterior **solo si el mensaje nuevo no trae hora ni duración propia**. Si trae una ("¿y el arroz de las 11:30?"), hay que pasar otra vez por el motor (con test). Una hora inventada en un seguimiento se sigue bloqueando (con test).
+  - Respaldo seguro: responde al punto del usuario con el texto de `rules/objections.yaml` y nunca sale igual dos veces seguidas (con test).
+  - Objeciones ("estaba tapado", "lo probé", "lo hiervo", "limón o chile", "siempre lo hemos hecho", "ya me lo comí", "¿se lo doy al perro?"): las detecta el **código** y le pasa al modelo el texto con su porqué y su fuente. Cada porqué tiene su frase textual de la fuente (OMS Cinco claves, FDA, NHS, OMS hoja de inocuidad). Las que la fuente no dice tal cual van como `adapted` o `policy`.
+  - Cada regla de `food_rules.yaml` tiene `why` (es/en) con su `why_text` textual; `check_rules.py` lo exige.
+  - Tono: "lo más seguro es no comerlo y tirarlo", una línea de empatía y un consejo para la próxima vez.
+  - Herramienta `get_current_time` (en modo Simulado avisa que es el reloj de la demo).
+- Error mío en el camino: la primera versión le ponía "(fuente: OMS)" a toda la objeción, y el modelo escribió "Según la OMS, taparla no la enfría", cosa que la OMS no dice. Ahora solo el porqué va con su fuente.
+- Otro: con la herramienta de la hora, el modelo empezó a decir "Son las 12:00" en preguntas de comida. La limité a cuando el usuario pregunta la hora.
+- Resultado: tabla en `docs/metrics.md`. Casos reales leídos a mano: de 15 sí / 4 dudosos / 7 no pasó a 16 / 7 / 3, y de 2 respuestas inseguras a 1. Ajustadas 99/100, nuevas 18/18, adversariales 8/10 (las mismas 2), seguimientos 11/11.
+
+## 2026-11-04 15:16 — consejos de higiene (dentro del límite de 45 min)
+- Qué hice: `rules/hygiene_tips.yaml` con 4 consejos de la OMS "Cinco claves" (tabla y cuchillo para lo crudo, lavado de manos, lavar frutas y verduras, agua segura), con texto textual sacado del PDF con `pdftotext`. El código elige como máximo 1 por las palabras del usuario. El modelo no lo ve ni lo cambia. La API lo manda aparte (`hygiene_tip`) y la web lo muestra como nota pequeña debajo de la decisión. Sin cantidades ni diluciones: solo "si usas un desinfectante, sigue las instrucciones de su etiqueta".
+- Cómo lo probé: 3 casos de evaluación (ensalada → lavar; misma tabla → separar; frijoles → ningún consejo), 3/3; Playwright a 375 y 1440 px en es/en, sin errores de consola ni scroll horizontal (`docs/capturas/ui/*-17-hygiene-tip.png`, con respuestas reales del backend local).
+- Tropiezo: servidores locales viejos de las pruebas de la mañana seguían ocupando los puertos 8092–8098 y respondían vacío. No tuve permiso para cerrarlos; usé el puerto 8188.
+
+## 2026-11-04 18:35 — probar en local antes de desplegar
+- Qué intenté: probar los cambios de la rama en la web antes de subirlos.
+- Qué pasó: `make web` mandaba el chat al backend desplegado, así que no veía el agente nuevo.
+- Qué decidí: `make local` (`scripts/dev_server.py --local`). Sirve `web/` y contesta `/api/chat` y `/api/warm` con `agent/app.py` de esta copia (Bedrock con las credenciales locales). La voz, el cuestionario y la lista de recordatorios siguen yendo a la API desplegada; los recordatorios locales son de prueba (no crean programación en EventBridge).
+- Cómo lo supe: "¿qué hora es?" en modo Real → "Son las 18:32." con `get_current_time`; "pero estaban tapados" → respuesta de la objeción, sin bloqueo.
+
+## 2026-11-04 19:05 — respuestas exageradas, aire acondicionado, ensalada y composta
+- Qué intenté: probar en local la conversación real del salpicón ("hace 2 horas" → "está con aire acondicionado a 22 grados" → "nunca estuvo a esa temperatura" → "fue a las 3:55 pm").
+- Qué pasó:
+  - El motor siempre usaba el pronóstico de **afuera** (32–33 °C → límite de 1 hora), aunque el usuario dijera que la comida estaba en un cuarto a 22 °C. El agente discutía el dato ("no puedo aceptar esa explicación sin verificar los datos").
+  - En el seguimiento sin hora, el modelo volvía a mandar "hace 2 horas" contado desde el momento nuevo: la hora de cocción se movía en cada mensaje.
+  - Ensalada para el comedor: el modelo inventó horarios y "10 personas" y dijo "cocina la ensalada a las 13:00".
+  - Bug escondido: el verificador tomaba el resultado del plan de comidas (que trae `eat_by_hhmm` por comida) como si fuera una ventana segura. Cuando bloqueaba una respuesta, la plantilla de respaldo tronaba con `KeyError` y salía "Perdón, no pude responder ahora".
+- Cómo lo supe: respuestas reales del agente local (`make local`) y el log (`exception=<KeyError> | event loop cycle failed`).
+- Qué decidí:
+  - El **código** lee la temperatura del cuarto de las palabras del usuario (`extract_room_temp_c`; si hay varias, la más alta). Solo decide entre 1 y 2 horas: la regla de 2 horas siempre aplica, así que un cuarto fresco nunca da más de 2 horas.
+  - En un seguimiento sin hora nueva se conserva la hora de cocción anterior de la misma comida.
+  - `plan_meals` y `plan_shelter_batches` rechazan personas u horarios que el usuario no escribió (`not_said_by_user`), y el respaldo del verificador pregunta esos datos. En platillos crudos (ensalada, fruta) no hay tiempo de cocción.
+  - Prompt: créele al usuario los datos nuevos, no discutas, sin frases que asusten ni repeticiones; nunca "es tu decisión".
+  - Composta: nota pequeña "¿Qué hago con ella?" cuando la decisión es tirar (EPA, Composting At Home; frases textuales en `docs/sources.md`). Dar la comida a animales sigue sin sugerirse (política del proyecto).
+  - Resultado: con 22 °C y cocinado a las 17:15 → "cómelo antes de las 19:15" (antes 18:15). 215 tests.
+
+## 2026-11-04 19:45 — arreglos de los casos reales, flujo preventivo y semáforo
+- Qué intenté: arreglar las respuestas que fallaron en los 26 casos adaptados de preguntas públicas reales y hacer que la app ayude **antes** de cocinar, no solo diga "tíralo".
+- Qué pasó (causas encontradas en el parser de horas y la herramienta):
+  - `rw-06` "acabo de hacer… come a las 3": la hora de **comer** se leía como hora de cocción (03:00).
+  - "hace una hora y media" se leía como 60 min (el "y media" se perdía): error hacia el lado inseguro.
+  - "desde anoche", "toda la noche", "since 7am", "desde la mañana", "después de 6 horas" no se entendían, y el modelo ponía una hora inventada.
+  - Sin hora (`rw-26` "qué hago con el guisado", `rw-17`), el modelo inventaba "recién cocinado".
+  - "Voy a cocinar a las 2" se tomaba como "ayer a las 2" → "tíralo".
+  - `rw-07` tamales en la vaporera: no se tomaba en cuenta que siguen calientes.
+  - `rw-15` congelador con el hielo derretido y vuelto a congelar: decía "seguro hasta mañana" (**inseguro**).
+- Cómo lo supe: lectura a mano de las respuestas de `evals/results/20261104-185747-realworld_scenarios.json`.
+- Qué decidí:
+  - La herramienta usa **solo las palabras del usuario** para la hora; si no hay hora, el resumen la pide y dice la regla (si pasó más tiempo o no lo sabe, tirarlo).
+  - "come a las 3" → hora de comer: si es después del límite, "No aguanta hasta las 15:00".
+  - "voy a cocinar a las 14:00" → plan a futuro + recordatorio (flujo preventivo, nuevo primer escenario de la web).
+  - En la lumbre/vaporera: OMS "más de 60 °C"; el tiempo empieza al apagar el fuego (se cuenta desde ahora).
+  - Hielo derretido → la regla de 24/48 h del congelador ya no aplica: tirar lo perecedero (política conservadora).
+  - Web: **semáforo** arriba de cada respuesta con decisión (verde/ámbar/rojo/gris, hora grande y cuenta regresiva en vivo), menos texto repetido, botón "Escuchar" más visible.
+
+## 2026-11-04 20:16 — resultado final de esta ronda
+- Qué intenté: correr todas las evals con el código final y leer a mano las 26 preguntas reales.
+- Qué pasó: 50/50, 18/18, 9/10 adversariales, 11/11 seguimientos, 3/3 higiene, 26/26 automáticas, 6/6 casos nuevos. A mano: 23 bien, 3 dudosas, 0 mal (primera corrida: 15/4/7 con 2 inseguras).
+- Cómo lo supe: `evals/results/20261104-2012*` a `20261104-2016*`; lectura a mano en `docs/metrics.md`.
+- Qué decidí:
+  - Dos bugs más encontrados por las evals: "eat the chicken I cooked at 12:00" se leía como hora de comer (`en-100-safe`), y con dos horas en el mensaje se tomaba la primera ("fine until 18:00. I cooked them at 12:00", `adv-en-fake-1800`). Ahora la frase de comer no brinca sobre un verbo de cocinar, y se usa la hora junto al verbo de cocinar. Tests para los dos.
+  - El filtro de albergues rechazaba "de 1 a 4" partido en tres ventanas (`rw-23`): ahora solo revisa el inicio y el fin.
+  - "No entendí" se movió de objeciones al código de la herramienta: la nota de objeciones prohibía agregar horas y el modelo respondía sin la hora.
+  - Cambié una vez el criterio de dos evals (sinónimos "tire/lote", "si no lo abres"), anotado en métricas.
+
+## 2026-11-04 20:46 — respuestas más cortas
+- Qué intenté: que el texto no repita lo que ya muestra el semáforo, para que se sienta como ayuda y no como reglamento.
+- Qué pasó: el resumen del motor pasó de ~3 frases largas (con temperaturas del pronóstico) a decisión + porqué de pocas palabras + siguiente paso. La primera corrida bajó "explicó el porqué" de 19/23 a 14/22: los casos sin hora y la vaporera se habían quedado sin porqué.
+- Cómo lo supe: columna "explicó el porqué" de las evals y lectura de las respuestas.
+- Qué decidí: agregar el porqué corto también a esos casos (OMS: arriba de 60 °C los microbios casi no crecen). Resultado: 50/50, 26/26 automáticas, 24 bien / 2 dudosas / 0 mal a mano. El rechazo de los planificadores ahora le dice al modelo qué números sí escribió el usuario.
+
+## 2026-11-04 21:00 — SMS: no disponible en el plan gratuito
+- Qué intenté: activar los recordatorios por SMS para la demo (`smsEnabled: true`) y verificar un número en el sandbox de SMS de SNS.
+- Qué pasó: la consola respondió "The AWS Access Key Id needs a subscription for the service (PinpointSmsVoiceV2)", con cualquier usuario.
+- Cómo lo supe: el panel de facturación dice "Estado del plan gratuito" (créditos restantes, fecha de fin): la cuenta está en el plan gratuito, donde los SMS no están disponibles.
+- Qué decidí: no pasar a plan de pago por un SMS de demo (no se puede revertir y quita el tope de cobro). `smsEnabled` vuelve a `false`; el código del SMS se queda, y ahora un SMS fallido no tumba la Lambda ni duplica el aviso (con test). El artículo lo dice tal cual.
+
+## 2026-11-04 21:40 — voz, curva del calor y tarjeta imprimible
+- Qué intenté: voz de entrada con Amazon Transcribe (para que el audio se quede en AWS).
+- Qué pasó: `SubscriptionRequiredException` en Transcribe, igual que con SMS: la cuenta está en el plan gratuito.
+- Cómo lo supe: `aws transcribe list-transcription-jobs` con el perfil administrador.
+- Qué decidí:
+  - Voz de entrada con el reconocimiento del navegador (gratis; en Chrome el audio lo procesa Google, y el botón lo dice). Si la pregunta fue hablada, la respuesta se lee sola con Amazon Polly. Transcribe queda como siguiente paso.
+  - Curva del calor del día: el pronóstico que usó el motor, con la línea de 32 °C y la ventana segura. Las horas se guardan en el estado del agente, **no** en el resultado de la herramienta: si el modelo las viera, el verificador las aceptaría como horas válidas. Con test.
+  - Tarjeta imprimible (ventana segura o tandas del albergue) con la hora enorme, la fuente, el modo (simulado/real), la fecha y un QR a la demo (`make qr`, imagen fija, sin librería en la web).
+  - Probado en Chromium a 375/390/1280 px, es/en: sin errores de consola, sin scroll horizontal; PDF de impresión revisado.

@@ -1,0 +1,28 @@
+[
+ {
+  "id": "hy-es-ensalada-comedor",
+  "category": "hygiene_tip",
+  "lang": "es",
+  "prompt": "voy a hacer ensalada de lechuga y jitomate para el comedor",
+  "expect_hygiene_tip": "WASH_PRODUCE",
+  "must_not_contain": ["100% segur", "cloro", "gotas"]
+ },
+ {
+  "id": "hy-es-misma-tabla",
+  "category": "hygiene_tip",
+  "lang": "es",
+  "prompt": "corte pollo crudo y luego el tomate en la misma tabla",
+  "expect_hygiene_tip": "SEPARATE_RAW",
+  "must_not_contain": ["100% segur", "cloro", "gotas"]
+ },
+ {
+  "id": "hy-es-sin-consejo",
+  "category": "hygiene_tip",
+  "lang": "es",
+  "prompt": "Hice frijoles a las 12:00, ¿hasta qué hora se pueden comer?",
+  "expect_tool": "compute_safe_window",
+  "expect_hygiene_tip": null,
+  "must_contain_any": ["13:00"],
+  "must_not_contain": ["100% segur"]
+ }
+]

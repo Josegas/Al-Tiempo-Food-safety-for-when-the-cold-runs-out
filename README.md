@@ -28,19 +28,26 @@ cp .env.example .env  # DEMO_MODE=true uses a saved 38 °C forecast
 make check            # lint + rules policy + tests
 make chat             # chat in Spanish (make chat CHAT_LANG=en for English)
 make web              # preview the web at http://localhost:8088 (API calls go to the live demo)
+make local            # same, but the chat runs the agent from THIS checkout (test before deploying)
 make loadtest         # burst test of the live API throttle (health endpoint only, no model calls)
 ```
 
 ## What it does
-1. **Safe window + reminders** — "I cooked beans at 12:00" → "According to the U.S. FDA, eat them before 13:00 or throw them away" (38 °C day → 1-hour rule).
+1. **Safe window + reminders** — before cooking ("I'm going to cook beans at 14:00" → "eat them before 15:00", with a reminder at 14:45) or after ("I cooked beans at 12:00" → "According to the U.S. FDA, eat them before 13:00 or throw them away"; 38 °C day → 1-hour rule). It also handles "he eats at 3" (*"it won't last until 15:00"*), food still steaming on the stove (WHO, above 60 °C: the clock starts when the heat goes off), and a room temperature the user reports (air conditioning at 22 °C → 2 hours, never more).
 2. **Meal planning** — when to cook and how much, so nothing sits out.
-3. **Power-outage mode** — fridge/freezer clock from the moment the power went out.
+3. **Power-outage mode** — fridge/freezer clock from the moment the power went out (a freezer whose ice melted no longer counts as safe).
 4. **Strict mode for babies and young children.**
 5. **Shelters & community kitchens** — staggered cooking batches with discard times.
 6. **Danger-sign escalation** — fixed WHO dehydration questions → "go to a clinic / call 911". No diagnosis, no doses.
 
-Every safe-window answer also shows a **timeline** (cooked → now → reminder → limit) drawn only from
-the rules engine's numbers. The web is **installable and opens without signal**: offline, it shows
+Every safe-window answer starts with a **traffic light** (green: eat before HH:MM, with a live
+countdown; amber: little time left or it won't last until mealtime; red: throw it away; grey: one
+detail is missing) and a **timeline** (cooked → now → reminder → limit), both drawn only from the
+rules engine's numbers. When the answer is "throw it away", a small note says what can go in a
+home compost pile (US EPA); a hygiene tip (WHO Five keys) appears when it applies.
+You can also **talk to it** (browser speech recognition; the answer is read aloud with Amazon
+Polly), see **today's heat curve** with the 32 °C line, and **print a kitchen card** (eat-by time or
+shelter batch table, with a QR code to the app). The web is **installable and opens without signal**: offline, it shows
 the basic official rules instead of an error.
 
 ## How it works

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from agent.rules_engine import comprehension_options
 
 FIELDS = ("food_type", "cooked_at_hhmm", "now_hhmm", "eat_by_hhmm", "status", "limit_minutes",
-          "minutes_left", "serve_immediately")  # fmt: skip
+          "minutes_left", "serve_immediately", "planned", "hot_holding", "wont_last_until")  # fmt: skip
 
 
 def _short_source(window: dict) -> dict:
@@ -58,6 +58,7 @@ def safe_window_decision(new_messages: list[dict]) -> dict | None:
     decision["rule_id"] = (window.get("deciding_source") or {}).get("rule_id")
     decision["max_temp_c"] = window.get("max_temp_c")
     decision["hot_threshold_c"] = window.get("hot_threshold_c")
+    decision["temp_source"] = window.get("temp_source") or "forecast"
     # Cooking time unknown -> the engine assumed "long ago": don't draw a made-up start point.
     decision["cooked_known"] = window.get("time_source") != "unknown"
     # Comprehension check: built here, outside the model loop, so the distractor times never

@@ -1,0 +1,227 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 9,
+  "passed": 9,
+  "median_latency_ms": 2366,
+  "avg_input_tokens": 8685,
+  "avg_output_tokens": 207,
+  "cost_per_turn_usd": 0.003436,
+  "verifier_retries": 2,
+  "verifier_blocks": 0,
+  "with_decision": 9,
+  "explained_why": 6,
+  "rows": [
+   {
+    "id": "rw-08-cocina-20",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco.",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3356,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12437,
+    "output_tokens": 285,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [
+       "13:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado del refri, o revísalos con un termómetro de cocina. El pollo crudo del congelador está bien hasta las 7:00 de mañana.\n\n*Porque* la regla oficial dice que un refri cerrado mantiene la comida fría unas 4 horas sin energía.",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado del refri, o revísalos con un termómetro de cocina. El pollo crudo del congelador está bien hasta las 7:00 de mañana.\n\n*Porque* la regla oficial dice que un refri cerrado mantiene la comida fría unas 4 horas sin energía."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1890,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8241,
+    "output_tokens": 133,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-16-volvio-luz-6h",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**El refri está bien, pero hay que revisar la comida.**  \n\nSegún la regla de la FDA, el refrigerador solo mantiene la comida segura unas 4 horas si la puerta se mantuvo cerrada. Como la luz volvió hace 6 horas, el límite de 4 horas ya pasó a las 10:00.  \n\n**Qué hacer:**  \n- **Desecha** la comida perecedera del refri (lácteos, carnes crudas, huevos, pescado, ensaladas, frutas y verduras cortadas, etc.).  \n- Si quieres revisar antes de tirar, usa un termómetro de cocina: si la temperatura está por debajo de 4 °C, la comida sigue segura. Si no tienes termómetro, lo más seguro es tirarla.  \n\nEl congelador está bien: mantiene la comida segura hasta las 06:00 de hoy. No hay que tirar nada del congelador.  \n\n**Recuerda:** cuando el refri se abre durante un apagón, el tiempo seguro se reduce. En la duda, lo más seguro es desechar la comida del refri.",
+    "answers": [
+     "**El refri está bien, pero hay que revisar la comida.**  \n\nSegún la regla de la FDA, el refrigerador solo mantiene la comida segura unas 4 horas si la puerta se mantuvo cerrada. Como la luz volvió hace 6 horas, el límite de 4 horas ya pasó a las 10:00.  \n\n**Qué hacer:**  \n- **Desecha** la comida perecedera del refri (lácteos, carnes crudas, huevos, pescado, ensaladas, frutas y verduras cortadas, etc.).  \n- Si quieres revisar antes de tirar, usa un termómetro de cocina: si la temperatura está por debajo de 4 °C, la comida sigue segura. Si no tienes termómetro, lo más seguro es tirarla.  \n\nEl congelador está bien: mantiene la comida segura hasta las 06:00 de hoy. No hay que tirar nada del congelador.  \n\n**Recuerda:** cuando el refri se abre durante un apagón, el tiempo seguro se reduce. En la duda, lo más seguro es desechar la comida del refri."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2675,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8271,
+    "output_tokens": 264,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-08-cocina-20",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco.",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3320,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12437,
+    "output_tokens": 280,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [
+       "13:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las **11:00**. Desecha la leche y el guisado (comida perecedera) del refri, o revísalos con un termómetro de cocina.  \n**Congelador:** está bien hasta las **07:00** de mañana, así que el pollo crudo del congelador sigue seguro.\n\n*La regla viene de la FDA (EE. UU.) y está verificada.*",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las **11:00**. Desecha la leche y el guisado (comida perecedera) del refri, o revísalos con un termómetro de cocina.  \n**Congelador:** está bien hasta las **07:00** de mañana, así que el pollo crudo del congelador sigue seguro.\n\n*La regla viene de la FDA (EE. UU.) y está verificada.*"
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1867,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8241,
+    "output_tokens": 143,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-16-volvio-luz-6h",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**El refri está bien, pero hay que revisar la comida.**  \n\nSegún la regla de la FDA, el refrigerador mantiene la comida fría unas 4 horas. Tu apagón duró 6 horas, así que el límite de 4 horas terminó a las 10:00.  \n\n**Lo que debes hacer:**  \n- **Desecha la comida perecedera del refri** (leche, yogur, carnes crudas, huevos, pescado, etc.) o revísala con un termómetro de cocina. Si la temperatura dentro del refri está por debajo de 4 °C, puedes conservarla; si no, tírala.  \n- El congelador está bien: mantiene la comida segura hasta las 06:00 del día que viene.  \n\nSi no tienes termómetro, lo más seguro es tirar la comida perecedera del refri.",
+    "answers": [
+     "**El refri está bien, pero hay que revisar la comida.**  \n\nSegún la regla de la FDA, el refrigerador mantiene la comida fría unas 4 horas. Tu apagón duró 6 horas, así que el límite de 4 horas terminó a las 10:00.  \n\n**Lo que debes hacer:**  \n- **Desecha la comida perecedera del refri** (leche, yogur, carnes crudas, huevos, pescado, etc.) o revísala con un termómetro de cocina. Si la temperatura dentro del refri está por debajo de 4 °C, puedes conservarla; si no, tírala.  \n- El congelador está bien: mantiene la comida segura hasta las 06:00 del día que viene.  \n\nSi no tienes termómetro, lo más seguro es tirar la comida perecedera del refri."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2366,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8236,
+    "output_tokens": 243,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-08-cocina-20",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, pero no puedo asumir que la temperatura de tu cocina es segura solo porque sientes que está fresca. Mis reglas solo aplican para alimentos que están **realmente** a temperaturas seguras, verificadas con un termómetro o con datos oficiales de la zona.\n\nSi tienes un termómetro y puedes medir la temperatura exacta de donde está la comida, dime:\n- La hora exacta a la que se cocinó\n- La temperatura real que mide el termómetro\n\nCon esos datos puedo decirte exactamente si es seguro comerla o si hay que tirarla.\n\nSi no tienes termómetro, lo más seguro es **no comerla** si no sabes con certeza que estuvo todo el tiempo por debajo de 4 °C (refrigerada) o por encima de 60 °C (caliente).",
+    "answers": [
+     "Lo siento, pero no puedo asumir que la temperatura de tu cocina es segura solo porque sientes que está fresca. Mis reglas solo aplican para alimentos que están **realmente** a temperaturas seguras, verificadas con un termómetro o con datos oficiales de la zona.\n\nSi tienes un termómetro y puedes medir la temperatura exacta de donde está la comida, dime:\n- La hora exacta a la que se cocinó\n- La temperatura real que mide el termómetro\n\nCon esos datos puedo decirte exactamente si es seguro comerla o si hay que tirarla.\n\nSi no tienes termómetro, lo más seguro es **no comerla** si no sabes con certeza que estuvo todo el tiempo por debajo de 4 °C (refrigerada) o por encima de 60 °C (caliente)."
+    ],
+    "tools": [],
+    "latency_ms": 1840,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 3826,
+    "output_tokens": 173,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las **11:00**. Desecha la leche y el guisado del refri, o revísalos con un termómetro de cocina. El pollo crudo del congelador está bien hasta las **07:00** de mañana, porque el congelador está medio lleno.\n\n*El refrigerador cerrado mantiene el frío unas 4 horas; el congelador medio lleno unas 24 horas.*",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las **11:00**. Desecha la leche y el guisado del refri, o revísalos con un termómetro de cocina. El pollo crudo del congelador está bien hasta las **07:00** de mañana, porque el congelador está medio lleno.\n\n*El refrigerador cerrado mantiene el frío unas 4 horas; el congelador medio lleno unas 24 horas.*"
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2078,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8241,
+    "output_tokens": 139,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-16-volvio-luz-6h",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "El refrigerador ya está frío otra vez, pero **lo más seguro es desechar la comida perecedera** (como carnes, lácteos, huevos, verduras frescas) que estuvo dentro durante el apagón. El límite oficial es 4 horas: después de eso, aunque el refri se enfrió, no podemos garantizar que la temperatura haya sido segura todo el tiempo.\n\nSi quieres revisar algo específico, puedes usar un termómetro de cocina: si la temperatura dentro del refri está por debajo de 4 °C, está bien; si no, deséchalo.\n\nEl congelador está bien: mantiene la comida segura hasta 48 horas si está lleno y la puerta no se abrió.",
+    "answers": [
+     "El refrigerador ya está frío otra vez, pero **lo más seguro es desechar la comida perecedera** (como carnes, lácteos, huevos, verduras frescas) que estuvo dentro durante el apagón. El límite oficial es 4 horas: después de eso, aunque el refri se enfrió, no podemos garantizar que la temperatura haya sido segura todo el tiempo.\n\nSi quieres revisar algo específico, puedes usar un termómetro de cocina: si la temperatura dentro del refri está por debajo de 4 °C, está bien; si no, deséchalo.\n\nEl congelador está bien: mantiene la comida segura hasta 48 horas si está lleno y la puerta no se abrió."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 3066,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8236,
+    "output_tokens": 206,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

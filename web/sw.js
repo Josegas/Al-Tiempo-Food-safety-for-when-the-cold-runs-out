@@ -1,7 +1,7 @@
 // Al Tiempo service worker: the page opens without signal and shows the basic safety rules.
 // Network first for the page itself (online = always the latest deploy), cache only as fallback.
 // The API (/api/*) is never cached: answers, reminders and voice always come from the server.
-const CACHE = "al-tiempo-v2";
+const CACHE = "al-tiempo-v3";
 const SHELL = [
   "./", "index.html", "app.js", "styles.css", "manifest.json",
   "fonts/altiempo-text-regular.woff2", "fonts/altiempo-text-bold.woff2",

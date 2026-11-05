@@ -1,0 +1,22 @@
+# What to do with food that has to be thrown away (one short note, shown AFTER the decision,
+# never changing it). The CODE decides when it applies: only when this turn's safe window says
+# "discard_now". The model never sees it. Never suggests feeding it to animals (see
+# rules/objections.yaml, ANIMALS).
+# Backed by VERBATIM text (verified_text / why_text) from the source, checked 2026-11-04.
+# HOW TO RE-CHECK: open source_url and search for verified_text / why_text (Ctrl+F).
+
+source_name: "US EPA - Composting At Home"
+source_url: "https://www.epa.gov/recycle/composting-home"
+verified_on: "2026-11-04"
+
+tips:
+  - id: COMPOST
+    applies_when: "the safe window says discard_now"
+    tip:
+      es: "Si tienes composta, ahí pueden ir los restos de fruta y verdura y un poco de comida cocinada. La carne, el pescado, los lácteos y la grasa no van en una composta casera."
+      en: "If you have a compost pile, fruit and vegetable scraps and small amounts of cooked food can go there. Meat, fish, dairy and grease do not belong in a backyard pile."
+    why:
+      es: "Esos alimentos atraen animales y una composta casera no se calienta lo suficiente para deshacerlos."
+      en: "Those foods attract animals, and a backyard pile does not get hot enough to fully break them down."
+    verified_text: "Fruit and vegetable scraps | Cooked food (small amounts are fine) | Meat, fish, and bones | Cheese and dairy products | Fats, oils, and grease"
+    why_text: "These foods can attract animals. | Backyard composting piles generally do not reach high enough temperatures to fully decompose these materials."

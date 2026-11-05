@@ -1,0 +1,92 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 0,
+  "median_latency_ms": 2705,
+  "avg_input_tokens": 11815,
+  "avg_output_tokens": 134,
+  "cost_per_turn_usd": 0.004269,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 0,
+  "explained_why": 0,
+  "rows": [
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": false,
+    "fails": [
+     "missing any of ['13:00']"
+    ],
+    "answer": "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3141,
+    "decision_correct": false,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13444,
+    "output_tokens": 143,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": false,
+    "fails": [
+     "missing any of ['13:00']"
+    ],
+    "answer": "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2705,
+    "decision_correct": false,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13444,
+    "output_tokens": 143,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": false,
+    "fails": [
+     "missing any of ['13:00']"
+    ],
+    "answer": "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "En pocas palabras: la hora límite es la misma; antes de esa hora se come y después se tira."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2298,
+    "decision_correct": false,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 8557,
+    "output_tokens": 118,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

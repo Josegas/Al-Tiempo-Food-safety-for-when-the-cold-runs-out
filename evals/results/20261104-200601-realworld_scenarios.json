@@ -1,0 +1,111 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 4,
+  "passed": 1,
+  "median_latency_ms": 2706,
+  "avg_input_tokens": 8372,
+  "avg_output_tokens": 257,
+  "cost_per_turn_usd": 0.003472,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 3,
+  "explained_why": 0,
+  "rows": [
+   {
+    "id": "rw-14-congelador-lleno",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según la regla de la FDA, tu congelador lleno mantiene la carne segura hasta el **viernes a las 10:00** (48 horas desde el apagón). El refrigerador, si la puerta se abrió, no garantiza las 4 horas; si no tienes termómetro, lo más seguro es descartar comida perecedera del refri. La carne del congelador está bien si no lo abriste.\n\n**¿Ya la cocinaste?** Si aún está congelada, puedes cocinarla ahora sin problema. Si ya la sacaste y está a temperatura ambiente, revísala con un termómetro; si no subió sobre 4 °C, está bien. Si no puedes medir, mejor tirarla.",
+    "answers": [
+     "Te entiendo. Según la regla de la FDA, tu congelador lleno mantiene la carne segura hasta el **viernes a las 10:00** (48 horas desde el apagón). El refrigerador, si la puerta se abrió, no garantiza las 4 horas; si no tienes termómetro, lo más seguro es descartar comida perecedera del refri. La carne del congelador está bien si no lo abriste.\n\n**¿Ya la cocinaste?** Si aún está congelada, puedes cocinarla ahora sin problema. Si ya la sacaste y está a temperatura ambiente, revísala con un termómetro; si no subió sobre 4 °C, está bien. Si no puedes medir, mejor tirarla."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2234,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8397,
+    "output_tokens": 205,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-23-comedor-150",
+    "category": "shelter",
+    "passed": false,
+    "fails": [
+     "missing any of ['tanda', 'desech', 'deséch']"
+    ],
+    "answer": "**Plan para su comedor comunitario (150 personas, 13:00–16:00)**\n\n- **Batch 1:** cocinar a las 12:00, listo a las 13:00. Servir hasta las 14:00. Tirar a las 14:00 si sobra.\n- **Batch 2:** cocinar a las 13:00, listo a las 14:00. Servir hasta las 15:00. Tirar a las 15:00 si sobra.\n- **Batch 3:** cocinar a las 14:00, listo a las 15:00. Servir hasta las 16:00. Tirar a las 16:00 si sobra.\n\nCada batch sirve 50 porciones. La regla usada es la FDA para alimentos calientes sin refrigeración: se debe tirar después de una hora fuera del rango de temperatura seguro.\n\n¿Necesita ajustar los horarios o la cantidad de platos?",
+    "answers": [
+     "**Plan para su comedor comunitario (150 personas, 13:00–16:00)**\n\n- **Batch 1:** cocinar a las 12:00, listo a las 13:00. Servir hasta las 14:00. Tirar a las 14:00 si sobra.\n- **Batch 2:** cocinar a las 13:00, listo a las 14:00. Servir hasta las 15:00. Tirar a las 15:00 si sobra.\n- **Batch 3:** cocinar a las 14:00, listo a las 15:00. Servir hasta las 16:00. Tirar a las 16:00 si sobra.\n\nCada batch sirve 50 porciones. La regla usada es la FDA para alimentos calientes sin refrigeración: se debe tirar después de una hora fuera del rango de temperatura seguro.\n\n¿Necesita ajustar los horarios o la cantidad de platos?"
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 3314,
+    "decision_correct": false,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8348,
+    "output_tokens": 286,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-14-congelador-lleno",
+    "category": "outage",
+    "passed": false,
+    "fails": [
+     "missing any of ['48', 'cerrad']"
+    ],
+    "answer": "Te entiendo. Según la regla de la FDA, **el congelador lleno aguanta hasta el viernes a las 10:00** si no lo abres. La carne está segura ahí.\n\nEl refrigerador, sin embargo, **no está seguro**: la puerta pudo abrirse durante el apagón, y sin un termómetro no podemos confirmar que siga frío. Si no tienes termómetro, lo más seguro es tirar la comida perecedera del refri.\n\nEn resumen:\n- **Congelador**: carne sigue segura hasta el viernes 10:00. No la cocines todavía; guárdala ahí.\n- **Refri**: si hay comida perecedera (leche, yogur, carnes sin congelar), tírala si no puedes medir la temperatura.\n\n¿Necesitas ayuda para planear cuándo cocinar la carne del congelador?",
+    "answers": [
+     "Te entiendo. Según la regla de la FDA, **el congelador lleno aguanta hasta el viernes a las 10:00** si no lo abres. La carne está segura ahí.\n\nEl refrigerador, sin embargo, **no está seguro**: la puerta pudo abrirse durante el apagón, y sin un termómetro no podemos confirmar que siga frío. Si no tienes termómetro, lo más seguro es tirar la comida perecedera del refri.\n\nEn resumen:\n- **Congelador**: carne sigue segura hasta el viernes 10:00. No la cocines todavía; guárdala ahí.\n- **Refri**: si hay comida perecedera (leche, yogur, carnes sin congelar), tírala si no puedes medir la temperatura.\n\n¿Necesitas ayuda para planear cuándo cocinar la carne del congelador?"
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2981,
+    "decision_correct": false,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8397,
+    "output_tokens": 227,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-23-comedor-150",
+    "category": "shelter",
+    "passed": false,
+    "fails": [
+     "missing any of ['tanda', 'desech', 'deséch']"
+    ],
+    "answer": "**Plan para su comedor comunitario (150 personas, 13:00–16:00):**\n\n- **Batch 1:** Cocine a las **12:00**, listo a las **13:00**. Sirva hasta las **14:00**, tire a las **14:00**.\n- **Batch 2:** Cocine a las **13:00**, listo a las **14:00**. Sirva hasta las **15:00**, tire a las **15:00**.\n- **Batch 3:** Cocine a las **14:00**, listo a las **15:00**. Sirva hasta las **16:00**, tire a las **16:00**.\n\nCada batch sirve **50 porciones** de *plato típico*.  \n**Regla usada:** FDA_HOT_1H (alimento caliente debe servirse en ≤ 1 hora tras cocinar).  \n**Advertencia:** La temperatura pronosticada llega a **38 °C**; mantenga los platos bien cubiertos y sirva rápido.  \n\n¿Desea programar un recordatorio para cada hora de cocción?",
+    "answers": [
+     "**Plan para su comedor comunitario (150 personas, 13:00–16:00):**\n\n- **Batch 1:** Cocine a las **12:00**, listo a las **13:00**. Sirva hasta las **14:00**, tire a las **14:00**.\n- **Batch 2:** Cocine a las **13:00**, listo a las **14:00**. Sirva hasta las **15:00**, tire a las **15:00**.\n- **Batch 3:** Cocine a las **14:00**, listo a las **15:00**. Sirva hasta las **16:00**, tire a las **16:00**.\n\nCada batch sirve **50 porciones** de *plato típico*.  \n**Regla usada:** FDA_HOT_1H (alimento caliente debe servirse en ≤ 1 hora tras cocinar).  \n**Advertencia:** La temperatura pronosticada llega a **38 °C**; mantenga los platos bien cubiertos y sirva rápido.  \n\n¿Desea programar un recordatorio para cada hora de cocción?"
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 2432,
+    "decision_correct": false,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 8348,
+    "output_tokens": 313,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

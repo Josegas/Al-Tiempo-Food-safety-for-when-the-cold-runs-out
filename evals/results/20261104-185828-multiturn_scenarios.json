@@ -1,0 +1,86 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 3192,
+  "avg_input_tokens": 12826,
+  "avg_output_tokens": 215,
+  "cost_per_turn_usd": 0.004824,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 3,
+  "explained_why": 3,
+  "rows": [
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora) o tirarlo. \n\nCon el calor actual (pronóstico a 38 °C), las bacterias crecen más rápido, así que el límite es de solo 1 hora desde que se cocinó. \n\n¿Quieres que te recuerde a las 12:45 para que lo comas antes de la 1 PM?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora) o tirarlo. \n\nCon el calor actual (pronóstico a 38 °C), las bacterias crecen más rápido, así que el límite es de solo 1 hora desde que se cocinó. \n\n¿Quieres que te recuerde a las 12:45 para que lo comas antes de la 1 PM?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3617,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12826,
+    "output_tokens": 220,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora). Si no lo comes antes de esa hora, lo más seguro es tirarlo.\n\n**Por qué:**  \nCon calor (el pronóstico llega a 38 °C), las bacterias crecen más rápido y el límite de seguridad baja de 2 horas a 1 hora.  \n\n¿Quieres que te recuerde a las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora). Si no lo comes antes de esa hora, lo más seguro es tirarlo.\n\n**Por qué:**  \nCon calor (el pronóstico llega a 38 °C), las bacterias crecen más rápido y el límite de seguridad baja de 2 horas a 1 hora.  \n\n¿Quieres que te recuerde a las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3192,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12826,
+    "output_tokens": 220,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Para tu huevo con nopales recién cocido, el límite es **antes de las 13:00** (una hora desde que lo cocinaste). Si no lo comes antes de esa hora, lo más seguro es tirarlo, porque con el calor actual (38 °C) las bacterias crecen muy rápido.  \n\n¿Quieres que te ponga un recordatorio para las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Para tu huevo con nopales recién cocido, el límite es **antes de las 13:00** (una hora desde que lo cocinaste). Si no lo comes antes de esa hora, lo más seguro es tirarlo, porque con el calor actual (38 °C) las bacterias crecen muy rápido.  \n\n¿Quieres que te ponga un recordatorio para las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2986,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12826,
+    "output_tokens": 205,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

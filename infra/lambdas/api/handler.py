@@ -127,6 +127,10 @@ def chat(body: dict) -> dict:
     out = {"answer": result.get("answer", ""), "metrics": {**metrics, "api_ms": ms}}
     if isinstance(result.get("decision"), dict):  # engine numbers for the web timeline (optional)
         out["decision"] = result["decision"]
+    if isinstance(result.get("hygiene_tip"), dict):  # optional hygiene tip chosen by code
+        out["hygiene_tip"] = result["hygiene_tip"]
+    if isinstance(result.get("leftover_tip"), dict):  # optional compost note chosen by code
+        out["leftover_tip"] = result["leftover_tip"]
     return _resp(200, out)
 
 

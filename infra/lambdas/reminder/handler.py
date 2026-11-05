@@ -44,8 +44,12 @@ def handler(event: dict, _context) -> dict:
     sms_status = "disabled"
     if event.get("channel") == "sms" and event.get("contact"):
         if SMS_ENABLED:
-            boto3.client("sns").publish(PhoneNumber=event["contact"], Message=item["message"])
-            sms_status = "sent"
+            try:
+                boto3.client("sns").publish(PhoneNumber=event["contact"], Message=item["message"])
+                sms_status = "sent"
+            except Exception as exc:  # e.g. number not verified in the SMS sandbox
+                # The web reminder is already stored: don't fail (a retry would duplicate it).
+                sms_status = f"failed_{type(exc).__name__}"
         else:
             sms_status = "skipped_sms_disabled"
     # Never log the phone number or the message text.

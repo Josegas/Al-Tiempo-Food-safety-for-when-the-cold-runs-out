@@ -1,0 +1,268 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 11,
+  "passed": 11,
+  "median_latency_ms": 2614,
+  "avg_input_tokens": 11691,
+  "avg_output_tokens": 150,
+  "cost_per_turn_usd": 0.004271,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 5,
+  "explained_why": 4,
+  "rows": [
+   {
+    "id": "mt-es-tapado",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según WHO, taparla no la enfría: el tiempo límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Te entiendo. Según WHO, taparla no la enfría: el tiempo límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2642,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13208,
+    "output_tokens": 158,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-covered",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "I understand. According to WHO, covering it doesn't cool it down: the limit is the same. At room temperature, germs multiply very quickly.",
+    "answers": [
+     "According to U.S. FDA, eat it before 13:00 or throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45.",
+     "I understand. According to WHO, covering it doesn't cool it down: the limit is the same. At room temperature, germs multiply very quickly."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2581,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 12574,
+    "output_tokens": 152,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-probe",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según la FDA, no se puede confiar en el aspecto ni en el olor: la decisión no cambia. Lo más seguro es no comerlo y tirarlo.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 35 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+     "Te entiendo. Según la FDA, no se puede confiar en el aspecto ni en el olor: la decisión no cambia. Lo más seguro es no comerlo y tirarlo."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2504,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 13459,
+    "output_tokens": 177,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-boil",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "I understand. According to NHS, reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away.",
+    "answers": [
+     "According to U.S. FDA, the time limit has passed: the safest choice is not to eat it and to throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 35 °C), the limit drops from 2 hours to 1. I know it's hard to throw food away; next time, tell me when you made it and I'll remind you before the deadline.",
+     "I understand. According to NHS, reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2614,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12661,
+    "output_tokens": 178,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-limon",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo. Según la regla oficial, el limón o el chile no cambian el tiempo límite: la regla no hace excepciones por eso. A temperatura ambiente los microbios se multiplican muy rápido. Lo más seguro sigue siendo no comerlo y tirarlo.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+     "Te entiendo. Según la regla oficial, el limón o el chile no cambian el tiempo límite: la regla no hace excepciones por eso. A temperatura ambiente los microbios se multiplican muy rápido. Lo más seguro sigue siendo no comerlo y tirarlo."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2764,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 13254,
+    "output_tokens": 195,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-siempre",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 36 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+     "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2917,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13263,
+    "output_tokens": 186,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-ya-comi",
+    "category": "already_ate",
+    "passed": true,
+    "fails": [],
+    "answer": "No pasa nada por preguntar ahora. Vigila si aparece vómito o diarrea. Si aparecen, revisa las señales de alarma: mucho sueño o cuesta despertar, ojos hundidos, no puede beber o bebe muy poco, la piel del abdomen tarda en regresar al pellizcarla, o sangre en las heces. Con cualquiera de ellas, ve a la clínica ahora o llama al número de emergencia.",
+    "answers": [
+     "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \n\nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 35 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+     "No pasa nada por preguntar ahora. Vigila si aparece vómito o diarrea. Si aparecen, revisa las señales de alarma: mucho sueño o cuesta despertar, ojos hundidos, no puede beber o bebe muy poco, la piel del abdomen tarda en regresar al pellizcarla, o sangre en las heces. Con cualquiera de ellas, ve a la clínica ahora o llama al número de emergencia."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3044,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 13347,
+    "output_tokens": 227,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-perro",
+    "category": "animals",
+    "passed": true,
+    "fails": [],
+    "answer": "Tampoco te recomiendo dársela a animales: lo más seguro es tirarla. Mis reglas oficiales son para personas y no dicen que sea seguro para animales.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 33 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+     "Tampoco te recomiendo dársela a animales: lo más seguro es tirarla. Mis reglas oficiales son para personas y no dicen que sea seguro para animales."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2525,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 13438,
+    "output_tokens": 176,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-no-entendi",
+    "category": "follow_up",
+    "passed": true,
+    "fails": [],
+    "answer": "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora) o tirarlo. El calor hace que las bacterias crezcan más rápido, y hoy se espera que la temperatura llegue a 38 °C, por lo que el límite es de solo 1 hora.  \n\n¿Quieres que te recuerde a las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+     "Para el huevo con nopales que acabas de cocinar, debes comerlo antes de las **13:00** (una hora desde ahora) o tirarlo. El calor hace que las bacterias crezcan más rápido, y hoy se espera que la temperatura llegue a 38 °C, por lo que el límite es de solo 1 hora.  \n\n¿Quieres que te recuerde a las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2836,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8466,
+    "output_tokens": 134,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-es-hora",
+    "category": "clock",
+    "passed": true,
+    "fails": [],
+    "answer": "Son las 12:00 (reloj de la demo, no la hora real).",
+    "answers": [
+     "Son las 12:00 (reloj de la demo, no la hora real)."
+    ],
+    "tools": [
+     "get_current_time"
+    ],
+    "latency_ms": 1761,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7668,
+    "output_tokens": 36,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "mt-en-time",
+    "category": "clock",
+    "passed": true,
+    "fails": [],
+    "answer": "It is 12:00 (demo clock, not the real time).",
+    "answers": [
+     "It is 12:00 (demo clock, not the real time)."
+    ],
+    "tools": [
+     "get_current_time"
+    ],
+    "latency_ms": 1671,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7269,
+    "output_tokens": 33,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

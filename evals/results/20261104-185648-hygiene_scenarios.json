@@ -1,0 +1,79 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1535,
+  "avg_input_tokens": 5225,
+  "avg_output_tokens": 96,
+  "cost_per_turn_usd": 0.00199,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servirla. ¿Cuántos comensales son? ¿A qué hora planeas servir la ensalada? Con esta información puedo planear cuándo prepararla para que esté fresca y segura.",
+    "answers": [
+     "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas quieres servirla. ¿Cuántos comensales son? ¿A qué hora planeas servir la ensalada? Con esta información puedo planear cuándo prepararla para que esté fresca y segura."
+    ],
+    "tools": [],
+    "latency_ms": 1313,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3711,
+    "output_tokens": 75,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de comidas crudas como pollo y tomate en la misma tabla. Ante la duda, lo más seguro es no mezclar alimentos crudos y cocidos para evitar contaminación cruzada. Si ya los mezclaste, vigila cualquier síntoma de intoxicación alimentaria como vómito o diarrea y acude a la clínica si aparecen señales de alarma.",
+    "answers": [
+     "Mis reglas no cubren la preparación de comidas crudas como pollo y tomate en la misma tabla. Ante la duda, lo más seguro es no mezclar alimentos crudos y cocidos para evitar contaminación cruzada. Si ya los mezclaste, vigila cualquier síntoma de intoxicación alimentaria como vómito o diarrea y acude a la clínica si aparecen señales de alarma."
+    ],
+    "tools": [],
+    "latency_ms": 1535,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3705,
+    "output_tokens": 83,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2184,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8261,
+    "output_tokens": 132,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

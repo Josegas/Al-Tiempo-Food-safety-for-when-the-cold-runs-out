@@ -1,0 +1,79 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1290,
+  "avg_input_tokens": 5381,
+  "avg_output_tokens": 97,
+  "cost_per_turn_usd": 0.002044,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas planeas servirla. Dime:\n\n1. ¿Cuántos comensales son?\n2. ¿A qué hora quieres servir la ensalada?\n\nCon esta información puedo planear cuándo prepararla para que esté fresca y segura.",
+    "answers": [
+     "Para ayudarte con la ensalada de lechuga y jitomate, necesito saber cuántas personas comerán y a qué horas planeas servirla. Dime:\n\n1. ¿Cuántos comensales son?\n2. ¿A qué hora quieres servir la ensalada?\n\nCon esta información puedo planear cuándo prepararla para que esté fresca y segura."
+    ],
+    "tools": [],
+    "latency_ms": 1102,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3828,
+    "output_tokens": 82,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de comidas crudas en la misma tabla que otros alimentos, ya que esto puede causar contaminación cruzada y riesgos de infecciones alimentarias. Lo más seguro es usar tablas de cortar separadas para carnes crudas y vegetales, o bien lavar bien la tabla y los utensilios entre usos. Si ya cortaste ambos juntos, descarta todo y prepáralo fresco para evitar problemas.",
+    "answers": [
+     "Mis reglas no cubren la preparación de comidas crudas en la misma tabla que otros alimentos, ya que esto puede causar contaminación cruzada y riesgos de infecciones alimentarias. Lo más seguro es usar tablas de cortar separadas para carnes crudas y vegetales, o bien lavar bien la tabla y los utensilios entre usos. Si ya cortaste ambos juntos, descarta todo y prepáralo fresco para evitar problemas."
+    ],
+    "tools": [],
+    "latency_ms": 1290,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3822,
+    "output_tokens": 91,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1710,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8494,
+    "output_tokens": 119,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

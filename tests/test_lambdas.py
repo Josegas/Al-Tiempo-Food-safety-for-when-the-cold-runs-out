@@ -194,3 +194,45 @@ def test_comprehension_has_a_daily_cap_and_empty_stats(api):
     )
     r = api.handler(event("GET /api/comprehension"), None)
     assert json.loads(r["body"]) == {"answered": 0, "correct": 0}
+
+
+def test_chat_passes_the_hygiene_tip_through(api):
+    tip = {"id": "WASH_PRODUCE", "tip": "Lava las frutas.", "why": "x", "source_name": "WHO", "source_url": "https://who.int"}  # fmt: skip
+
+    def invoke(**kw):
+        body = {"answer": "ok", "metrics": {}, "hygiene_tip": tip}
+        return {"response": io.BytesIO(json.dumps(body).encode())}
+
+    api.AGENTCORE = SimpleNamespace(invoke_agent_runtime=invoke)
+    r = api.handler(event("POST /api/chat", {"prompt": "ensalada", "session_id": SESSION}), None)
+    assert json.loads(r["body"])["hygiene_tip"] == tip
+
+
+def test_chat_passes_the_leftover_tip_through(api):
+    tip = {"id": "COMPOST", "tip": "Composta.", "why": "x", "source_name": "US EPA", "source_url": "https://www.epa.gov"}  # fmt: skip
+
+    def invoke(**kw):
+        body = {"answer": "ok", "metrics": {}, "leftover_tip": tip}
+        return {"response": io.BytesIO(json.dumps(body).encode())}
+
+    api.AGENTCORE = SimpleNamespace(invoke_agent_runtime=invoke)
+    r = api.handler(event("POST /api/chat", {"prompt": "salpicón", "session_id": SESSION}), None)
+    assert json.loads(r["body"])["leftover_tip"] == tip
+
+
+def test_reminder_lambda_survives_a_failed_sms(monkeypatch):
+    """SMS sandbox: an unverified number makes SNS raise. The web reminder must still be stored
+    and the Lambda must not fail (a retry would duplicate the reminder)."""
+    mod = load("reminder", monkeypatch)
+    mod.TABLE = FakeTable()
+    mod.SMS_ENABLED = True
+
+    class FailingSNS:
+        def publish(self, **kw):
+            raise RuntimeError("not verified")
+
+    monkeypatch.setattr(mod.boto3, "client", lambda name, **kw: FailingSNS())
+    out = mod.handler({"reminder_id": "r2", "session_id": SESSION, "message": "Eat the beans",
+                       "channel": "sms", "contact": "+5210000000000", "at_local": "12:45",
+                       "fire_utc": "2026-11-04T19:45:00Z"}, None)  # fmt: skip
+    assert out == {"ok": True} and len(mod.TABLE.items) == 1

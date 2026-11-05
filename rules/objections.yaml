@@ -1,0 +1,124 @@
+# Common objections and follow-ups ("it was covered", "I tasted it", "I'll boil it again"...).
+# The CODE detects them from the user's words (triggers, lower-case substrings) and gives the
+# model this text; the model may rephrase it but must not add facts. Each reply has a "why"
+# backed by a VERBATIM sentence (why_text) from its source. kind: official | adapted | policy
+# (same meaning as in food_rules.yaml). No clock times or limits here: those come from the engine.
+# HOW TO RE-CHECK: open source_url and search for why_text (Ctrl+F).
+
+objections:
+  - id: COVERED
+    kind: adapted
+    triggers:
+      es: ["tapad", "con tapa", "la tapé", "lo tapé", "los tapé", "las tapé"]
+      en: ["covered", "with a lid", "had a lid", "lid on"]
+    reply:
+      es: "Taparla no la enfría: el tiempo límite es el mismo, tapada o no."
+      en: "Covering it doesn't cool it down: the time limit is the same, covered or not."
+    why:
+      es: "A temperatura ambiente los microbios se multiplican muy rápido."
+      en: "At room temperature, germs multiply very quickly."
+    why_text: "Microorganisms can multiply very quickly if food is stored at room temperature."
+    adaptation: "The rule counts time at room temperature and has no exception for covered food."
+    source_name: "WHO - Five keys to safer food (WHO/SDE/PHE/FOS/01.1)"
+    source_url: "https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf"
+    verified_on: "2026-11-04"
+
+  - id: SMELL_TASTE
+    kind: adapted
+    triggers:
+      es: ["huele bien", "olía bien", "lo olí", "la olí", "los olí", "lo probé", "la probé", "los probé", "las probé", "sabe bien", "sabía bien", "estaban buenos", "estaba bueno", "estaba buena", "se ve bien", "se veía bien"]
+      en: ["smells fine", "smells good", "smelled fine", "smelled good", "tasted it", "tastes fine", "tasted fine", "tastes good", "looks fine", "looked fine", "looks ok"]
+    reply:
+      es: "Que huela, sepa o se vea bien no indica que sea seguro: la decisión no cambia."
+      en: "Smelling, tasting or looking fine doesn't show it is safe: the decision stays the same."
+    why:
+      es: "Según la FDA, no se puede confiar en el aspecto ni en el olor."
+      en: "According to the FDA, you can't rely on appearance or odor."
+    why_text: "You can’t rely on appearance or odor."
+    adaptation: "The FDA says it about food after a power outage; the same applies to food left out. The source does not mention taste."
+    source_name: "U.S. FDA - Food and Water Safety During Power Outages and Floods (content current as of 03/05/2024)"
+    source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"
+    verified_on: "2026-11-04"
+
+  - id: REHEAT
+    kind: adapted
+    triggers:
+      es: ["hierv", "recalent", "calentar otra vez", "calentarlo otra vez", "calentarla otra vez", "lo caliento", "la caliento", "los caliento", "volver a calentar", "lo vuelvo a calentar"]
+      en: ["boil it", "boil them", "boil food", "boiling", "reheat", "heat it again", "heat it up again", "germs die"]
+    reply:
+      es: "Recalentar no elimina las toxinas que ya se formaron: si ya pasó el límite, hay que tirarla."
+      en: "Reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away."
+    why:
+      es: "Según el NHS, a temperatura ambiente las bacterias producen toxinas y recalentar no las elimina."
+      en: "According to the NHS, at room temperature bacteria make toxins and reheating will not get rid of them."
+    why_text: "The bacteria multiply and produce toxins that make you be sick (vomit) and have diarrhoea. Reheating food will not get rid of these toxins."
+    adaptation: "The NHS says it about cooked rice and grains; we apply it to any food left out past its limit."
+    source_name: "NHS - Starchy foods and carbohydrates (page last reviewed 15 March 2023)"
+    source_url: "https://www.nhs.uk/live-well/eat-well/food-types/starchy-foods-and-carbohydrates/"
+    verified_on: "2026-11-04"
+
+  - id: LIME_CHILI
+    kind: adapted
+    triggers:
+      es: ["limón", "limon", "vinagre", "echo chile", "eché chile", "puse chile", "pongo chile", "o chile"]
+      en: ["lime", "lemon", "chili", "chilli", "vinegar"]
+    reply:
+      es: "El limón o el chile no cambian el tiempo límite: la regla oficial no hace excepciones por eso."
+      en: "Lime or chili doesn't change the time limit: the official rule makes no exception for it."
+    why:
+      es: "A temperatura ambiente los microbios se multiplican muy rápido."
+      en: "At room temperature, germs multiply very quickly."
+    why_text: "Microorganisms can multiply very quickly if food is stored at room temperature."
+    adaptation: "The source does not mention lime or chili; its rule has no exception for added ingredients."
+    source_name: "WHO - Five keys to safer food (WHO/SDE/PHE/FOS/01.1)"
+    source_url: "https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf"
+    verified_on: "2026-11-04"
+
+  - id: ALWAYS_DONE
+    kind: official
+    triggers:
+      es: ["siempre lo hemos", "siempre la hemos", "siempre hemos", "toda la vida", "nunca nos ha pasado", "nunca nos pasó", "nunca me ha pasado", "no exageres"]
+      en: ["always done", "we always", "never got sick", "never made us sick", "nothing ever happened", "don't exaggerate"]
+    reply:
+      es: "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene."
+      en: "I understand, and I respect your family's habit; still, the decision stays the same."
+    why:
+      es: "Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada."
+      en: "According to WHO, almost 1 in 9 people in the world fall ill every year after eating contaminated food."
+    why_text: "An estimated 866 million – almost 1 in 9 people in the world – fall ill after eating contaminated food and 1.52 million die every year."
+    source_name: "WHO - Food safety fact sheet (4 June 2026)"
+    source_url: "https://www.who.int/news-room/fact-sheets/detail/food-safety"
+    verified_on: "2026-11-04"
+
+  - id: ALREADY_ATE
+    kind: official
+    triggers:
+      es: ["ya me lo comí", "ya me la comí", "ya me los comí", "ya lo comí", "ya la comí", "ya los comí", "ya nos lo comimos", "ya lo comimos", "ya la comimos", "ya se lo di", "ya se la di", "ya se lo dimos"]
+      en: ["already ate", "i ate it", "we ate it", "already eaten", "already gave it", "i gave it to"]
+    reply:
+      es: "No pasa nada por preguntar ahora. Vigila si aparece vómito o diarrea. Si aparecen, revisa las señales de alarma: mucho sueño o cuesta despertar, ojos hundidos, no puede beber o bebe muy poco, la piel del abdomen tarda en regresar al pellizcarla, o sangre en las heces. Con cualquiera de ellas, ve a la clínica ahora o llama al número de emergencia."
+      en: "It's fine to ask now. Watch for vomiting or diarrhoea. If they start, check the danger signs: very sleepy or hard to wake, sunken eyes, unable to drink or drinking very little, belly skin slow to go back when pinched, or blood in the stool. With any of them, go to a clinic now or call the emergency number."
+    why:
+      es: "Según el NHS, las toxinas de la comida que se quedó fuera pueden causar vómito y diarrea."
+      en: "According to the NHS, toxins in food left out can cause vomiting and diarrhoea."
+    why_text: "The bacteria multiply and produce toxins that make you be sick (vomit) and have diarrhoea."
+    danger_signs_source: "WHO - Diarrhoeal disease fact sheet (7 March 2024), see rules/danger_signs.yaml"
+    source_name: "NHS - Starchy foods and carbohydrates (page last reviewed 15 March 2023)"
+    source_url: "https://www.nhs.uk/live-well/eat-well/food-types/starchy-foods-and-carbohydrates/"
+    verified_on: "2026-11-04"
+
+  - id: ANIMALS
+    kind: policy
+    triggers:
+      es: ["al perro", "a los perros", "a mi perro", "al gato", "a mi gato", "a los gatos", "a las gallinas", "a los puercos", "a los cerdos", "a los marranos", "a los animales", "a mi mascota", "a las mascotas", "al ganado"]
+      en: ["to the dog", "to my dog", "to the dogs", "to the cat", "to my cat", "to the chickens", "to the pigs", "to animals", "to the animals", "to my pet", "to the pets", "to livestock"]
+    reply:
+      es: "Tampoco te recomiendo dársela a animales: lo más seguro es tirarla."
+      en: "I don't recommend giving it to animals either: the safest choice is to throw it away."
+    why:
+      es: "Mis reglas oficiales son para personas y no dicen que sea seguro para animales."
+      en: "My official rules are for people and do not say it is safe for animals."
+    why_text: "Project policy: when in doubt, the safest option. No official rule here covers animals."
+    source_name: "Al Tiempo project policy"
+    source_url: "https://github.com/Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out/blob/main/rules/objections.yaml"
+    verified_on: "2026-11-04"

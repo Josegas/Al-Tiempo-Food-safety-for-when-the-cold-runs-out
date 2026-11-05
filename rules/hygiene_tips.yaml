@@ -1,0 +1,68 @@
+# Hygiene tips (one short tip, shown AFTER the main decision, never changing it).
+# The CODE decides if a tip applies (substring triggers, in priority order); the model never does.
+# At most 1 tip per answer. No amounts or dilutions of chemicals (chlorine, colloidal silver...):
+# where it applies, only "if you use a disinfectant, follow the instructions on its label".
+# Every tip and its "why" are backed by VERBATIM text (verified_text / why_text) from the source.
+# Source checked 2026-11-04 on the PDF below (text extracted with pdftotext).
+# HOW TO RE-CHECK: open source_url and search for verified_text / why_text (Ctrl+F).
+
+source_name: "WHO - Five keys to safer food (WHO/SDE/PHE/FOS/01.1)"
+source_url: "https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf"
+verified_on: "2026-11-04"
+
+tips:
+  - id: SEPARATE_RAW
+    applies_when: "raw meat, poultry or seafood and ready-to-eat food on the same board or knife"
+    triggers:
+      es: ["misma tabla", "la tabla", "mismo cuchillo", "el cuchillo"]
+      en: ["same board", "cutting board", "same knife", "the knife"]
+    tip:
+      es: "Usa una tabla y un cuchillo para lo crudo (carne, pollo, pescado) y otros para lo que ya está listo para comer."
+      en: "Use one board and knife for raw meat, poultry and seafood, and others for food that is ready to eat."
+    why:
+      es: "La carne, el pollo y el pescado crudos y sus jugos pueden pasar microbios peligrosos a otros alimentos."
+      en: "Raw meat, poultry and seafood and their juices can carry dangerous germs onto other foods."
+    verified_text: "Use separate equipment and utensils such as knives and cutting boards for handling raw foods"
+    why_text: "Raw food, especially meat, poultry and seafood, and their juices, can contain dangerous microorganisms which may be transferred onto other foods during food preparation and storage."
+
+  - id: WASH_HANDS
+    applies_when: "hands before cooking or before feeding a baby"
+    triggers:
+      es: ["las manos", "lavarme las manos", "antes de cocinar", "darle de comer a mi bebé", "dar de comer a mi bebé", "darle de comer al bebé"]
+      en: ["my hands", "wash hands", "before cooking", "feed my baby", "feeding my baby", "feed the baby"]
+    tip:
+      es: "Lávate las manos antes de tocar la comida, seguido mientras cocinas y después de ir al baño."
+      en: "Wash your hands before handling food, often while cooking, and after going to the toilet."
+    why:
+      es: "Los microbios peligrosos viajan en las manos, los trapos y los utensilios, y el menor contacto los pasa a la comida."
+      en: "Dangerous germs travel on hands, cloths and utensils, and the slightest contact can move them to food."
+    verified_text: "Wash your hands before handling food and often during food preparation ✔ Wash your hands after going to the toilet"
+    why_text: "These microorganisms are carried on hands, wiping cloths and utensils, especially cutting boards and the slightest contact can transfer them to food and cause foodborne diseases."
+
+  - id: WASH_PRODUCE
+    applies_when: "raw fruit or vegetables"
+    triggers:
+      es: ["ensalada", "lechuga", "verdura cruda", "verduras crudas", "fruta", "pico de gallo"]
+      en: ["salad", "lettuce", "raw vegetables", "raw veggies", "fruit"]
+    tip:
+      es: "Lava las frutas y verduras con agua segura, sobre todo si se comen crudas. Si usas un desinfectante, sigue las instrucciones de su etiqueta."
+      en: "Wash fruits and vegetables with safe water, especially if they are eaten raw. If you use a disinfectant, follow the instructions on its label."
+    why:
+      es: "El agua y los alimentos crudos pueden traer microbios peligrosos; lavar y pelar ayuda a bajar el riesgo."
+      en: "Water and raw food can carry dangerous germs; washing and peeling can reduce the risk."
+    verified_text: "Wash fruits and vegetables, especially if eaten raw"
+    why_text: "Raw materials, including water and ice, may be contaminated with dangerous microorganisms and chemicals. ... simple measures such as washing and peeling may reduce the risk."
+
+  - id: SAFE_WATER
+    applies_when: "water to prepare food"
+    triggers:
+      es: ["agua de la llave", "agua del pozo", "agua de pozo", "agua de la pipa", "agua para cocinar", "agua para preparar", "agua para la fórmula", "qué agua"]
+      en: ["tap water", "well water", "water for cooking", "water to cook", "water for the formula", "which water"]
+    tip:
+      es: "Usa agua segura para preparar la comida, o trátala para que sea segura. Si usas un desinfectante, sigue las instrucciones de su etiqueta."
+      en: "Use safe water to prepare food, or treat it to make it safe. If you use a disinfectant, follow the instructions on its label."
+    why:
+      es: "El agua puede traer microbios peligrosos y sustancias químicas."
+      en: "Water can carry dangerous germs and chemicals."
+    verified_text: "Use safe water or treat it to make it safe"
+    why_text: "Raw materials, including water and ice, may be contaminated with dangerous microorganisms and chemicals."

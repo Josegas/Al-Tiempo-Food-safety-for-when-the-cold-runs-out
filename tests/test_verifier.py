@@ -110,3 +110,214 @@ def test_normal_answer_without_times_passes():
     ev = _model_event("No es correcto. ¿A qué hora la cocinaste? Así te digo el límite oficial.")
     v.on_model_response(ev)
     assert ev.retry is False and v.retried_count == 0
+
+
+def test_retry_note_does_not_approve_its_own_blocked_times():
+    """Live bug: the retry note ("...no tool returned: ['18:00']") was appended to the user's
+    message, and times in user messages are allowed, so the same invented time passed on retry."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    messages = [{"role": "user", "content": [{"text": "perdón, no entendí"}]}]
+
+    def event(text):
+        msg = {"role": "assistant", "content": [{"text": text}]}
+        return SimpleNamespace(
+            stop_response=SimpleNamespace(stop_reason="end_turn", message=msg),
+            agent=SimpleNamespace(messages=messages),
+            retry=False,
+        )
+
+    first = event("Cómelo antes de las 18:00.")
+    v.on_model_response(first)
+    assert first.retry is True and "18:00" in messages[0]["content"][-1]["text"]  # note added
+    second = event("Cómelo antes de las 18:00.")
+    v.on_model_response(second)
+    assert v.blocked_count == 1  # still blocked: the note is not "something the user typed"
+    assert "18:00" not in second.stop_response.message["content"][0]["text"]
+
+
+def test_times_the_user_really_typed_are_still_allowed():
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    ev = _model_event("Dijiste que la cocinaste a las 12:30; ¿qué comida es?")
+    ev.agent.messages[0]["content"].append({"text": "la cociné a las 12:30"})
+    v.on_model_response(ev)
+    assert ev.retry is False and v.retried_count == 0
+
+
+def _session_window(cooked="12:00", eat_by="13:00", time_source="user_text"):
+    from agent.tools._common import DEMO_DATE
+
+    return {
+        "food_type": "cooked_food", "eat_by_hhmm": eat_by, "eat_by": f"{DEMO_DATE.isoformat()}T{eat_by}:00",
+        "cooked_at_hhmm": cooked, "time_source": time_source, "reminder_at_hhmm": "12:45",
+        "status": "eat_before_deadline", "source_name": "U.S. FDA - Handling Food Safely", "rule_ids": ["FDA_HOT_1H"],
+    }  # fmt: skip
+
+
+def test_follow_up_fallback_repeats_the_last_engine_decision(monkeypatch):
+    """Live: "perdón, no entendía" -> no tool call -> blocked -> the template now repeats the
+    session's last engine decision (tied to its cooking time) instead of saying nothing useful."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    monkeypatch.setenv("DEMO_MODE", "true")  # clock fixed at 12:00
+    state = {"last_window": _session_window()}
+    v = VerifierHook(language="es")
+    messages = [{"role": "user", "content": [{"text": "perdón, no entendía"}]}]
+
+    def event(text):
+        msg = {"role": "assistant", "content": [{"text": text}]}
+        agent = SimpleNamespace(messages=messages, state=SimpleNamespace(get=state.get))
+        return SimpleNamespace(stop_response=SimpleNamespace(stop_reason="end_turn", message=msg), agent=agent, retry=False)  # fmt: skip
+
+    v.on_model_response(event("Te dije que antes de las 13:00, a las 12:45 te aviso."))
+    last = event("Antes de las 13:00, aviso 12:45.")
+    v.on_model_response(last)
+    final = last.stop_response.message["content"][0]["text"]
+    assert v.blocked_count == 1
+    assert final.startswith("Para no darte una hora equivocada")
+    assert (
+        "Para lo que cocinaste a las 12:00: según U.S. FDA, cómelo antes de las 13:00 o deséchalo."
+        in final
+    )
+    assert "12:45" not in final  # only the deadline, nothing else from memory
+
+
+def test_follow_up_fallback_says_discard_when_the_deadline_passed(monkeypatch):
+    from agent.hooks.verifier import VerifierHook
+
+    monkeypatch.setenv("DEMO_MODE", "true")  # 12:00 > 11:30
+    text = VerifierHook(language="en").safe_answer(_session_window(cooked="10:30", eat_by="11:30"))
+    assert (
+        "For the food you cooked at 10:30: according to U.S. FDA, the time limit has passed: the "
+        "safest choice is not to eat it and to throw it away." in text
+    )
+    assert "11:30" not in text
+
+
+def test_follow_up_fallback_skips_unknown_cooking_time(monkeypatch):
+    from agent.hooks.verifier import VerifierHook
+
+    monkeypatch.setenv("DEMO_MODE", "true")
+    text = VerifierHook(language="es").safe_answer(_session_window(time_source="unknown"))
+    assert "cocinaste" not in text and "13:00" not in text
+
+
+def _follow_up_event(messages, text, state=None):
+    from types import SimpleNamespace
+
+    st = state or {}
+    msg = {"role": "assistant", "content": [{"text": text}]}
+    agent = SimpleNamespace(messages=messages, state=SimpleNamespace(get=st.get))
+    return SimpleNamespace(stop_response=SimpleNamespace(stop_reason="end_turn", message=msg), agent=agent, retry=False)  # fmt: skip
+
+
+def _turn_with_tool(v):
+    from types import SimpleNamespace
+
+    v.on_start(SimpleNamespace(messages=[]))
+    v.on_tool_result(SimpleNamespace(result=TOOL_RESULT))
+
+
+def test_follow_up_without_its_own_time_may_repeat_the_engine_results():
+    """Live bug: "pero estaban tapados" -> the model repeated 13:00 from the previous turn ->
+    blocked twice -> generic template. The previous turn's engine results now hold."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    _turn_with_tool(v)  # turn 1: the engine said 13:00
+    v.on_start(SimpleNamespace(messages=[]))  # turn 2: no tool call
+    messages = [{"role": "user", "content": [{"text": "pero estaban tapados"}]}]
+    ev = _follow_up_event(
+        messages, "Taparlos no los enfría: cómelos antes de las 13:00 o deséchalos."
+    )
+    v.on_model_response(ev)
+    assert ev.retry is False and v.violations == []
+
+
+def test_follow_up_with_a_new_time_needs_the_engine_again():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    _turn_with_tool(v)
+    v.on_start(SimpleNamespace(messages=[]))
+    messages = [{"role": "user", "content": [{"text": "¿y el arroz de las 11:30?"}]}]
+    ev = _follow_up_event(messages, "Cómelo antes de las 13:00.")  # 13:00 belongs to the beans
+    v.on_model_response(ev)
+    assert ev.retry is True and v.violations[0]["times"] == ["13:00"]
+
+
+def test_invented_time_in_a_follow_up_is_still_blocked():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="en")
+    _turn_with_tool(v)
+    v.on_start(SimpleNamespace(messages=[]))
+    messages = [{"role": "user", "content": [{"text": "but it was covered"}]}]
+    ev = _follow_up_event(messages, "Covered food is fine until 18:00.")
+    v.on_model_response(ev)
+    assert ev.retry is True and v.violations[0]["times"] == ["18:00"]
+
+
+def test_fallback_answers_the_users_point_and_never_repeats_itself(monkeypatch):
+    from agent.hooks.verifier import VerifierHook
+
+    monkeypatch.setenv("DEMO_MODE", "true")
+    v = VerifierHook(language="es")
+    first = v.safe_answer(_session_window(), ["COVERED"])
+    second = v.safe_answer(_session_window(), ["COVERED"])
+    assert "Taparla no la enfría" in first and "Taparla no la enfría" in second
+    assert "microbios se multiplican" in first  # the rule's why
+    assert first != second
+    assert v.safe_answer(_session_window(), ["COVERED"]) != second
+
+
+def test_code_notes_are_not_the_users_words():
+    from agent.hooks.verifier import _user_claims
+
+    blocks = [{"text": "pero estaban tapados"}, {"text": "[rules] ... 18:00 ... 3 horas"}]
+    assert _user_claims(blocks) == (set(), set())
+
+
+def test_copied_example_placeholder_is_blocked():
+    from agent.hooks.verifier import PLACEHOLDER_RE
+
+    assert PLACEHOLDER_RE.search("Según {fuente}, cómelo antes de las {hora_limite}.")
+
+
+def test_meal_plan_result_is_not_taken_for_a_safe_window():
+    """Bug seen locally: a plan_meals result (eat_by_hhmm per meal) was stored as the safe window
+    and the safe fallback crashed with KeyError('eat_by_hhmm')."""
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    plan = {"meals": [{"meal_hhmm": "14:00", "eat_by_hhmm": "15:00"}], "sources": []}
+    v.on_tool_result(SimpleNamespace(result={"content": [{"text": json.dumps(plan)}]}))
+    assert v.last_window is None
+    assert "Según" not in v.safe_answer()  # generic fallback, no crash
+
+
+def test_fallback_asks_for_people_and_times_when_plan_data_was_invented():
+    from types import SimpleNamespace
+
+    from agent.hooks.verifier import VerifierHook
+
+    v = VerifierHook(language="es")
+    refused = {"error": "not_said_by_user", "missing": ["people", "meal times"]}
+    v.on_tool_result(SimpleNamespace(result={"content": [{"text": json.dumps(refused)}]}))
+    text = v.safe_answer()
+    assert "cuántas personas" in text and extract_claims(text) == (set(), set())

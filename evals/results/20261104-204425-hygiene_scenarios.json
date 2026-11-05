@@ -1,0 +1,96 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1638,
+  "avg_input_tokens": 8050,
+  "avg_output_tokens": 156,
+  "cost_per_turn_usd": 0.003087,
+  "verifier_retries": 1,
+  "verifier_blocks": 1,
+  "with_decision": 1,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir.",
+    "answers": [
+     "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 3522,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 11839,
+    "output_tokens": 273,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "12:00",
+       "14:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "12:00",
+       "14:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de comidas en tablas de cortar. Lo más seguro es no mezclar carnes crudas con otros alimentos para evitar contaminación cruzada. Si ya cortaste el pollo crudo y el tomate en la misma tabla, descarta todo y usa una tabla limpia para cada cosa, o lava bien la tabla entre usos con agua caliente y jabón. Si ya los mezclaste, no los comas.",
+    "answers": [
+     "Mis reglas no cubren la preparación de comidas en tablas de cortar. Lo más seguro es no mezclar carnes crudas con otros alimentos para evitar contaminación cruzada. Si ya cortaste el pollo crudo y el tomate en la misma tabla, descarta todo y usa una tabla limpia para cada cosa, o lava bien la tabla entre usos con agua caliente y jabón. Si ya los mezclaste, no los comas."
+    ],
+    "tools": [],
+    "latency_ms": 1280,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3825,
+    "output_tokens": 90,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con este calor (más de 32 °C) las bacterias crecen más rápido: aguanta 1 hora, no 2. ¿Te aviso a las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1638,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8487,
+    "output_tokens": 106,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

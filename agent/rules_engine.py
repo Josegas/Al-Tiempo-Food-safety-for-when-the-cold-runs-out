@@ -39,6 +39,11 @@ class Rule:
     kind: str = "official"
     hot_threshold_c: float | None = None
     hot_hold_min_c: float | None = None
+    # {"es", "en"}: one plain sentence, backed by why_text in the YAML (not part of the hash)
+    why: dict | None = field(default=None, hash=False, compare=False)
+
+    def why_in(self, language: str) -> str:
+        return str((self.why or {}).get(language if language in ("es", "en") else "en") or "")
 
     def source(self) -> dict:
         return {
@@ -68,6 +73,7 @@ def load_rules(path: str | None = None) -> dict[str, Rule]:
             kind=raw.get("kind", "official"),
             hot_threshold_c=raw.get("hot_threshold_c"),
             hot_hold_min_c=raw.get("hot_hold_min_c"),
+            why=raw.get("why"),
         )
     return rules
 
@@ -128,6 +134,7 @@ class SafeWindow:
     # Why: hottest forecast hour in the window (None = no forecast -> assumed hot).
     max_temp_c: float | None = None
     hot_threshold_c: float = 32.0
+    temp_source: str = "forecast"  # forecast | user (room temperature the user said) | none
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -145,11 +152,15 @@ def compute_safe_window(
     hourly_temps: HourlyTemps | None = None,
     feeding_started_at: datetime | None = None,
     now: datetime | None = None,
+    room_temp_c: float | None = None,
 ) -> SafeWindow:
     """Latest time to eat food kept at room temperature (no fridge).
 
     Applies every rule that matches and keeps the SHORTEST limit (most conservative).
     Missing data -> worst reasonable case.
+    room_temp_c: temperature of the room where the food is, as the USER said it (e.g. air
+    conditioning at 22 °C). It replaces the outdoor forecast only to choose 1 h vs 2 h: the
+    2-hour rule always applies, so it can never make the limit longer than 2 hours.
     """
     assumptions: list[str] = []
     applied: list[Rule] = []
@@ -169,7 +180,12 @@ def compute_safe_window(
     # Heat: if any forecast hour in the 2-hour window is above 32 °C -> 1 hour.
     hot = get_rule("FDA_HOT_1H")
     max_t = _max_temp_between(hourly_temps, cooked_at, cooked_at + timedelta(minutes=120))
+    temp_source = "forecast"
+    if room_temp_c is not None:
+        max_t, temp_source = float(room_temp_c), "user"
+        assumptions.append(f"Used the room temperature the user reported ({max_t:.1f} °C).")
     if max_t is None:
+        temp_source = "none"
         assumptions.append("No temperature forecast available: assumed hot day (> 32 °C).")
         applied.append(hot)
     elif max_t > hot.hot_threshold_c:
@@ -230,6 +246,7 @@ def compute_safe_window(
         deciding_source=deciding.source(),
         max_temp_c=None if max_t is None else round(max_t, 1),
         hot_threshold_c=hot.hot_threshold_c,
+        temp_source=temp_source,
     )
 
 
@@ -266,8 +283,13 @@ def track_outage(
     now: datetime,
     fridge_door_opened: bool | None = None,
     freezer_fullness: str | None = None,
+    freezer_thawed: bool = False,
 ) -> dict:
-    """What is still within the official outage rules and what is not."""
+    """What is still within the official outage rules and what is not.
+
+    freezer_thawed: the user says the ice melted (and maybe froze again). The 24/48-hour rule
+    is about keeping the cold; once the food thawed it no longer holds (conservative policy).
+    """
     assumptions: list[str] = []
     fridge = get_rule("FDA_OUTAGE_FRIDGE_4H")
 
@@ -292,16 +314,28 @@ def track_outage(
         )
 
     fridge_ok = now < fridge_until and door_rule_holds
-    freezer_ok = now < freezer_until and fridge_door_opened is not True
+    freezer_ok = now < freezer_until and fridge_door_opened is not True and not freezer_thawed
+    if freezer_thawed:
+        assumptions.append(
+            "The user says the ice melted: the freezer food thawed, the hold-time rule no longer applies."
+        )
     # A deadline is only given when its rule applies (door kept closed). Otherwise there is no
     # time to give: the model can't relay one, and the verifier blocks any time it invents.
     # (Eval found it: "door opened" -> the model said "safe until 15:00 if the thermometer...".)
-    fridge_time = door_rule_holds
-    freezer_time = fridge_door_opened is not True
+    # ...but a limit that has already passed is safe to name ("ended at 02:00"): the summary says
+    # it, so the verifier must be able to back it (eval rw-15 was blocked for this).
+    fridge_time = door_rule_holds or now >= fridge_until
+    freezer_time = fridge_door_opened is not True and not freezer_thawed
 
     return {
         "summary": outage_summary(
-            now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer.limit_minutes // 60
+            now,
+            fridge_until,
+            freezer_until,
+            fridge_ok,
+            freezer_ok,
+            freezer.limit_minutes // 60,
+            freezer_thawed,
         ),
         "elapsed_minutes": max(elapsed, 0),
         "fridge_safe_until": fridge_until.isoformat() if fridge_time else None,
@@ -332,7 +366,9 @@ def _day(when: datetime, now: datetime, lang: str) -> str:
     return _DAYS[lang][when.weekday()]
 
 
-def outage_summary(now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer_hours) -> dict:
+def outage_summary(
+    now, fridge_until, freezer_until, fridge_ok, freezer_ok, freezer_hours, freezer_thawed=False
+) -> dict:
     """Plain-language verdict built in code, so the model only has to relay it (es/en)."""
     out: dict = {}
     for lang in ("en", "es"):
@@ -378,7 +414,16 @@ def outage_summary(now, fridge_until, freezer_until, fridge_ok, freezer_ok, free
                 if freezer_ok
                 else "Congelador: revisa si la comida aún tiene cristales de hielo; si no, deséchala."
             )
-        out[lang] = f"{fridge} {freezer}"
+        if freezer_thawed:
+            freezer = (
+                f"Freezer: the ice melted, so the food thawed and the {freezer_hours}-hour rule no "
+                "longer holds. The safest choice is to throw away the perishable food from the freezer."
+                if lang == "en"
+                else f"Congelador: el hielo se derritió, así que la comida se descongeló y la regla de "
+                f"{freezer_hours} horas ya no aplica. Lo más seguro es tirar la comida perecedera del congelador."
+            )
+        why = load_rules()["FDA_OUTAGE_FRIDGE_4H"].why_in(lang)
+        out[lang] = f"{fridge} {freezer}" + (f" {why}" if why and not fridge_ok else "")
     return out
 
 

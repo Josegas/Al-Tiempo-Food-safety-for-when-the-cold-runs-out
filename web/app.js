@@ -5,10 +5,15 @@
 
 const SCENARIOS = [
   // [icon, tone, es title, es description, es prompt, en title, en description, en prompt]
-  ["window", "primary",
-    "Ventana segura", "Cocinaste y no tienes refri: te decimos hasta qué hora se puede comer.",
+  ["bell", "primary",
+    "Voy a cocinar", "Antes de cocinar: hasta qué hora se puede comer y un aviso a tiempo.",
+    "Voy a cocinar frijoles a las 14:00 y no tengo refri. ¿Hasta qué hora se pueden comer?",
+    "I'm about to cook", "Before cooking: until when it can be eaten, and a reminder in time.",
+    "I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?"],
+  ["window", "",
+    "Ya cociné", "Cocinaste y no tienes refri: te decimos hasta qué hora se puede comer.",
     "Cociné frijoles a las 12:00 y no tengo refri. ¿Hasta qué hora se pueden comer?",
-    "Safe window", "You cooked and have no fridge: find out until what time it can be eaten.",
+    "Already cooked", "You cooked and have no fridge: find out until what time it can be eaten.",
     "I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?"],
   ["baby", "",
     "Bebé + arroz", "Reglas más estrictas para bebés y niños pequeños.",
@@ -88,17 +93,6 @@ const I18N = {
       title: "La ventana segura", cooked: "Cocinado", now: "Ahora", remind: "Aviso", limit: "Límite",
       left: (m) => `Quedan ${fmtLeft(m, "es")} para comerlo.`, expired: "Ya pasó el límite: deséchalo.",
       by: (src) => src ? `Decide: ${src}` : "Decide: nuestra regla más estricta para bebés y niños",
-      why: (d, t) => ({
-        FDA_HOT_1H: t == null
-          ? "Por qué 1 hora: no tenemos el pronóstico del clima, así que suponemos calor (más de 32 °C), el caso más seguro."
-          : `Por qué 1 hora: el pronóstico llega a ${t} °C. Con más de 32 °C, la FDA baja el límite de 2 horas a 1: con calor, las bacterias se multiplican más rápido.`,
-        FDA_2H: t == null ? null : `Por qué 2 horas: el pronóstico no pasa de 32 °C (máximo ${t} °C). A temperatura ambiente, la OMS y la FDA dicen máximo 2 horas.`,
-        WHO_COOKED_2H: t == null ? null : `Por qué 2 horas: el pronóstico no pasa de 32 °C (máximo ${t} °C). A temperatura ambiente, la OMS y la FDA dicen máximo 2 horas.`,
-        NHS_RICE_1H: "Por qué 1 hora: el NHS pide refrigerar el arroz cocido dentro de 1 hora. Sin refri, usamos esa hora como límite para comerlo.",
-        POLICY_CHILD_STRICT: "Por qué 1 hora: para bebés y niños pequeños usamos una regla más estricta que la oficial. Los menores de 5 años cargan el 29% del daño por comida contaminada (OMS).",
-        CDC_FORMULA_2H: "Por qué 2 horas: los CDC piden usar la fórmula preparada dentro de 2 horas.",
-        CDC_FORMULA_FEED_1H: "Por qué 1 hora: los CDC piden usar la fórmula dentro de 1 hora desde que el bebé empieza a tomar, y tirar lo que sobre.",
-      })[d.rule_id] || null,
       aria: (d) => `Línea de tiempo. ${d.cooked_known ? `Cocinado a las ${d.cooked_at_hhmm}. Límite: ${d.eat_by_hhmm}. ` : ""}Ahora son las ${d.now_hhmm}.`,
     },
     sh: {
@@ -109,8 +103,40 @@ const I18N = {
       print: "Imprimir plan", people: (n) => `${n} personas`,
       aria: (d) => `Plan de tandas para ${d.people} personas. ` + d.batches.map((b, i) => `Tanda ${i + 1}: cocinar a las ${b.start_cooking_hhmm}, servir desde las ${b.ready_hhmm}, desechar a las ${b.discard_hhmm}.`).join(" "),
     },
+    hygiene: { kicker: "Consejo de higiene", why: "Por qué:", src: "Fuente:" },
+    leftover: { kicker: "¿Qué hago con ella?", why: "Por qué:", src: "Fuente:" },
+    heat: {
+      title: "El calor de hoy, hora por hora", line: "32 °C", window: "Ventana segura",
+      note: "Arriba de 32 °C la FDA baja el límite de 2 horas a 1.",
+      src: (demo) => demo ? "Pronóstico: día de prueba de 38 °C" : "Pronóstico: Open-Meteo.com (CC BY 4.0)",
+      aria: (d, max) => `Gráfica del pronóstico de ${d.hourly[0][0]} a ${d.hourly[d.hourly.length - 1][0]}; máximo ${max} °C. La ventana segura va de ${d.cooked_at_hhmm} a ${d.eat_by_hhmm}.`,
+    },
+    mic: {
+      start: "Hablar", stop: "Escuchando… toca para terminar",
+      hint: "Usa el reconocimiento de voz de tu navegador (en Chrome, el audio lo procesa Google). La respuesta se lee en voz alta con Amazon Polly.",
+      denied: "No pude usar el micrófono. Revisa el permiso del navegador o escribe tu pregunta.",
+      none: "No te escuché. Toca Hablar e inténtalo otra vez.",
+    },
+    card: {
+      print: "Imprimir tarjeta", title: "Tarjeta para la cocina",
+      cooked: (h) => `Comida cocinada a las ${h}`, planned: (h) => `Si se cocina a las ${h}`,
+      eat: "CÓMELA ANTES DE LAS", after: "Después de esa hora, TÍRALA.",
+      kids: "Bebés y niños pequeños: servir al momento, sin guardar sobras.",
+      plan: (n) => `Plan de cocina · ${n} personas`, batch: "Tanda", cook: "Empezar a cocinar", serve: "Servir desde",
+      discard: "TIRAR a las", portions: "Porciones", done: "Hecho",
+      qr: "Escanea para preguntar por otra comida.",
+      foot: "Guía general de reglas oficiales de inocuidad. No es consejo médico. Emergencia: llama a tu número local.",
+    },
+    verdict: {
+      eat: "Cómelo antes de las", toss: "Tíralo", tossSub: (h) => h ? `El límite fue a las ${h}.` : "Ya pasó el límite.",
+      ask: "Falta un dato", askSub: "¿A qué hora lo cocinaste?",
+      hot: "En el fuego: el tiempo no corre", hotSub: (h) => `Si apagas el fuego ahora: cómelo antes de las ${h}.`,
+      plan: (h) => `Si lo cocinas a las ${h}`, wont: (h) => `No aguanta hasta las ${h}`,
+      left: (m) => `Quedan ${fmtLeft(m, "es")}`, over: "Ya pasó el límite: tíralo.",
+    },
     quiz: {
-      q: "Pregunta rápida: según la respuesta, ¿hasta qué hora se puede comer?",
+      kicker: "Comprobación anónima · opcional",
+      q: "¿Se entendió? Toca la hora límite que te dimos arriba:",
       ok: "¡Correcto!", no: (c) => `La hora correcta es ${c}.`,
       panel: (pct, n) => `Comprensión: ${pct} % correcto (n = ${n})`,
       note: "Anónimo: solo se cuenta si acertaste, sin datos personales.",
@@ -119,6 +145,7 @@ const I18N = {
       summary: "Ver por dentro", forecast: "Pronóstico usado", engine: "Motor de reglas", verifier: "Verificador",
       fcDemo: "Simulado: un día guardado de 38 °C, igual para todos.",
       fcLive: (t) => `Pronóstico real por hora (Open-Meteo): máximo ${t} °C en esas horas.`,
+      fcUser: (t) => `Temperatura del cuarto que nos dijiste: ${t} °C (en lugar del pronóstico de afuera).`,
       fcNone: "Sin pronóstico para esas horas: se asume más de 32 °C (el caso más seguro).",
       fcLiveAny: "Modo real: pronóstico por hora de Open-Meteo si compartiste tu ubicación; si no, se asume calor.",
       fcNotUsed: "Esta respuesta no necesitó el pronóstico.",
@@ -198,17 +225,6 @@ const I18N = {
       title: "The safe window", cooked: "Cooked", now: "Now", remind: "Reminder", limit: "Limit",
       left: (m) => `${fmtLeft(m, "en")} left to eat it.`, expired: "The limit has passed: throw it away.",
       by: (src) => src ? `Decided by: ${src}` : "Decided by: our stricter rule for babies and young children",
-      why: (d, t) => ({
-        FDA_HOT_1H: t == null
-          ? "Why 1 hour: we have no weather forecast, so we assume heat (over 32 °C), the safest case."
-          : `Why 1 hour: the forecast reaches ${t} °C. Above 32 °C, the FDA cuts the limit from 2 hours to 1: in the heat, bacteria multiply faster.`,
-        FDA_2H: t == null ? null : `Why 2 hours: the forecast stays at or below 32 °C (max ${t} °C). At room temperature, WHO and the FDA say 2 hours at most.`,
-        WHO_COOKED_2H: t == null ? null : `Why 2 hours: the forecast stays at or below 32 °C (max ${t} °C). At room temperature, WHO and the FDA say 2 hours at most.`,
-        NHS_RICE_1H: "Why 1 hour: the NHS says to refrigerate cooked rice within 1 hour. Without a fridge, we use that hour as the limit to eat it.",
-        POLICY_CHILD_STRICT: "Why 1 hour: for babies and young children we use a rule stricter than the official one. Children under 5 carry 29% of the harm from unsafe food (WHO).",
-        CDC_FORMULA_2H: "Why 2 hours: the CDC says to use prepared formula within 2 hours.",
-        CDC_FORMULA_FEED_1H: "Why 1 hour: the CDC says to use formula within 1 hour of when feeding begins, and throw out what is left.",
-      })[d.rule_id] || null,
       aria: (d) => `Timeline. ${d.cooked_known ? `Cooked at ${d.cooked_at_hhmm}. Limit: ${d.eat_by_hhmm}. ` : ""}Now it is ${d.now_hhmm}.`,
     },
     sh: {
@@ -219,8 +235,40 @@ const I18N = {
       print: "Print plan", people: (n) => `${n} people`,
       aria: (d) => `Batch plan for ${d.people} people. ` + d.batches.map((b, i) => `Batch ${i + 1}: cook at ${b.start_cooking_hhmm}, serve from ${b.ready_hhmm}, discard at ${b.discard_hhmm}.`).join(" "),
     },
+    hygiene: { kicker: "Hygiene tip", why: "Why:", src: "Source:" },
+    leftover: { kicker: "What to do with it?", why: "Why:", src: "Source:" },
+    heat: {
+      title: "Today's heat, hour by hour", line: "32 °C", window: "Safe window",
+      note: "Above 32 °C the FDA cuts the limit from 2 hours to 1.",
+      src: (demo) => demo ? "Forecast: 38 °C test day" : "Forecast: Open-Meteo.com (CC BY 4.0)",
+      aria: (d, max) => `Forecast chart from ${d.hourly[0][0]} to ${d.hourly[d.hourly.length - 1][0]}; max ${max} °C. The safe window runs from ${d.cooked_at_hhmm} to ${d.eat_by_hhmm}.`,
+    },
+    mic: {
+      start: "Speak", stop: "Listening… tap to finish",
+      hint: "Uses your browser's speech recognition (in Chrome, Google processes the audio). The answer is read aloud with Amazon Polly.",
+      denied: "I couldn't use the microphone. Check the browser permission or type your question.",
+      none: "I didn't hear you. Tap Speak and try again.",
+    },
+    card: {
+      print: "Print card", title: "Kitchen card",
+      cooked: (h) => `Food cooked at ${h}`, planned: (h) => `If cooked at ${h}`,
+      eat: "EAT IT BEFORE", after: "After that time, THROW IT AWAY.",
+      kids: "Babies and young children: serve right away, keep no leftovers.",
+      plan: (n) => `Cooking plan · ${n} people`, batch: "Batch", cook: "Start cooking", serve: "Serve from",
+      discard: "THROW AWAY at", portions: "Portions", done: "Done",
+      qr: "Scan to ask about another dish.",
+      foot: "General guidance from official food-safety rules. Not medical advice. Emergency: call your local number.",
+    },
+    verdict: {
+      eat: "Eat it before", toss: "Throw it away", tossSub: (h) => h ? `The limit was ${h}.` : "The limit has passed.",
+      ask: "Missing one detail", askSub: "When did you cook it?",
+      hot: "On the heat: the clock is not running", hotSub: (h) => `If you turn off the heat now: eat it before ${h}.`,
+      plan: (h) => `If you cook it at ${h}`, wont: (h) => `It won't last until ${h}`,
+      left: (m) => `${fmtLeft(m, "en")} left`, over: "The limit has passed: throw it away.",
+    },
     quiz: {
-      q: "Quick question: according to the answer, until what time can it be eaten?",
+      kicker: "Anonymous check · optional",
+      q: "Was it clear? Tap the deadline we gave you above:",
       ok: "Correct!", no: (c) => `The right time is ${c}.`,
       panel: (pct, n) => `Comprehension: ${pct}% correct (n = ${n})`,
       note: "Anonymous: we only count whether you got it right, no personal data.",
@@ -229,6 +277,7 @@ const I18N = {
       summary: "Look inside", forecast: "Forecast used", engine: "Rules engine", verifier: "Verifier",
       fcDemo: "Simulated: a saved 38 °C day, the same for everyone.",
       fcLive: (t) => `Real hourly forecast (Open-Meteo): up to ${t} °C in those hours.`,
+      fcUser: (t) => `Room temperature you told us: ${t} °C (instead of the outdoor forecast).`,
       fcNone: "No forecast for those hours: assumed above 32 °C (the safest case).",
       fcLiveAny: "Live mode: Open-Meteo hourly forecast if you shared your location; otherwise heat is assumed.",
       fcNotUsed: "This answer did not need the forecast.",
@@ -464,28 +513,64 @@ function typingMessage() {
   return addNode(m);
 }
 
-function botMessage(answer, metrics, decision) {
+function botMessage(answer, metrics, decision, hygiene, leftover) {
   const m = el("article", "msg msg-bot");
+  const v = verdictBox(decision);
+  if (v) m.appendChild(v);
   const body = el("div", "ans");
   renderAnswer(body, answer);
   m.appendChild(body);
   const tl = safeWindowTimeline(decision) || shelterTimeline(decision);
   if (tl) m.appendChild(tl);
+  const heat = heatChart(decision);
+  if (heat) m.appendChild(heat);
+  const card = printCard(decision);
+  if (card) m.appendChild(card);
   m.appendChild(decisionTrail(metrics));
+  const tip = hygieneNote(hygiene) || hygieneNote(leftover, "leftover");
+  if (tip) m.appendChild(tip);
   const quiz = quizBlock(decision);
   if (quiz) m.appendChild(quiz);
   const meta = el("div", "meta");
-  const btn = el("button", "listen");
+  const btn = el("button", "listen listen-main");
   btn.type = "button";
   btn.append(icon("speaker"), el("span", "", t("listen")));
   btn.addEventListener("click", () => speak(answer, btn));
   meta.appendChild(btn);
-  if (decision && decision.kind === "shelter_plan" && tl) meta.appendChild(printButton(m));
+  if (state.voiceReply) { // asked by voice -> answer by voice (Amazon Polly)
+    state.voiceReply = false;
+    speak(answer, btn);
+  }
+  if (card) meta.appendChild(printButton(m, decision.kind === "shelter_plan" ? t("sh").print : t("card").print));
   if (metrics && metrics.api_ms) meta.appendChild(el("span", "latency", `${(metrics.api_ms / 1000).toFixed(1)} s`));
   m.appendChild(meta);
   const inside = insideView(metrics, decision);
   if (inside) m.appendChild(inside);
   return addNode(m);
+}
+
+// ---------------------------------------------------------------- hygiene tip
+// Chosen by the backend's code from the user's words (rules/hygiene_tips.yaml), never by the model.
+// A small note after the decision: it must not compete with the safe window.
+function hygieneNote(h, kind = "hygiene") {
+  if (!h || typeof h.tip !== "string" || !h.tip) return null;
+  const H = t(kind);
+  const box = el("aside", "hygiene");
+  box.setAttribute("aria-label", H.kicker);
+  box.append(el("p", "hygiene-kicker", H.kicker), el("p", "hygiene-tip", h.tip));
+  if (h.why) {
+    const why = el("p", "hygiene-why");
+    why.append(el("span", "hygiene-k", `${H.why} `), document.createTextNode(h.why));
+    box.appendChild(why);
+  }
+  if (h.source_name && /^https:\/\//.test(h.source_url || "")) {
+    const src = el("p", "hygiene-src");
+    const a = el("a", "", h.source_name.split(" - ")[0]);
+    a.href = h.source_url; a.target = "_blank"; a.rel = "noopener";
+    src.append(el("span", "hygiene-k", `${H.src} `), a);
+    box.appendChild(src);
+  }
+  return box;
 }
 
 // ---------------------------------------------------------------- safe-window timeline
@@ -498,6 +583,169 @@ function fmtLeft(min, lang) {
   if (!h) return `${m} min`;
   return m ? `${h} h ${m} min` : `${h} h`;
 }
+
+// ---------------------------------------------------------------- heat curve
+// The forecast the engine used, hour by hour, with the 32 °C line and the safe window shaded.
+// Data: decision.hourly (added by the backend from the same forecast; never read by the model).
+function heatChart(d) {
+  if (!d || d.kind !== "safe_window" || !Array.isArray(d.hourly) || d.hourly.length < 3 || !d.cooked_known) return null;
+  const pts = d.hourly.filter((p) => Array.isArray(p) && HHMM.test(p[0]) && Number.isFinite(p[1]));
+  if (pts.length < 3) return null;
+  const H = t("heat");
+  const W = 320, Ht = 130, L = 30, R = 8, T = 12, B = 22;
+  const temps = pts.map((p) => p[1]);
+  const lo = Math.floor(Math.min(...temps, 30) - 2), hi = Math.ceil(Math.max(...temps, 33) + 1);
+  const x0 = toMin(pts[0][0]), span = ((toMin(pts[pts.length - 1][0]) - x0 + 1440) % 1440) || 60;
+  const X = (hhmm) => L + (((toMin(hhmm) - x0 + 1440) % 1440) / span) * (W - L - R);
+  const Y = (c) => T + (1 - (c - lo) / (hi - lo)) * (Ht - T - B);
+  const NS = SVGNS, svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${Ht}`);
+  svg.setAttribute("class", "heat-svg");
+  svg.setAttribute("role", "img");
+  const max = Math.max(...temps);
+  svg.setAttribute("aria-label", H.aria(d, max));
+  const add = (tag, attrs, text) => {
+    const n = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, String(v)));
+    if (text != null) n.textContent = text;
+    svg.appendChild(n);
+    return n;
+  };
+  // safe window (cooked -> eat by), clipped to the chart
+  const clip = (v) => Math.max(L, Math.min(W - R, v));
+  const wx1 = clip(X(d.cooked_at_hhmm)), wx2 = clip(X(d.eat_by_hhmm));
+  if (wx2 > wx1) add("rect", { x: wx1, y: T, width: wx2 - wx1, height: Ht - T - B, class: "heat-win" });
+  // 32 °C line
+  add("line", { x1: L, x2: W - R, y1: Y(32), y2: Y(32), class: "heat-limit" });
+  add("text", { x: L + 3, y: Y(32) - 4, "text-anchor": "start", class: "heat-limit-t" }, H.line);
+  // curve + points above 32 °C
+  add("polyline", { points: pts.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" "), class: "heat-line" });
+  pts.forEach((p) => add("circle", { cx: X(p[0]), cy: Y(p[1]), r: 2.6, class: p[1] > 32 ? "heat-pt hot" : "heat-pt" }));
+  // axis labels: every other hour, and the max
+  pts.forEach((p, i) => { if (i % 2 === 0) add("text", { x: X(p[0]), y: Ht - 6, "text-anchor": "middle", class: "heat-ax" }, p[0].slice(0, 2)); });
+  const mp = pts[temps.indexOf(max)];
+  add("text", { x: X(mp[0]), y: Y(max) - 6, "text-anchor": "middle", class: "heat-max" }, `${max} °C`);
+  [lo + 1, hi - 1].forEach((c) => add("text", { x: L - 4, y: Y(c) + 3, "text-anchor": "end", class: "heat-ax" }, `${Math.round(c)}°`));
+  const fig = el("figure", "heat");
+  fig.append(el("figcaption", "tl-title", H.title), svg);
+  const legend = el("p", "heat-legend");
+  legend.append(el("span", "heat-key", ""), document.createTextNode(` ${H.window} · ${H.note}`));
+  fig.append(legend, el("p", "tl-src", H.src(state.mode === "demo")));
+  return fig;
+}
+
+// ---------------------------------------------------------------- printable card (hidden on screen)
+// A big, plain card to stick on the kitchen wall: only engine times, the source and a QR code.
+function printCard(d) {
+  if (!d) return null;
+  const C = t("card");
+  const card = el("section", "print-card");
+  card.setAttribute("aria-hidden", "true");
+  // Says the mode and the date: a simulated 38 °C plan must never pass for a real one.
+  const day = new Date().toLocaleDateString(state.lang === "es" ? "es-MX" : "en-US", { weekday: "long", day: "numeric", month: "long" });
+  card.appendChild(el("p", "pc-brand", `Al Tiempo · ${C.title} · ${state.mode === "demo" ? t("badgeDemo") : t("badgeLive")} · ${day}`));
+  if (d.kind === "safe_window") {
+    if (!d.cooked_known || d.status === "discard_now" || !HHMM.test(d.eat_by_hhmm || "")) return null;
+    card.appendChild(el("p", "pc-sub", d.planned ? C.planned(d.cooked_at_hhmm) : C.cooked(d.cooked_at_hhmm)));
+    card.appendChild(el("p", "pc-eat", C.eat));
+    card.appendChild(el("p", "pc-time", d.eat_by_hhmm));
+    card.appendChild(el("p", "pc-after", C.after));
+    if (d.serve_immediately) card.appendChild(el("p", "pc-sub", C.kids));
+  } else if (d.kind === "shelter_plan" && Array.isArray(d.batches) && d.batches.length) {
+    if (!d.batches.every((b) => HHMM.test(b.discard_hhmm || ""))) return null;
+    card.appendChild(el("p", "pc-plan", C.plan(d.people || "")));
+    const table = el("table", "pc-table");
+    const head = el("tr");
+    [C.batch, C.cook, C.serve, C.discard, C.portions, C.done].forEach((h) => head.appendChild(el("th", "", h)));
+    table.appendChild(head);
+    d.batches.forEach((b, i) => {
+      const tr = el("tr");
+      [String(i + 1), b.start_cooking_hhmm || "", b.ready_hhmm || "", b.discard_hhmm, String(b.portions ?? ""), "☐"].forEach((v, j) => tr.appendChild(el("td", j === 3 ? "pc-discard" : "", v)));
+      table.appendChild(tr);
+    });
+    card.appendChild(table);
+    if (d.hot_hold && d.batches[0].keep_above_c) card.appendChild(el("p", "pc-sub", t("sh").hot(d.batches[0].keep_above_c)));
+  } else {
+    return null;
+  }
+  const src = d.source && d.source.kind !== "policy" ? d.source.name : null;
+  card.appendChild(el("p", "pc-src", (d.kind === "shelter_plan" ? t("sh") : t("tl")).by(src)));
+  const qr = el("div", "pc-qr");
+  const img = el("img");
+  img.src = "icons/qr-demo.png"; img.alt = ""; img.width = 96; img.height = 96;
+  qr.append(img, el("p", "", C.qr));
+  card.append(qr, el("p", "pc-foot", C.foot));
+  return card;
+}
+
+// ---------------------------------------------------------------- verdict ("traffic light")
+// First thing in the answer: one colour and one big time, copied from the engine's decision.
+// green = eat before HH:MM, amber = little time left / won't last until mealtime, red = throw it
+// away, grey = a detail is missing. The countdown only counts down the engine's minutes_left.
+const AMBER_MIN = 15;
+
+function verdictBox(d) {
+  if (!d || d.kind !== "safe_window") return null;
+  const V = t("verdict");
+  const box = el("section", "verdict");
+  box.setAttribute("role", "status");
+  const head = el("p", "v-head");
+  const big = el("p", "v-big");
+  const sub = el("p", "v-sub");
+  let tone;
+  if (!d.cooked_known) {
+    tone = "grey";
+    head.textContent = V.ask;
+    big.textContent = V.askSub;
+    big.classList.add("v-big-text");
+  } else if (d.status === "discard_now") {
+    tone = "red";
+    head.textContent = "✕";
+    big.textContent = V.toss;
+    big.classList.add("v-big-word");
+    sub.textContent = V.tossSub(d.eat_by_hhmm);
+  } else if (d.hot_holding) {
+    tone = "green";
+    head.textContent = V.hot;
+    big.textContent = "60 °C+";
+    sub.textContent = V.hotSub(d.eat_by_hhmm);
+  } else {
+    tone = d.wont_last_until ? "amber" : "green";
+    head.textContent = d.wont_last_until ? V.wont(d.wont_last_until) : d.planned ? V.plan(d.cooked_at_hhmm) : V.eat;
+    if (d.wont_last_until || d.planned) head.textContent += ` · ${V.eat.toLowerCase()}`;
+    big.textContent = d.eat_by_hhmm;
+    if (Number.isInteger(d.minutes_left) && !d.planned) {
+      box.dataset.deadline = String(Date.now() + d.minutes_left * 60000);
+      sub.classList.add("v-left");
+    }
+  }
+  box.classList.add(`v-${tone}`);
+  box.append(head, big);
+  if (sub.textContent || box.dataset.deadline) box.appendChild(sub);
+  tickVerdict(box);
+  return box;
+}
+
+function tickVerdict(box) {
+  const deadline = Number(box.dataset.deadline);
+  if (!deadline) return;
+  const V = t("verdict");
+  const sub = box.querySelector(".v-left");
+  const left = Math.ceil((deadline - Date.now()) / 60000);
+  if (left <= 0) {
+    box.classList.remove("v-green", "v-amber");
+    box.classList.add("v-red");
+    sub.textContent = V.over;
+    delete box.dataset.deadline;
+    return;
+  }
+  sub.textContent = V.left(left);
+  if (left <= AMBER_MIN && box.classList.contains("v-green")) {
+    box.classList.replace("v-green", "v-amber");
+  }
+}
+
+setInterval(() => document.querySelectorAll(".verdict[data-deadline]").forEach(tickVerdict), 15000);
 
 function safeWindowTimeline(d) {
   if (!d || d.kind !== "safe_window") return null;
@@ -552,20 +800,13 @@ function safeWindowTimeline(d) {
     if (d.cooked_known) point("pt-limit pt-past", T.limit, d.eat_by_hhmm);
     point(d.cooked_known ? "pt-now pt-end" : "pt-now", T.now, d.now_hhmm);
   } else {
-    point("pt-now", T.now, d.now_hhmm);
+    if (!d.planned) point("pt-now", T.now, d.now_hhmm);
     point("pt-rem", T.remind, d.reminder_at_hhmm);
     point("pt-limit pt-end", T.limit, d.eat_by_hhmm);
   }
   fig.appendChild(list);
 
-  const status = el("p", "tl-status");
-  status.append(icon(expired ? "alert" : "window"));
-  const left = expired ? null : (Number.isInteger(d.minutes_left) ? d.minutes_left : (eat - now + 1440) % 1440);
-  status.appendChild(el("span", "", expired ? T.expired : T.left(left)));
-  fig.appendChild(status);
-  const temp = Number.isFinite(d.max_temp_c) ? String(Math.round(d.max_temp_c * 10) / 10) : null;
-  const why = T.why(d, temp);
-  if (why) fig.appendChild(el("p", "tl-why", why));
+  // The reason is already in the answer (the engine's summary): not repeated here.
   fig.appendChild(el("p", "tl-src", T.by(d.source && d.source.kind !== "policy" ? d.source.name : null)));
   return fig;
 }
@@ -591,7 +832,8 @@ function insideView(metrics, d) {
   // 1. Forecast
   const usedForecast = metrics.tools_used.some((x) => FORECAST_TOOLS.has(x));
   let fc = I.fcNotUsed;
-  if (metrics.demo && (usedForecast || d)) fc = I.fcDemo;
+  if (d && d.kind === "safe_window" && d.temp_source === "user" && Number.isFinite(d.max_temp_c)) fc = I.fcUser(Math.round(d.max_temp_c * 10) / 10);
+  else if (metrics.demo && (usedForecast || d)) fc = I.fcDemo;
   else if (d && d.kind === "safe_window") fc = Number.isFinite(d.max_temp_c) ? I.fcLive(Math.round(d.max_temp_c * 10) / 10) : I.fcNone;
   else if (usedForecast || d) fc = I.fcLiveAny;
   step(I.forecast, fc);
@@ -640,7 +882,8 @@ function quizBlock(d) {
   const Q = t("quiz");
   const box = el("div", "quiz");
   box.setAttribute("role", "group");
-  const label = el("p", "quiz-q", Q.q);
+  const label = el("p", "quiz-q");
+  label.append(el("span", "quiz-kicker", Q.kicker), el("span", "", Q.q));
   label.id = `quiz-${Math.random().toString(36).slice(2, 9)}`;
   box.setAttribute("aria-labelledby", label.id);
   const row = el("div", "quiz-opts");
@@ -736,10 +979,10 @@ function shelterTimeline(d) {
 }
 
 // Prints only this answer (plan text + batch timeline + verifier seal), with the print stylesheet.
-function printButton(msg) {
+function printButton(msg, label) {
   const b = el("button", "listen print-btn");
   b.type = "button";
-  b.append(icon("print"), el("span", "", t("sh").print));
+  b.append(icon("print"), el("span", "", label || t("sh").print));
   b.addEventListener("click", () => {
     document.querySelectorAll(".print-target").forEach((x) => x.classList.remove("print-target"));
     msg.classList.add("print-target");
@@ -855,7 +1098,7 @@ async function send(prompt, { echo = true } = {}) {
     if (data.error || !data.answer) {
       errorMessage(data.answer || t("error"), data.error === "daily_cap" ? null : prompt);
     } else {
-      botMessage(data.answer, data.metrics, data.decision);
+      botMessage(data.answer, data.metrics, data.decision, data.hygiene_tip, data.leftover_tip);
     }
   } catch (e) {
     typing.remove();
@@ -946,11 +1189,68 @@ function setLang(lang) {
   resetConversation();
   render();
   warmUp();
+  document.dispatchEvent(new Event("langchange"));
 }
 
 document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("#prompt").value; $("#prompt").value = ""; autosize(); send(v); });
+
+// ---------------------------------------------------------------- voice input (browser speech recognition)
+// For people who read or type little: speak, the text goes to the same chat, and the answer is
+// read aloud with Amazon Polly. Only shown where the browser supports it (Chrome, Edge, Android).
+// Amazon Transcribe would keep the audio in AWS, but it is not available on this account's plan.
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRec) {
+  const mic = document.createElement("button");
+  mic.type = "button";
+  mic.id = "mic";
+  mic.className = "mic";
+  mic.append(icon("mic"), el("span", "mic-label", t("mic").start));
+  $("#send").before(mic);
+  let rec = null;
+  const label = () => mic.querySelector(".mic-label");
+  const setIdle = () => { rec = null; mic.classList.remove("listening"); mic.setAttribute("aria-pressed", "false"); label().textContent = t("mic").start; };
+  const refreshMic = () => { mic.title = t("mic").hint; mic.setAttribute("aria-label", t("mic").start); if (!rec) label().textContent = t("mic").start; };
+  refreshMic();
+  document.addEventListener("langchange", refreshMic);
+  mic.addEventListener("click", () => {
+    if (state.busy) return;
+    if (rec) { rec.stop(); return; }
+    rec = new SpeechRec();
+    rec.lang = state.lang === "es" ? "es-MX" : "en-US";
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    let finalText = "";
+    rec.onresult = (ev) => {
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const r = ev.results[i];
+        if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+      }
+      $("#prompt").value = (finalText + interim).trim();
+      autosize();
+    };
+    rec.onerror = (ev) => {
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") errorMessage(t("mic").denied, null);
+    };
+    rec.onend = () => {
+      const text = ($("#prompt").value || "").trim();
+      setIdle();
+      if (finalText.trim() && text) {
+        $("#prompt").value = ""; autosize();
+        state.voiceReply = true;
+        send(text);
+      } else if (!text) {
+        errorMessage(t("mic").none, null);
+      }
+    };
+    mic.classList.add("listening");
+    mic.setAttribute("aria-pressed", "true");
+    label().textContent = t("mic").stop;
+    rec.start();
+  });
+}
 $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#form").requestSubmit(); } });
 
 function autosize() {

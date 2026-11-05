@@ -1,0 +1,98 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1888,
+  "avg_input_tokens": 6697,
+  "avg_output_tokens": 122,
+  "cost_per_turn_usd": 0.002546,
+  "verifier_retries": 1,
+  "verifier_blocks": 1,
+  "with_decision": 2,
+  "explained_why": 1,
+  "rows": [
+   {
+    "id": "hy-es-ensalada-comedor",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir.",
+    "answers": [
+     "Para planearlo con las reglas oficiales, dime cuántas personas van a comer y a qué hora lo van a servir."
+    ],
+    "tools": [
+     "plan_meals"
+    ],
+    "latency_ms": 3396,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7914,
+    "output_tokens": 182,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "12:00",
+       "14:00",
+       "17:00",
+       "19:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "12:00",
+       "14:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "hy-es-misma-tabla",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la preparación de comidas en tablas de cortar. Lo más seguro es usar tablas separadas para carne cruda y vegetales para evitar contaminación cruzada. Si ya cortaste ambos en la misma tabla, deséchala y usa una nueva limpia para los vegetales.",
+    "answers": [
+     "Mis reglas no cubren la preparación de comidas en tablas de cortar. Lo más seguro es usar tablas separadas para carne cruda y vegetales para evitar contaminación cruzada. Si ya cortaste ambos en la misma tabla, deséchala y usa una nueva limpia para los vegetales."
+    ],
+    "tools": [],
+    "latency_ms": 1057,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 3776,
+    "output_tokens": 65,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "hy-es-sin-consejo",
+    "category": "hygiene_tip",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45.",
+    "answers": [
+     "Según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Puedo recordártelo a las 12:45."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1888,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8402,
+    "output_tokens": 119,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

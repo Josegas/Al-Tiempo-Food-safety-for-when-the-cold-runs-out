@@ -9,6 +9,7 @@ from pathlib import Path
 from strands import Agent
 from strands.models import BedrockModel
 
+from agent.hooks.objections import ObjectionHook
 from agent.hooks.verifier import VerifierHook
 from agent.tools import ALL_TOOLS
 
@@ -41,7 +42,10 @@ def build_agent(language: str = "en", messages: list | None = None) -> tuple[Age
         model=model,
         system_prompt=system_prompt(language),
         tools=ALL_TOOLS,
-        hooks=[verifier],
+        hooks=[
+            ObjectionHook(language=language),
+            verifier,
+        ],  # objections first: verifier sees the note
         messages=messages,
         callback_handler=None,
     )

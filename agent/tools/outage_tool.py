@@ -30,6 +30,28 @@ FREEZER_HALF = re.compile(
 )
 
 
+# "the ice cubes melted and froze again", "se derritió el hielo", "se descongeló"
+FREEZER_THAWED = re.compile(
+    r"melted|thawed|defrost|refroze|froze\s+again|derriti|descongel|deshiel|volvi\w+\s+a\s+congelar",
+    re.I,
+)
+
+
+MENTIONS_FREEZER = re.compile(r"freezer|congelad|frozen", re.I)
+
+
+def _fridge_only(summary: str) -> str:
+    """Drops the freezer sentence(s) from the engine summary (they start with Freezer:/Congelador:)."""
+    for tag in ("Freezer:", "Congelador:"):
+        if tag in summary:
+            head, _, rest = summary.partition(tag)
+            # the closing "why" sentence after the freezer part is about the fridge: keep it
+            tail = rest.split(". ")
+            keep = [t for t in tail if t.startswith(("A closed fridge", "El refrigerador cerrado"))]
+            return (head.strip() + (" " + ". ".join(keep) if keep else "")).strip()
+    return summary
+
+
 def door_and_freezer_from_text(text: str) -> tuple[bool | None, str | None]:
     door = False if DOOR_CLOSED.search(text) else True if DOOR_OPENED.search(text) else None
     freezer = "half" if FREEZER_HALF.search(text) else "full" if FREEZER_FULL.search(text) else None
@@ -62,7 +84,16 @@ def track_outage(
         started = ut.clock or parse_local(outage_started_at)
     if started is None:
         return out({"error": "outage_started_at not understood; ask the user for the time."})
-    result = engine_track_outage(started, now, fridge_door_opened, freezer_fullness)
+    thawed = bool(FREEZER_THAWED.search(text))
+    result = engine_track_outage(started, now, fridge_door_opened, freezer_fullness, thawed)
     result["now_hhmm"] = now.strftime("%H:%M")
+    if not MENTIONS_FREEZER.search(text):
+        # The user only talked about the fridge: the summary says nothing about the freezer, so
+        # the model can't move their food there (eval rw-13: "the raw chicken is safe in the
+        # freezer until tomorrow", when the user never mentioned a freezer).
+        result["summary"] = {lang: _fridge_only(txt) for lang, txt in result["summary"].items()}
+        result["freezer_mentioned"] = False
+        result["freezer_safe_until"] = result["freezer_safe_until_hhmm"] = None
+        result["freezer_status"] = "not_mentioned_by_user"
     tool_context.agent.state.set("last_window", None)  # a later reminder is not about a dish
     return out(result)

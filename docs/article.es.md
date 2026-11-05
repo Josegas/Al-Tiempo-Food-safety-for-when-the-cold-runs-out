@@ -149,7 +149,7 @@ El agente es un ciclo de **Strands Agents** con **7 herramientas**. Cada herrami
 **Por qué les sirve:**
 - **Respuestas claras:** recibes una hora del reloj y una acción ("cómelo antes de las 13:00 o deséchalo"), no una tabla de reglas.
 - **Voz:** cualquier respuesta se puede escuchar con Amazon Polly, para quien lee poco. Hoy hay dos idiomas, y agregar más es un cambio de configuración.
-- **Funciona aunque el usuario no esté:** el recordatorio llega aunque se haya cerrado la app, gracias a EventBridge Scheduler. El SMS para celulares básicos está implementado. En la demo pública está apagado porque las cuentas en sandbox de SMS solo pueden enviar a números verificados.
+- **Funciona aunque el usuario no esté:** el recordatorio llega aunque se haya cerrado la app, gracias a EventBridge Scheduler. El SMS para celulares básicos está implementado (Amazon SNS) y probado con un cliente simulado, pero está apagado en la demo pública: la cuenta de AWS está en el plan gratuito, donde los SMS no están disponibles. Si un SMS falla, el recordatorio en la web llega igual.
 - **Seguro por defecto:**
   - Si no se sabe la hora de cocción, asume el peor caso y pregunta la hora.
   - Si falla el pronóstico, usa el límite más estricto (1 hora).
@@ -342,7 +342,7 @@ policy: arn:aws:iam::<account>:policy/al-tiempo-kill-switch
 - Las reglas son de **tiempo y temperatura**. No cubren comida que ya estaba contaminada, ni alergias.
 - **Todavía no hay estudio de campo.** Todas las métricas de arriba son del sistema.
 - El modelo todavía puede decir cosas de forma imperfecta. En una respuesta de las evals dijo que la comida "lleva 2 horas fuera" cuando llevaba 0 horas (conservador, pero falso). El verificador revisa horas y límites, no cada frase.
-- El SMS solo funciona con números verificados en el sandbox de SNS. La demo usa recordatorios en la web.
+- Los recordatorios por SMS están implementados pero apagados en la demo: la cuenta de AWS está en el plan gratuito, donde los SMS no están disponibles. La demo usa recordatorios en la web y notificaciones del navegador.
 - Por ahora, dos idiomas.
 
 **Siguientes pasos:**

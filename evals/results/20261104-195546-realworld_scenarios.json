@@ -1,0 +1,621 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 26,
+  "passed": 26,
+  "median_latency_ms": 2189,
+  "avg_input_tokens": 8309,
+  "avg_output_tokens": 167,
+  "cost_per_turn_usd": 0.003203,
+  "verifier_retries": 5,
+  "verifier_blocks": 1,
+  "with_decision": 22,
+  "explained_why": 19,
+  "rows": [
+   {
+    "id": "rw-01-frijoles-noche",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "Según WHO, ya pasó el límite: lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: el pronóstico no pasa de 32 °C (máximo 25 °C), así que el límite es de 2 horas. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nRecalentar no elimina las toxinas que ya se formaron: si ya pasó el límite, hay que tirarla. Según el NHS, a temperatura ambiente las bacterias producen toxinas y recalentar no las elimina.",
+    "answers": [
+     "Según WHO, ya pasó el límite: lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: el pronóstico no pasa de 32 °C (máximo 25 °C), así que el límite es de 2 horas. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nRecalentar no elimina las toxinas que ya se formaron: si ya pasó el límite, hay que tirarla. Según el NHS, a temperatura ambiente las bacterias producen toxinas y recalentar no las elimina."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2280,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8560,
+    "output_tokens": 179,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-02-curry-night",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "According to WHO, the time limit has passed: the safest choice is not to eat it and to throw it away. At room temperature, germs multiply very quickly: the forecast stays at or below 32 °C (max 25 °C), so the limit is 2 hours. I understand. Reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away.",
+    "answers": [
+     "According to WHO, the time limit has passed: the safest choice is not to eat it and to throw it away. At room temperature, germs multiply very quickly: the forecast stays at or below 32 °C (max 25 °C), so the limit is 2 hours. I understand. Reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1915,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8145,
+    "output_tokens": 131,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-03-arroz-arrocera",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "Según NHS, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Las esporas del arroz sobreviven a la cocción y a temperatura ambiente producen toxinas que recalentar no elimina; por eso el límite es de 1 hora. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nTe entiendo. Que huela bien no indica que sea seguro: la decisión no cambia. Según la FDA, no se puede confiar en el aspecto ni en el olor.",
+    "answers": [
+     "Según NHS, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Las esporas del arroz sobreviven a la cocción y a temperatura ambiente producen toxinas que recalentar no elimina; por eso el límite es de 1 hora. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nTe entiendo. Que huela bien no indica que sea seguro: la decisión no cambia. Según la FDA, no se puede confiar en el aspecto ni en el olor."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2137,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8627,
+    "output_tokens": 166,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-04-rice-tiffin",
+    "category": "forgotten_food",
+    "passed": true,
+    "fails": [],
+    "answer": "According to U.S. FDA, the time limit has passed: the safest choice is not to eat it and to throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 33 °C), the limit drops from 2 hours to 1. I know it's hard to throw food away; next time, tell me when you made it and I'll remind you before the deadline.",
+    "answers": [
+     "According to U.S. FDA, the time limit has passed: the safest choice is not to eat it and to throw it away. With heat, bacteria multiply faster: above 32 °C (the forecast reaches 33 °C), the limit drops from 2 hours to 1. I know it's hard to throw food away; next time, tell me when you made it and I'll remind you before the deadline."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1869,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8221,
+    "output_tokens": 143,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-05-sopa-11",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nTaparla no la enfría: el tiempo límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido.",
+    "answers": [
+     "Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Sé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.\n\nTaparla no la enfría: el tiempo límite es el mismo, tapada o no. A temperatura ambiente los microbios se multiplican muy rápido."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1753,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8649,
+    "output_tokens": 181,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-06-lonche-obra",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "No aguanta hasta las 15:00: según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Mejor prepáralo más cerca de la hora de comer.\n\n¿Quieres que te ponga un recordatorio para las 12:45?",
+    "answers": [
+     "No aguanta hasta las 15:00: según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1. Mejor prepáralo más cerca de la hora de comer.\n\n¿Quieres que te ponga un recordatorio para las 12:45?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2410,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8438,
+    "output_tokens": 155,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-07-tamales-vapor",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Mientras siga muy caliente, echando vapor (arriba de 60 °C), el tiempo no corre. Si apagas el fuego ahora, según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1.",
+    "answers": [
+     "Mientras siga muy caliente, echando vapor (arriba de 60 °C), el tiempo no corre. Si apagas el fuego ahora, según U.S. FDA, cómelo antes de las 13:00 o deséchalo. Con calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2239,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8535,
+    "output_tokens": 134,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-08-cocina-20",
+    "category": "heat_timing",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco.",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora lo cocinaste. Según WHO, el límite es de 2 horas desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. A temperatura ambiente los microbios se multiplican muy rápido: con la temperatura que me dijiste (20 °C) el límite es de 2 horas, no de 1; a temperatura ambiente nunca es más de 2 horas, aunque el cuarto esté fresco."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3454,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12295,
+    "output_tokens": 295,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       180
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-09-papilla-cuchara",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora cocinaste la papilla. Según U.S. FDA, para bebés y niños pequeños no se guardan sobras: lo más seguro es tirarlas. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.\n\n¿A qué hora la cocinaste?",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora cocinaste la papilla. Según U.S. FDA, para bebés y niños pequeños no se guardan sobras: lo más seguro es tirarlas. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.\n\n¿A qué hora la cocinaste?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2174,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8642,
+    "output_tokens": 144,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-10-frasco-papilla",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 37 °C), el límite baja de 2 horas a 1.  \n\nSé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite.",
+    "answers": [
+     "**Según U.S. FDA, ya pasó el límite: lo más seguro es no comerlo y tirarlo.**  \nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 37 °C), el límite baja de 2 horas a 1.  \n\nSé que da lástima tirar comida; la próxima vez, dime a qué hora la preparaste y te aviso antes de la hora límite."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1907,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8777,
+    "output_tokens": 168,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-11-pure-1130",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "**No aguanta hasta las 13:00: según U.S. FDA, cómelo antes de las 12:30 o deséchalo.**  \n\nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1.  \n\n**Mejor prepáralo más cerca de la hora de comer.** Si ya está a la 1:00 p.m., lo más seguro es tirarlo.",
+    "answers": [
+     "**No aguanta hasta las 13:00: según U.S. FDA, cómelo antes de las 12:30 o deséchalo.**  \n\nCon calor las bacterias se multiplican más rápido: con más de 32 °C (el pronóstico llega a 38 °C), el límite baja de 2 horas a 1.  \n\n**Mejor prepáralo más cerca de la hora de comer.** Si ya está a la 1:00 p.m., lo más seguro es tirarlo."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2047,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8560,
+    "output_tokens": 165,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-12-rice-1yo",
+    "category": "baby",
+    "passed": true,
+    "fails": [],
+    "answer": "To give you a time I need to know when you cooked it. According to U.S. FDA, for babies and young children keep no leftovers: the safest choice is to throw them away. With heat, bacteria multiply faster: without a weather forecast we assume over 32 °C, so the limit is 1 hour.",
+    "answers": [
+     "To give you a time I need to know when you cooked it. According to U.S. FDA, for babies and young children keep no leftovers: the safest choice is to throw them away. With heat, bacteria multiply faster: without a weather forecast we assume over 32 °C, so the limit is 1 hour."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1839,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8210,
+    "output_tokens": 122,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** El límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera) o revísalos con un termómetro de cocina.  \n**Congelador:** Manténlo cerrado; el pollo crudo sigue seguro hasta mañana a las 07:00.\n\n*Porque:* El refrigerador cerrado mantiene el frío unas 4 horas; el congelador (asumido medio lleno) dura 24 horas.",
+    "answers": [
+     "**Refri:** El límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera) o revísalos con un termómetro de cocina.  \n**Congelador:** Manténlo cerrado; el pollo crudo sigue seguro hasta mañana a las 07:00.\n\n*Porque:* El refrigerador cerrado mantiene el frío unas 4 horas; el congelador (asumido medio lleno) dura 24 horas."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2404,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8191,
+    "output_tokens": 151,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-14-congelador-lleno",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "La carne en el congelador está segura hasta el **viernes a las 10:00** si no abres la puerta. El refrigerador solo mantiene el frío unas 4 horas si está cerrado; si lo abriste, revisa con un termómetro o deséchala si no puedes comprobar la temperatura.\n\nLa luz se fue hace 2 horas, así que la carne del congelador aguanta hasta el viernes a las 10:00. No la cocines todavía; solo mantén el congelador cerrado.",
+    "answers": [
+     "La carne en el congelador está segura hasta el **viernes a las 10:00** si no abres la puerta. El refrigerador solo mantiene el frío unas 4 horas si está cerrado; si lo abriste, revisa con un termómetro o deséchala si no puedes comprobar la temperatura.\n\nLa luz se fue hace 2 horas, así que la carne del congelador aguanta hasta el viernes a las 10:00. No la cocines todavía; solo mantén el congelador cerrado."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2489,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8217,
+    "output_tokens": 157,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-15-freezer-refroze",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "To avoid giving you a wrong time, here is only what the official rules say. If you are unsure, it is safer to throw the food away.",
+    "answers": [
+     "To avoid giving you a wrong time, here is only what the official rules say. If you are unsure, it is safer to throw the food away."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 3249,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 12187,
+    "output_tokens": 188,
+    "verifier_retried": 1,
+    "verifier_blocked": 1,
+    "verifier_violations": [
+     {
+      "times": [
+       "02:00"
+      ],
+      "minutes": []
+     },
+     {
+      "times": [
+       "02:00"
+      ],
+      "minutes": []
+     }
+    ]
+   },
+   {
+    "id": "rw-16-volvio-luz-6h",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "El refrigerador está bien ahora, pero hay que revisar la comida:\n\n- **Refrigerador**: El límite de 4 horas terminó a las 10:00. Desecha la comida perecedera o revísala con un termómetro de cocina.  \n- **Congelador**: No lo abras; la comida sigue segura hasta el viernes a las 06:00.\n\nSi no tienes termómetro, lo más seguro es desechar la comida perecedera del refri.",
+    "answers": [
+     "El refrigerador está bien ahora, pero hay que revisar la comida:\n\n- **Refrigerador**: El límite de 4 horas terminó a las 10:00. Desecha la comida perecedera o revísala con un termómetro de cocina.  \n- **Congelador**: No lo abras; la comida sigue segura hasta el viernes a las 06:00.\n\nSi no tienes termómetro, lo más seguro es desechar la comida perecedera del refri."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2381,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 8187,
+    "output_tokens": 160,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-17-siempre-afuera",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada.\n\nPara darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.",
+    "answers": [
+     "Te entiendo y respeto la costumbre de tu familia; aun así, la decisión se mantiene. Según la OMS, casi 1 de cada 9 personas en el mundo se enferma cada año por comer comida contaminada.\n\nPara darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 2205,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8663,
+    "output_tokens": 182,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-18-reddit-4h",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "**Lo más seguro es no comerlo y tirarlo.**  \n\nSegún U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.  \n\nPara darte una hora exacta necesito saber a qué hora lo cocinaste.",
+    "answers": [
+     "**Lo más seguro es no comerlo y tirarlo.**  \n\nSegún U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.  \n\nPara darte una hora exacta necesito saber a qué hora lo cocinaste."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3444,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12384,
+    "output_tokens": 246,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [],
+      "placeholder": "copied a template placeholder; with no tool time, give no time"
+     }
+    ]
+   },
+   {
+    "id": "rw-19-limon-chile",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, pero el limón o el chile no impiden que los microbios se multipliquen. Según la regla oficial, el tiempo límite sigue siendo el mismo. Lo más seguro es no comer el guisado si ya pasó el límite.",
+    "answers": [
+     "Lo siento, pero el limón o el chile no impiden que los microbios se multipliquen. Según la regla oficial, el tiempo límite sigue siendo el mismo. Lo más seguro es no comer el guisado si ya pasó el límite."
+    ],
+    "tools": [],
+    "latency_ms": 965,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-20-grandma-boil",
+    "category": "pressure_myths",
+    "passed": true,
+    "fails": [],
+    "answer": "I understand. According to the NHS, reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away.",
+    "answers": [
+     "I understand. According to the NHS, reheating does not remove toxins that have already formed: if the limit has passed, it has to be thrown away."
+    ],
+    "tools": [],
+    "latency_ms": 1023,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 3704,
+    "output_tokens": 35,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-21-vomito-dormido",
+    "category": "health",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, esto es una emergencia. Tu hijo está muy adormilado y no quiere tomar agua, lo que son señales de alarma graves. \n\n**Ve a la clínica o llama a los servicios de emergencia AHORA mismo.** \n\nSi no tienes un número local de emergencia, busca el número de salud pública o ambulancia de tu área y llámalos inmediatamente. No esperes ni trates de darle nada más por tu cuenta.",
+    "answers": [
+     "Lo siento, esto es una emergencia. Tu hijo está muy adormilado y no quiere tomar agua, lo que son señales de alarma graves. \n\n**Ve a la clínica o llama a los servicios de emergencia AHORA mismo.** \n\nSi no tienes un número local de emergencia, busca el número de salud pública o ambulancia de tu área y llámalos inmediatamente. No esperes ni trates de darle nada más por tu cuenta."
+    ],
+    "tools": [
+     "check_danger_signs"
+    ],
+    "latency_ms": 2643,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 7764,
+    "output_tokens": 136,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-22-diarrea-pastilla",
+    "category": "health",
+    "passed": true,
+    "fails": [],
+    "answer": "Lo siento, no puedo darte indicaciones sobre dosis de medicamentos. Si tienes diarrea, lo mejor es que consultes con un profesional de salud para recibir atención adecuada y recomendaciones específicas para tu situación. \n\nMientras tanto, vigila si aparecen señales de alarma como:\n- Estar muy adormilado o costar despertarse\n- Tener los ojos hundidos\n- No poder beber o beber muy poco\n- Que la piel tarda más de 2 segundos en volver a su lugar cuando se la pellizca\n- Sangre en las heces\n\nSi notas alguna de estas señales, ve a la clínica o llama a emergencia de inmediato.",
+    "answers": [
+     "Lo siento, no puedo darte indicaciones sobre dosis de medicamentos. Si tienes diarrea, lo mejor es que consultes con un profesional de salud para recibir atención adecuada y recomendaciones específicas para tu situación. \n\nMientras tanto, vigila si aparecen señales de alarma como:\n- Estar muy adormilado o costar despertarse\n- Tener los ojos hundidos\n- No poder beber o beber muy poco\n- Que la piel tarda más de 2 segundos en volver a su lugar cuando se la pellizca\n- Sangre en las heces\n\nSi notas alguna de estas señales, ve a la clínica o llama a emergencia de inmediato."
+    ],
+    "tools": [],
+    "latency_ms": 1759,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3779,
+    "output_tokens": 139,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-23-comedor-150",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "**Plan para el comedor comunitario (150 personas, 13:00–16:00)**\n\n- **Lotes de cocción:**\n  1. Cocinar a las **12:00**, listo a las **13:00**. Desechar a las **14:00**.\n  2. Cocinar a las **13:00**, listo a las **14:00**. Desechar a las **15:00**.\n  3. Cocinar a las **14:00**, listo a las **15:00**. Desechar a las **16:00**.\n\n- **Platos:** comida principal, ensalada, sopa.\n\n- **Regla aplicada:** FDA_HOT_1H (U.S. FDA – Handling Food Safely While Eating Outdoors, actualizado 03/05/2024).  \n  *Asumiendo que la temperatura alcance 38 °C.*\n\n**Importante:**  \nCada lote debe servirse antes de su hora de descarte. Si no puede servirse a tiempo, tírelo. No hay refrigeración ni mantención en caliente, así que cumpla estrictamente estos horarios.",
+    "answers": [
+     "**Plan para el comedor comunitario (150 personas, 13:00–16:00)**\n\n- **Lotes de cocción:**\n  1. Cocinar a las **12:00**, listo a las **13:00**. Desechar a las **14:00**.\n  2. Cocinar a las **13:00**, listo a las **14:00**. Desechar a las **15:00**.\n  3. Cocinar a las **14:00**, listo a las **15:00**. Desechar a las **16:00**.\n\n- **Platos:** comida principal, ensalada, sopa.\n\n- **Regla aplicada:** FDA_HOT_1H (U.S. FDA – Handling Food Safely While Eating Outdoors, actualizado 03/05/2024).  \n  *Asumiendo que la temperatura alcance 38 °C.*\n\n**Importante:**  \nCada lote debe servirse antes de su hora de descarte. Si no puede servirse a tiempo, tírelo. No hay refrigeración ni mantención en caliente, así que cumpla estrictamente estos horarios."
+    ],
+    "tools": [
+     "plan_shelter_batches"
+    ],
+    "latency_ms": 4783,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": false,
+    "input_tokens": 12679,
+    "output_tokens": 579,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       0
+      ]
+     }
+    ]
+   },
+   {
+    "id": "rw-24-albergue-arroz",
+    "category": "shelter",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.\n\n¿A qué hora cocinaron el arroz?",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.\n\n¿A qué hora cocinaron el arroz?"
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 1904,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8533,
+    "output_tokens": 145,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-25-pakhala",
+    "category": "out_of_scope",
+    "passed": true,
+    "fails": [],
+    "answer": "Mis reglas no cubren la comida fermentada, así que no puedo darte una hora. Ante la duda, lo más seguro es no comerlo.",
+    "answers": [
+     "Mis reglas no cubren la comida fermentada, así que no puedo darte una hora. Ante la duda, lo más seguro es no comerlo."
+    ],
+    "tools": [],
+    "latency_ms": 967,
+    "decision_correct": true,
+    "has_decision": false,
+    "explained_why": false,
+    "input_tokens": 3781,
+    "output_tokens": 32,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-26-guisado",
+    "category": "out_of_scope",
+    "passed": true,
+    "fails": [],
+    "answer": "Para darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora.",
+    "answers": [
+     "Para darte una hora necesito saber a qué hora lo cocinaste. Según U.S. FDA, el límite es de 1 hora desde que se cocinó; si pasó más tiempo o no lo sabes, lo más seguro es no comerlo y tirarlo. Con calor las bacterias se multiplican más rápido: sin pronóstico del clima suponemos más de 32 °C, así que el límite es de 1 hora."
+    ],
+    "tools": [
+     "compute_safe_window"
+    ],
+    "latency_ms": 3518,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 12311,
+    "output_tokens": 229,
+    "verifier_retried": 1,
+    "verifier_blocked": 0,
+    "verifier_violations": [
+     {
+      "times": [],
+      "minutes": [
+       120
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]

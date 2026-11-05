@@ -3,6 +3,8 @@
 #
 # Every rule needs: id, description, limit_minutes (or null), source_name, source_url,
 # verified_on, unverified, and verified_text (VERBATIM sentence copied from the source page).
+# why: {es, en} one plain sentence that explains the rule to the user, backed by why_text (VERBATIM
+#      from the same source, or from why_source_url when given). The model may rephrase it, never add to it.
 #   unverified: true -> the engine refuses to use it unless ALLOW_UNVERIFIED_RULES=true (dev only),
 #                       and CI blocks releases (scripts/check_rules.py --strict).
 #   kind: official   -> the number is written in the source.
@@ -23,6 +25,10 @@ rules:
     source_name: "WHO - Five keys to safer food (WHO/SDE/PHE/FOS/01.1)"
     source_url: "https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf"
     verified_on: "2026-11-03"
+    why:
+      es: "A temperatura ambiente los microbios se multiplican muy rápido."
+      en: "At room temperature, germs multiply very quickly."
+    why_text: "Microorganisms can multiply very quickly if food is stored at room temperature."
     unverified: false
 
   - id: WHO_HOT_HOLD_60C
@@ -35,6 +41,10 @@ rules:
     source_name: "WHO - Five keys to safer food (WHO/SDE/PHE/FOS/01.1)"
     source_url: "https://www.who.int/docs/librariesprovider2/default-document-library/5keys_en.pdf"
     verified_on: "2026-11-03"
+    why:
+      es: "Arriba de 60 °C los microbios crecen más lento o dejan de crecer."
+      en: "Above 60 °C, germs grow more slowly or stop growing."
+    why_text: "By holding at temperatures below 5°C or above 60°C, the growth of microorganisms is slowed down or stopped."
     unverified: false
 
   - id: FDA_2H
@@ -46,6 +56,10 @@ rules:
     source_name: "U.S. FDA - Handling Food Safely While Eating Outdoors (content current as of 03/05/2024)"
     source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/handling-food-safely-while-eating-outdoors"
     verified_on: "2026-11-03"
+    why:
+      es: "Fuera del frío, las bacterias de la comida se multiplican rápido y pueden enfermar."
+      en: "Out of the cold, bacteria in food multiply quickly and can make people sick."
+    why_text: "This is when bacteria in food can multiply rapidly, and lead to foodborne illness."
     unverified: false
 
   - id: FDA_HOT_1H
@@ -58,6 +72,10 @@ rules:
     source_name: "U.S. FDA - Handling Food Safely While Eating Outdoors (content current as of 03/05/2024)"
     source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/handling-food-safely-while-eating-outdoors"
     verified_on: "2026-11-03"
+    why:
+      es: "Con calor las bacterias se multiplican más rápido."
+      en: "With heat, bacteria multiply faster."
+    why_text: "As food heats up in summer temperatures, bacteria multiply rapidly."
     unverified: false
 
   - id: NHS_RICE_1H
@@ -70,6 +88,10 @@ rules:
     source_name: "NHS - Starchy foods and carbohydrates (page last reviewed 15 March 2023)"
     source_url: "https://www.nhs.uk/live-well/eat-well/food-types/starchy-foods-and-carbohydrates/"
     verified_on: "2026-11-03"
+    why:
+      es: "Las esporas del arroz sobreviven a la cocción y a temperatura ambiente producen toxinas que recalentar no elimina."
+      en: "Rice spores survive cooking and, at room temperature, make toxins that reheating does not remove."
+    why_text: "If cooked rice or grains are left standing at room temperature, the spores can germinate. The bacteria multiply and produce toxins that make you be sick (vomit) and have diarrhoea. Reheating food will not get rid of these toxins."
     unverified: false
 
   - id: CDC_FORMULA_2H
@@ -81,6 +103,10 @@ rules:
     source_name: "CDC - Infant Formula Preparation and Storage (page dated May 14, 2026)"
     source_url: "https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/preparation-and-storage.html"
     verified_on: "2026-11-03"
+    why:
+      es: "La fórmula preparada se echa a perder si se queda a temperatura ambiente."
+      en: "Prepared formula spoils if it is left at room temperature."
+    why_text: "Prepared infant formula can spoil if it is left out at room temperature."
     unverified: false
 
   - id: CDC_FORMULA_FEED_1H
@@ -92,6 +118,10 @@ rules:
     source_name: "CDC - Infant Formula Preparation and Storage (page dated May 14, 2026)"
     source_url: "https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/preparation-and-storage.html"
     verified_on: "2026-11-03"
+    why:
+      es: "La fórmula mezclada con la saliva del bebé hace que crezcan bacterias."
+      en: "Formula mixed with the baby's saliva can make bacteria grow."
+    why_text: "The combination of infant formula and your baby's saliva can cause bacteria to grow."
     unverified: false
 
   - id: POLICY_CHILD_STRICT
@@ -103,6 +133,12 @@ rules:
     source_name: "Al Tiempo project policy (based on FDA_HOT_1H)"
     source_url: "https://github.com/Josegas/Al-Tiempo-Food-safety-for-when-the-cold-runs-out/blob/main/rules/food_rules.yaml"
     verified_on: "2026-11-03"
+    why:
+      es: "Los niños menores de 5 años cargan el 29% del daño por comida contaminada (OMS)."
+      en: "Children under 5 carry 29% of the harm from unsafe food (WHO)."
+    why_text: "Children under 5 years of age experience 29% of the health burden due to unsafe food, with 143 000 deaths in 2021."
+    why_source_name: "WHO - Food safety fact sheet (4 June 2026)"
+    why_source_url: "https://www.who.int/news-room/fact-sheets/detail/food-safety"
     unverified: false
 
   - id: FDA_OUTAGE_FRIDGE_4H
@@ -114,6 +150,10 @@ rules:
     source_name: "U.S. FDA - Food and Water Safety During Power Outages and Floods (content current as of 03/05/2024)"
     source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"
     verified_on: "2026-11-03"
+    why:
+      es: "El refrigerador cerrado mantiene el frío unas 4 horas."
+      en: "A closed fridge keeps food cold for about 4 hours."
+    why_text: "The refrigerator will keep food cold for about 4 hours if it is unopened."
     unverified: false
 
   - id: FDA_OUTAGE_FREEZER_FULL_48H
@@ -125,6 +165,10 @@ rules:
     source_name: "U.S. FDA - Food and Water Safety During Power Outages and Floods (content current as of 03/05/2024)"
     source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"
     verified_on: "2026-11-03"
+    why:
+      es: "Un congelador lleno y cerrado mantiene la temperatura unas 48 horas."
+      en: "A full, closed freezer keeps its temperature for about 48 hours."
+    why_text: "A full freezer will keep the temperature for approximately 48 hours (24 hours if it is half full) if the door remains closed."
     unverified: false
 
   - id: FDA_OUTAGE_FREEZER_HALF_24H
@@ -136,4 +180,8 @@ rules:
     source_name: "U.S. FDA - Food and Water Safety During Power Outages and Floods (content current as of 03/05/2024)"
     source_url: "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"
     verified_on: "2026-11-03"
+    why:
+      es: "Un congelador a medias y cerrado mantiene la temperatura unas 24 horas."
+      en: "A half-full, closed freezer keeps its temperature for about 24 hours."
+    why_text: "A full freezer will keep the temperature for approximately 48 hours (24 hours if it is half full) if the door remains closed."
     unverified: false

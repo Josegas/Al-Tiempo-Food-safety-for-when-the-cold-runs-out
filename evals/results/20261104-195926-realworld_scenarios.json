@@ -1,0 +1,83 @@
+[
+ {
+  "model": "us.amazon.nova-2-lite-v1:0",
+  "runs": 3,
+  "passed": 3,
+  "median_latency_ms": 1965,
+  "avg_input_tokens": 8230,
+  "avg_output_tokens": 131,
+  "cost_per_turn_usd": 0.003077,
+  "verifier_retries": 0,
+  "verifier_blocks": 0,
+  "with_decision": 3,
+  "explained_why": 3,
+  "rows": [
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera). El pollo crudo también es perecedero; tíralo o revísalo con un termómetro de cocina (si está por debajo de 4 °C está bien).  \n\nEl refrigerador cerrado mantiene el frío unas 4 horas.",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera). El pollo crudo también es perecedero; tíralo o revísalo con un termómetro de cocina (si está por debajo de 4 °C está bien).  \n\nEl refrigerador cerrado mantiene el frío unas 4 horas."
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 2098,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8230,
+    "output_tokens": 132,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las **11:00**.  \nLo más seguro es desechar la leche y el guisado, y revisar el pollo crudo con un termómetro de cocina. Si no tienes termómetro, lo mejor es tirarlo también.\n\n*El refrigerador cerrado mantiene el frío unas 4 horas.*",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las **11:00**.  \nLo más seguro es desechar la leche y el guisado, y revisar el pollo crudo con un termómetro de cocina. Si no tienes termómetro, lo mejor es tirarlo también.\n\n*El refrigerador cerrado mantiene el frío unas 4 horas.*"
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1965,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8230,
+    "output_tokens": 121,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   },
+   {
+    "id": "rw-13-luz-7am",
+    "category": "outage",
+    "passed": true,
+    "fails": [],
+    "answer": "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera). El pollo crudo también está en riesgo; si lo vas a usar, revísalo con un termómetro de cocina y asegúrate de que esté a 4 °C o menos antes de cocinarlo.  \n\n*El refrigerador cerrado mantiene el frío unas 4 horas.*",
+    "answers": [
+     "**Refri:** el límite de 4 horas terminó a las 11:00. Desecha la leche y el guisado (comida perecedera). El pollo crudo también está en riesgo; si lo vas a usar, revísalo con un termómetro de cocina y asegúrate de que esté a 4 °C o menos antes de cocinarlo.  \n\n*El refrigerador cerrado mantiene el frío unas 4 horas.*"
+    ],
+    "tools": [
+     "track_outage"
+    ],
+    "latency_ms": 1899,
+    "decision_correct": true,
+    "has_decision": true,
+    "explained_why": true,
+    "input_tokens": 8230,
+    "output_tokens": 141,
+    "verifier_retried": 0,
+    "verifier_blocked": 0,
+    "verifier_violations": []
+   }
+  ]
+ }
+]

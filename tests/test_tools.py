@@ -61,14 +61,59 @@ def test_outage_tool_demo():
 def test_shelter_tool_demo():
     r = j(
         plan_shelter_batches(
-            people=120, service_windows=[["13:00", "15:00"]], dishes=["rice"], can_hot_hold=False
+            people=120,
+            service_windows=[["13:00", "15:00"]],
+            dishes=["rice"],
+            can_hot_hold=False,
+            tool_context=ctx("Albergue con 120 personas, comida de 13:00 a 15:00"),
         )
     )
     assert len(r["batches"]) == 2
 
 
 def test_meals_tool_no_times():
-    assert "error" in j(plan_meals(people=3, meal_times=["x"], dishes=["beans"]))
+    assert "error" in j(
+        plan_meals(people=3, meal_times=["x"], dishes=["beans"], tool_context=ctx())
+    )
+
+
+def test_meals_tool_rejects_invented_people_and_times():
+    # "voy a hacer ensalada para el comedor": the user gave no times nor people
+    r = j(
+        plan_meals(
+            people=10,
+            meal_times=["12:00", "14:00"],
+            dishes=["ensalada"],
+            tool_context=ctx("voy a hacer ensalada de lechuga y jitomate para el comedor"),
+        )
+    )
+    assert r["error"] == "not_said_by_user"
+    assert set(r["missing"]) == {"people", "meal times"}
+
+
+def test_meals_tool_accepts_user_numbers_in_words():
+    r = j(
+        plan_meals(
+            people=4,
+            meal_times=["13:30", "19:30"],
+            dishes=["soup"],
+            tool_context=ctx("Four of us. Lunch at 13:30 and dinner at 19:30"),
+        )
+    )
+    assert len(r["meals"]) == 2
+
+
+def test_shelter_tool_rejects_invented_window():
+    r = j(
+        plan_shelter_batches(
+            people=150,
+            service_windows=[["18:00", "20:00"]],
+            dishes=["arroz"],
+            can_hot_hold=False,
+            tool_context=ctx("damos de comer a 150 personas de 1 a 4 de la tarde"),
+        )
+    )
+    assert r["error"] == "not_said_by_user"
 
 
 def test_reminder_dry_run_without_infra(monkeypatch):
@@ -191,12 +236,13 @@ def test_safe_window_summary_is_built_in_code():
     """Live screenshot showed "I can set a reminder for 13:00" while the reminder was 12:45."""
     w = j(compute_safe_window(food_type="cooked_food", tool_context=ctx("I cooked beans at 12:00")))
     assert w["summary"] == (
-        "According to U.S. FDA, eat it before 13:00 or throw it away. Above 32 °C (the forecast "
-        "reaches 38 °C), the limit drops from 2 hours to 1. I can remind you at 12:45."
+        "According to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) "
+        "bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at 12:45?"
     )
     b = j(compute_safe_window(food_type="cooked_rice", audience="infant",
                               tool_context=ctx("rice I cooked 5 hours ago", language="es")))  # fmt: skip
-    assert "ya pasó el límite: deséchalo ahora." in b["summary"]
+    assert "ya pasó el límite: lo más seguro es no comerlo y tirarlo." in b["summary"]
+    assert "Sé que da lástima" in b["summary"]  # empathy + tip for next time
 
 
 @pytest.mark.parametrize(
@@ -238,3 +284,51 @@ def test_reminder_turn_carries_the_engine_facts_it_is_based_on():
     v = VerifierHook()  # the reminder result must not be mistaken for a safe window
     v.on_tool_result(type("E", (), {"result": {"content": [{"text": raw}]}})())
     assert v.last_window is None
+
+
+def test_current_time_tool_in_simulated_mode(monkeypatch):
+    """Live: "¿sabes qué hora es?" -> "no tengo acceso a la hora". Now a tool gives it."""
+    from agent.tools.clock_tool import get_current_time
+
+    monkeypatch.setenv("DEMO_MODE", "true")
+    r = j(get_current_time(tool_context=ctx("¿qué hora es?", language="es")))
+    assert r["now_hhmm"] == "12:00" and r["simulated"] is True and "demo clock" in r["note"]
+    assert r["summary"] == "Son las 12:00 (reloj de la demo, no la hora real)."
+
+
+def test_current_time_tool_in_real_mode(monkeypatch):
+    from agent.hooks.verifier import collect_allowed
+    from agent.tools.clock_tool import get_current_time
+
+    monkeypatch.setenv("DEMO_MODE", "false")
+    raw = get_current_time(tool_context=ctx("what time is it?"))
+    r = j(raw)
+    assert r["simulated"] is False and r["note"] == ""
+    assert r["now_hhmm"] in collect_allowed(raw)[0]  # the verifier lets the model say it
+
+
+def test_meals_tool_raw_salad_has_no_cooking_lead_time():
+    r = j(
+        plan_meals(
+            people=40,
+            meal_times=["14:00"],
+            dishes=["ensalada de lechuga y jitomate"],
+            tool_context=ctx("ensalada para el comedor, somos 40 personas y comemos a las 14:00"),
+        )
+    )
+    assert r["raw_food"] is True
+    assert r["meals"][0]["start_cooking_hhmm"] == "14:00"
+
+
+def test_shelter_tool_accepts_split_service_window():
+    # eval rw-23: "de 1 a 4 de la tarde" split by the model into three 1-hour windows
+    r = j(
+        plan_shelter_batches(
+            people=150,
+            service_windows=[["13:00", "14:00"], ["14:00", "15:00"], ["15:00", "16:00"]],
+            dishes=["guisado"],
+            can_hot_hold=False,
+            tool_context=ctx("damos de comer a 150 personas de 1 a 4 de la tarde, no hay refri"),
+        )
+    )
+    assert "error" not in r and r["batches"]
