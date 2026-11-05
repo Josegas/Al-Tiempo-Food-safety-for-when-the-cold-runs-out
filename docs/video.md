@@ -1,26 +1,57 @@
 # Guion del video (< 3 min) — Al Tiempo
 
 Reglas: menos de 3:00 (los jueces no ven más), público en YouTube, **subtítulos en inglés**, sin música con
-copyright y **sin logos ni marcas de terceros** (OMS, FDA, CDC, NHS, USDA, FoodKeeper…): las fuentes se dicen o se escriben en texto, nunca con su logo. Si grabas la consola de AWS o GitHub, que no sea el foco de la toma. Graba la pantalla del celular (o el navegador en modo celular con F12 → 📱)
-y la terminal. La voz puede ser tuya en inglés o en español con subtítulos en inglés.
+copyright y **sin logos ni marcas de terceros** (OMS, FDA, CDC, NHS, USDA, FoodKeeper…): las fuentes se dicen o se
+escriben en texto, nunca con su logo. Si grabas la consola de AWS o GitHub, que no sea el foco de la toma.
+
+**Graba en Chrome** (celular Android o Chrome de escritorio en modo celular con F12 → 📱): el micrófono solo
+aparece en Chrome, Edge y Android. La voz puede ser tuya en inglés, o en español con subtítulos en inglés.
 
 Todas las cifras de abajo están medidas o tienen fuente (`docs/metrics.md`, `docs/sources.md`).
+Miniatura para YouTube: [img/thumbnail-video.png](img/thumbnail-video.png) (abajo).
 
 | Tiempo | En pantalla | Voz / subtítulo (inglés) |
 |---|---|---|
-| 0:00–0:15 | Texto sobre fondo: "38 °C. No fridge. Rice cooked at 9:00." → `docs/img/cover.png` | "A mother cooked rice at nine. It's 38 degrees and she has no fridge. At two, her child is hungry. Is the rice still OK? Every year, 866 million people get sick from unsafe food, according to the WHO." |
-| 0:15–0:35 | Abre la demo en el celular; toca **Safe window** | "Al Tiempo answers with a clock time, not a guess: eat the beans before 13:00 or throw them away — and it cites the rule: the U.S. FDA one-hour rule above 32 °C." |
-| 0:35–0:55 | Responde "Yes, please schedule the reminder" → espera → aparece el ⏰ recordatorio | "It can remind you at the exact minute with Amazon EventBridge Scheduler, even if you close the app. In the demo the clock is accelerated, so it arrives in about a minute." |
-| 0:55–1:10 | **Power outage** | "Lost power? It starts the clock when the power went out: the fridge's 4-hour limit ended at 10:00; the full freezer is fine until Friday." |
-| 1:10–1:30 | **Shelter (120 people)** | "For shelters after a disaster, it plans staggered cooking batches so nothing is served outside the safe window, with a discard time for each batch." |
-| 1:30–1:40 | **Baby + rice** y **Danger signs** (rápido) | "Stricter rules for babies. And if a child shows danger signs, it says: call 911 now. No diagnosis, no doses." |
-| 1:40–2:15 | `docs/img/verifier.png`, luego `docs/img/architecture.png` | "The model talks; the rules decide. The language model never calculates a time. A tested rules engine does, with 11 official rules verified word by word. A verifier hook blocks any time the engine didn't produce. It runs on Strands Agents and Amazon Bedrock AgentCore, deployed with CDK and GitHub Actions." |
-| 2:15–2:45 | `docs/img/model-evals.png`, luego la terminal con `make smoke` → RESULT: PASS | "We measured it. 99 of 100 evaluation conversations follow the rules, and none was unsafe. 8 of 8 invented times are blocked. 9 of 9 live reminders arrived on time. About a quarter of a cent per message." |
-| 2:45–3:00 | La demo + link | "Next: a pilot with a community kitchen, WhatsApp and more languages. Try it in one minute, no login, at the link below." |
+| 0:00–0:12 | Imagen **A** (portada) o texto: "38 °C. No fridge. Rice cooked at 9:00." | "A mother cooked rice at nine. It's 38 degrees and she has no fridge. Is it still safe for her child? Every year, 866 million people get sick from unsafe food, according to the WHO." |
+| 0:12–0:40 | Demo en **inglés**. Toca 🎤 **Speak** y di: *"I'm going to cook beans at two in the afternoon. Until when can we eat them?"* → aparece el **semáforo verde 15:00** → se oye la respuesta (Polly) | "Al Tiempo helps before the food sits out. I just ask out loud. It answers with a clock time, not a guess — eat it before three — and reads it back, for people who read little." |
+| 0:40–0:55 | Baja a **"Today's heat, hour by hour"** (la curva con la línea de 32 °C) | "Why one hour and not two? Today's forecast goes above 32 degrees, so the official FDA rule drops from two hours to one. You can see it." |
+| 0:55–1:10 | Escribe *"Yes, please remind me"* → corta la espera → aparece ⏰ **Reminder** | "It schedules a reminder for the exact minute with Amazon EventBridge Scheduler, even if you close the app. In the demo the clock is accelerated." |
+| 1:10–1:25 | Escribe: *"I cooked stew at 11, the room has air conditioning at 22 degrees"* → respuesta | "It listens to real details: in a 22-degree room the limit is two hours — and never more." |
+| 1:25–1:40 | Botón **Shelter (120 people)** → plan de tandas → **Print card** → la tarjeta impresa (imagen **D**) | "For shelters after a disaster, it plans cooking batches so nothing is served past its time — and prints a card for the kitchen wall." |
+| 1:40–1:50 | Rápido: arroz de hace 5 horas → **rojo "Throw it away"**; luego **Danger signs** | "If it's too late, it says so plainly. If a child shows danger signs: go to a clinic now. No diagnosis, no doses." |
+| 1:50–2:20 | Imagen **B** (verificador), luego imagen **C** (arquitectura) | "The model talks; the rules decide. The language model never calculates a time. A tested rules engine does, with eleven official rules verified word by word. A verifier hook blocks any time the engine didn't produce. It runs on Strands Agents and Amazon Bedrock AgentCore, built with CDK and GitHub Actions." |
+| 2:20–2:45 | Texto en pantalla: "26 real questions · right answers 15 → 24 · unsafe 2 → 0" y luego la terminal con `make smoke` → `RESULT: PASS` | "We tested it with 26 questions real people asked online. At first, 15 were right and 2 were unsafe. We fixed what we learned: now 24 are right and none is unsafe. 50 of 50 evaluation scenarios pass, and each answer costs about three tenths of a cent." |
+| 2:45–3:00 | La demo + link | "Next: a pilot with a community kitchen, and SMS and voice in AWS. Try it in one minute, no login, at the link below." |
+
+## Imágenes para el video
+Ábrelas a pantalla completa (o arrástralas a tu editor de video) en la escena que indica la tabla.
+
+**A. Portada** (0:00–0:12) — [img/cover.png](img/cover.png)
+
+![Portada](img/cover.png)
+
+**B. Verificador** (1:50–2:05) — [img/verifier.png](img/verifier.png)
+
+![Verificador](img/verifier.png)
+
+**C. Arquitectura** (2:05–2:20) — [img/architecture.png](img/architecture.png)
+
+![Arquitectura](img/architecture.png)
+
+**D. Tarjeta impresa del albergue** (1:25–1:40) — [capturas/ui/live-print-card-shelter-en.png](capturas/ui/live-print-card-shelter-en.png)
+
+![Tarjeta impresa](capturas/ui/live-print-card-shelter-en.png)
+
+**Miniatura de YouTube** — [img/thumbnail-video.png](img/thumbnail-video.png)
+
+![Miniatura](img/thumbnail-video.png)
 
 ## Antes de grabar
-- Usa una ventana de incógnito (sesión nueva) y espera ~5 s antes del primer clic: el primer mensaje tarda ~2 s.
+- Usa una ventana de incógnito (sesión nueva) y espera ~5 s antes del primer mensaje: así el primero tarda ~2 s.
+- La primera vez que tocas 🎤, Chrome pide permiso del micrófono: acéptalo antes de grabar.
+- Si el audio de la respuesta no suena solo (algunos navegadores lo bloquean), toca **🔊 Listen**.
 - Graba cada escena por separado y júntalas; recorta las esperas (deja ver que el recordatorio llega).
+- Para la tarjeta impresa: **Print card** → en la vista previa de impresión, graba la hoja (no hace falta imprimir).
 - Subtítulos: pega la columna de voz en YouTube Studio → Subtítulos → inglés.
-- Descripción de YouTube: link de la demo, link del repo, y "Built with Strands Agents on AWS. Code written with the help of Claude Code."
+- Descripción de YouTube: link de la demo, link del repo, y "Built with Strands Agents on AWS. Code written with the help of Claude Code. Weather data by Open-Meteo.com (CC BY 4.0)."
 - Al terminar, pásame el link y lo pongo en el artículo y en el README.

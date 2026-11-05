@@ -1,7 +1,8 @@
 """schedule_reminder: one-time EventBridge Scheduler schedule that triggers the reminder Lambda.
 
 Without REMINDER_LAMBDA_ARN / SCHEDULER_ROLE_ARN (local dev) it runs as a dry run.
-In demo mode the clock is accelerated: the reminder fires ~1 minute from now.
+In demo mode the clock is accelerated: the schedule fires ~10 s from now (EventBridge adds ~5-45 s;
+the web polls every 4 s while waiting), so a judge sees it in under a minute.
 The schedule deletes itself after running (ActionAfterCompletion=DELETE).
 """
 
@@ -16,6 +17,7 @@ from strands import ToolContext, tool
 from agent.forecast import demo_mode
 from agent.tools._common import now_local, out, parse_local, tz
 
+DEMO_FIRE_SECONDS = 10  # demo: fire soon after asking (was 60 s; measured total ~100 s)
 E164 = re.compile(r"^\+[1-9]\d{7,14}$")
 
 # (es noun, es pronoun suffix, en noun)
@@ -73,7 +75,7 @@ def schedule_reminder(
 
     now = now_local()
     if demo_mode():
-        fire_utc = datetime.now(UTC) + timedelta(minutes=1)
+        fire_utc = datetime.now(UTC) + timedelta(seconds=DEMO_FIRE_SECONDS)
     else:
         if when_local <= now:
             return out({"scheduled": False, "error": "that time already passed"})

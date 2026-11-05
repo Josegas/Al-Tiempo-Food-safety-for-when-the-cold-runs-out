@@ -194,7 +194,7 @@ def architecture() -> None:
         d,
         (40, y0, 330, y0 + 170),
         "Phone or browser",
-        "Bilingual web, demo mode, voice button, no login",
+        "Bilingual web, speak or type, heat chart, print card, no login",
         MUTED,
     )
     box(
@@ -213,7 +213,13 @@ def architecture() -> None:
     )
     arrow(d, (330, y0 + 85), (400, y0 + 85))
     arrow(d, (720, y0 + 85), (790, y0 + 85), label="/api/*")
-    box(d, (790, y0 + 240, 1130, y0 + 360), "Amazon Polly", "Reads answers aloud (es/en)", AQUA)
+    box(
+        d,
+        (790, y0 + 240, 1130, y0 + 360),
+        "Amazon Polly",
+        "Reads answers aloud; automatic after voice",
+        AQUA,
+    )
     arrow(d, (960, y0 + 170), (960, y0 + 240))
 
     # Agent runtime
@@ -225,7 +231,7 @@ def architecture() -> None:
         d,
         (ax0 + 24, ay0 + 100, ax1 - 24, ay0 + 225),
         "Strands agent",
-        "Agent loop + 7 tools, one session per user",
+        "Agent loop + 8 tools, one session per user",
         BLUE,
     )
     box(
@@ -277,7 +283,7 @@ def architecture() -> None:
         d,
         (1270, ty, 1660, ty + 200),
         "Lambda + DynamoDB",
-        "Stores the delivered reminder; data expires in 7 days (TTL). SMS optional",
+        "Stores the delivered reminder; data expires in 7 days (TTL). SMS built, off (Free plan)",
         VIOLET,
     )
     arrow(d, (1240, ty + 100), (1270, ty + 100))
@@ -362,7 +368,7 @@ def verifier() -> None:
     arrow(d, (xs[3], r2 + 80), (xs[2] + w, r2 + 80))
     d.text(
         (40, 770),
-        "Measured: 8 of 8 invented times blocked in adversarial tests; 0 of 100 eval answers needed the template.",
+        "Measured: 8 of 8 invented times blocked in adversarial tests; 26 real questions: 0 unsafe answers (was 2).",
         font=font(22, True),
         fill=INK,
     )
@@ -453,9 +459,21 @@ def article_thumbnail() -> None:
     img.save(OUT / "thumbnail-article.png", optimize=True)
 
 
+def builder_cover() -> None:
+    """Builder Center cover, 1200x675, NO text (the form asks for an image without text):
+    the sun + clock + thermometer art on a warm background with a hint of a plate's shadow."""
+    img, d = canvas(1200, 675)
+    d.rectangle((0, 0, 1200, 675), fill="#fff7ef")
+    d.rectangle((0, 0, 1200, 14), fill=ORANGE)
+    d.ellipse((330, 560, 870, 640), fill="#f4e6d8")  # soft shadow under the art
+    clock_art(d, 560, 330, 185, temp="")
+    img.save(OUT / "cover-builder.png", optimize=True)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     cover()
+    builder_cover()
     video_thumbnail()
     article_thumbnail()
     architecture()

@@ -1,0 +1,77 @@
+{
+ "plan": {
+  "turns": [
+   "I'm going to cook beans at 14:00 and I have no fridge. Until what time can we eat them?"
+  ],
+  "answers": [
+   "If you cook it at 14:00, according to U.S. FDA, eat it before 15:00. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Cook only what will be eaten. Shall I remind you at 14:45?"
+  ]
+ },
+ "cooked-reminder": {
+  "turns": [
+   "I cooked beans at 12:00 and I have no fridge. Until what time can we eat them?",
+   "Yes, please remind me."
+  ],
+  "answers": [
+   "According to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Shall I remind you at 12:45?",
+   "Reminder set for 12:45: \"Al Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA\"",
+   "REMINDER: Reminder\nfor 12:45\n\nAl Tiempo: eat the food before 13:00. After that, throw it away. Source: U.S. FDA"
+  ]
+ },
+ "baby": {
+  "turns": [
+   "Can I give my baby the rice I cooked 5 hours ago? It was out of the fridge."
+  ],
+  "answers": [
+   "According to U.S. FDA, the limit has passed: the safest choice is not to eat it and to throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. I know it's a pity; next time tell me the time and I'll remind you before."
+  ]
+ },
+ "outage": {
+  "turns": [
+   "The power went out at 06:00. I haven't opened the fridge and the freezer is full. What do I do?"
+  ],
+  "answers": [
+   "According to the U.S. FDA, fridge food is no longer safe after 4 hours (ended at 10:00). Throw away perishable fridge food, or check it with a food thermometer. The freezer is still safe until Friday 06:00 because it’s full and closed. Keep it closed."
+  ]
+ },
+ "shelter": {
+  "turns": [
+   "I run a shelter with 120 people. Lunch is 13:00 to 15:00, rice and beans, no way to keep food hot."
+  ],
+  "answers": [
+   "According to U.S. FDA - Handling Food Safely While Eating Outdoors, eat it before 14:00 or throw it away.\n\nWe scheduled two batches:\n\nFirst batch ready at 13:00, discard at 14:00\nSecond batch ready at 14:00, discard at 15:00\n\nNo food should sit out past its discard time."
+  ]
+ },
+ "danger": {
+  "turns": [
+   "My 2-year-old daughter has diarrhea, she is very sleepy and barely drinks. We are in Mexico."
+  ],
+  "answers": [
+   "According to WHO, your daughter shows danger signs: very sleepy and barely drinks. This is an emergency. Call 911 or go to the nearest clinic right now. Do not wait."
+  ]
+ },
+ "wont-last": {
+  "turns": [
+   "I just made egg and chorizo for my husband's lunch, he eats at 3 on the building site and has no cooler."
+  ],
+  "answers": [
+   "It won't last until 15:00: according to U.S. FDA, eat it before 13:00 or throw it away. In this heat (over 32 °C) bacteria grow faster: it lasts 1 hour, not 2. Better to make it closer to mealtime."
+  ]
+ },
+ "ac-room": {
+  "turns": [
+   "I cooked stew at 11:00, it's in a room with air conditioning at 22 degrees. Until when?"
+  ],
+  "answers": [
+   "According to WHO, eat it before 13:00 or throw it away. At the 22 °C you told me, it lasts 2 hours, never more: out of the fridge bacteria multiply. Shall I remind you at 12:45?"
+  ]
+ },
+ "no-time": {
+  "turns": [
+   "What do I do with the stew?"
+  ],
+  "answers": [
+   "According to U.S. FDA: with no forecast we assume heat, and in heat bacteria grow faster: it lasts 1 hour. If more time has passed or you don't know, the safest choice is to throw it away.\n\nWhen did you cook it?"
+  ]
+ }
+}
